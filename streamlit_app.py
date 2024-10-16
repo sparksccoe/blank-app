@@ -117,6 +117,14 @@ if playlist_id:
     track_speechiness = [track["speechiness"] for track in audio_features]
     track_key = [track["key"] for track in audio_features]
 
+    # Extract genres by fetching artist details
+    track_genres = []
+    for track in tracks:
+        artist_id = track["track"]["artists"][0]["id"]  # Taking the first artist for simplicity
+        artist = sp.artist(artist_id)  # Get artist information
+        genres = artist.get("genres", [])  # Get the genres associated with the artist
+        track_genres.append(", ".join(genres) if genres else "No genre available")
+
     # display the playlist data in a table
     st.write(f"## {playlist['name']}")
     st.image(playlist_cover, width=300)
