@@ -13,6 +13,14 @@ import pandas as pd
 import plotly.express as px
 from datetime import datetime
 
+hide_streamlit_style = """
+            <style>
+            [data-testid="stToolbar"] {visibility: hidden !important;}
+            footer {visibility: hidden !important;}
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 image = Image.open('data_adventures_logo.png')
 st.sidebar.image(image)
 st.title("Data Adventures in Music")
