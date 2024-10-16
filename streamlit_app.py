@@ -105,15 +105,19 @@ if playlist_id:
         st.write(f"| {track_names[i]} | {track_artists[i]} | {track_release_date[i]} | :blue[{track_popularity[i]}] | :green[{track_danceability[i]}] | :orange[{track_energy[i]}] | :red[{track_valence[i]}] | :violet[{track_speechiness[i]}] | :gray[{track_tempo[i]}] |")
 
 # data = {"Image": track_image, "Name": track_names, "Preview": track_preview, "Artist": track_artists, "Release Date": track_release_date, "Popularity": track_popularity, "Duration (ms)": track_duration, "Acoustic": track_acousticness, "Dance": track_danceability, "Energy": track_energy, "Happy": track_valence, "Instrumental": track_instrumentalness, "Key": track_key, "Live": track_liveness, "Loud (Db)": track_loudness, "Speech": track_speechiness, "Tempo": track_tempo}
-# df = pd.DataFrame(data)
-# st.data_editor(
-#      df,
-#      column_config={
-#          "Image": st.column_config.ImageColumn(
-#              label="#", width="small"
-#          )
-#      },
-#  )
+if playlist_id:
+    data = {"Image": track_image, "Name": track_names, "Preview": track_preview, "Artist": track_artists, "Release Date": track_release_date, "Popularity": track_popularity, "Duration (ms)": track_duration, "Acoustic": track_acousticness, "Dance": track_danceability, "Energy": track_energy, "Happy": track_valence, "Instrumental": track_instrumentalness, "Key": track_key, "Live": track_liveness, "Loud (Db)": track_loudness, "Speech": track_speechiness, "Tempo": track_tempo}
+    df = pd.DataFrame(data)
+    st.data_editor(
+        df,
+        column_config={
+            "Image": st.column_config.ImageColumn(
+                "Album Art",
+            )
+        },
+        disabled=True,
+    )
+
     # # analyze the playlist data
     # st.write("")
     # st.write("### Playlist Analysis")
