@@ -218,7 +218,6 @@ if playlist_id:
     selected_feature_with_description = st.selectbox("Select an audio feature to rank tracks by:", features_with_descriptions)
     # Extract the feature name from the selected option (before the colon)
     selected_feature = selected_feature_with_description.split(":")[0]
-    selected_feature = st.selectbox("Select an audio feature to rank tracks by:", features)
     num_tracks = st.slider(f"How many tracks do you want to display?", min_value=1, max_value=num_total_tracks, value=3)
     sorted_df = df.sort_values(by=selected_feature, ascending=False)
     st.write(f"### Top {num_tracks} Tracks by {selected_feature}")
