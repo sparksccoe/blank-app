@@ -57,18 +57,37 @@ st.sidebar.image(image)
 st.title("Data Adventures in Music")
 st.write('Let’s dive into a Data Adventure with your playlist!')
 
-playlist_name = st.sidebar.text_input("Enter the public Spotify playlist name:")
+# Add radio button for choosing between entering playlist name or URL
+input_choice = st.sidebar.radio("How would you like to enter the playlist?", ("by name", "by URL"))
 
-# search for the playlist ID based on the name
-if playlist_name:
-    playlists = sp.search(playlist_name, type="playlist")["playlists"]["items"]
-    if playlists:
-        playlist_id = playlists[0]["id"]
-    else:
-        st.write("No playlists found with that name.")
-        playlist_id = None
+# Initialize playlist_id as None
+playlist_id = None
+
+# Conditional input based on the user's choice
+if input_choice == "by name":
+    playlist_name = st.sidebar.text_input("Enter the public Spotify playlist name:")
+
+    # Search for the playlist ID based on the name
+    if playlist_name:
+        try:
+            playlists = sp.search(playlist_name, type="playlist")["playlists"]["items"]
+            if playlists:
+                playlist_id = playlists[0]["id"]
+            else:
+                st.write("No playlists found with that name.")
+        except Exception as e:
+            st.write("Error occurred while searching for the playlist.")
+            st.write(f"Error: {e}")
 else:
-    playlist_id = None
+    playlist_url = st.sidebar.text_input("Enter the Spotify playlist URL:")
+
+    # Extract the playlist ID from the URL
+    if playlist_url:
+        try:
+            playlist_id = playlist_url.split("/")[-1].split("?")[0]  # Handles URLs with or without query params
+        except Exception as e:
+            st.write("Error occurred while extracting the playlist ID.")
+            st.write(f"Error: {e}")
 
 # retrieve data from the Spotify API
 if playlist_id:
