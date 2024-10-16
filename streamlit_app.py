@@ -101,7 +101,7 @@ if playlist_id:
     st.write(f"## {playlist['name']}")
     st.write(f"**Description:** {playlist['description']}")
     st.write(f"**Number of tracks:** {len(tracks)}")
-    st.write("")
+    # st.write("")
     # st.write("### Tracklist")
     # st.write("| Name | Artist | Release Date | :blue[Popularity] | :green[Danceability] | :orange[Energy] | :red[Happiness] | :violet[Speechiness] | :gray[Tempo] |")
     # for i in range(len(tracks)):
