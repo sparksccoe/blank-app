@@ -157,6 +157,9 @@ if playlist_id:
             "Artist": st.column_config.TextColumn(
                 "Artist", help="The primary artist or band who performed the track"
             ),
+            "Genre": st.column_config.TextColumn(
+                "Genre", help="Genres are based on the primary artist, as Spotify doesn't provide genre information at the album or track level."
+            ),
             "Release Date": st.column_config.TextColumn(
                 "Release Date", help="The date when the track or album was released"
             ),
