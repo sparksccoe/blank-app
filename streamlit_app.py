@@ -135,12 +135,57 @@ if playlist_id:
     df = pd.DataFrame(data)
     num_total_tracks = len(df)
     df.index += 1
-    st.write("The table below is scrollable both horizontally and vertically. Each column can be clicked to sort in ascending or descending order.")
+    st.write("The table below is scrollable both horizontally and vertically. Each column can be clicked to sort in ascending or descending order. Hovering over a column header will explain what that feature represents.")
     st.data_editor(
         df,
         column_config={
             "Image": st.column_config.ImageColumn(
-                "Album Art", help="Click twice on the album cover to enlarge"
+            "Album Art", help="Click on the album cover to enlarge"
+            ),
+            "Name": st.column_config.TextColumn(
+                "Track Name", help="The name of the track"
+            ),
+            "Artist": st.column_config.TextColumn(
+                "Artist", help="The primary artist or band who performed the track"
+            ),
+            "Release Date": st.column_config.TextColumn(
+                "Release Date", help="The date when the track or album was released"
+            ),
+            "Popularity": st.column_config.NumberColumn(
+                "Popularity", help="The popularity score of the track (0 to 100)"
+            ),
+            "Duration (ms)": st.column_config.NumberColumn(
+                "Duration (ms)", help="The duration of the track in milliseconds"
+            ),
+            "Acoustic": st.column_config.NumberColumn(
+                "Acousticness", help="A measure of the acoustic quality of the track (0 to 1)"
+            ),
+            "Dance": st.column_config.NumberColumn(
+                "Danceability", help="How suitable the track is for dancing (0 to 1)"
+            ),
+            "Energy": st.column_config.NumberColumn(
+                "Energy", help="The intensity and activity level of the track (0 to 1)"
+            ),
+            "Happy": st.column_config.NumberColumn(
+                "Valence", help="A measure of the musical positivity of the track (0 to 1)"
+            ),
+            "Instrumental": st.column_config.NumberColumn(
+                "Instrumentalness", help="The likelihood that the track is instrumental (0 to 1)"
+            ),
+            "Key": st.column_config.NumberColumn(
+                "Key", help="The musical key the track is composed in (0 to 11)"
+            ),
+            "Live": st.column_config.NumberColumn(
+                "Liveness", help="The probability that the track was performed live (0 to 1)"
+            ),
+            "Loud (Db)": st.column_config.NumberColumn(
+                "Loudness", help="The overall loudness of the track in decibels (dB)"
+            ),
+            "Speech": st.column_config.NumberColumn(
+                "Speechiness", help="The presence of spoken words in the track (0 to 1)"
+            ),
+            "Tempo": st.column_config.NumberColumn(
+                "Tempo", help="The tempo of the track in beats per minute (BPM)"
             )
         },
         disabled=True,
