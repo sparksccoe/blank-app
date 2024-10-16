@@ -100,7 +100,7 @@ if playlist_id:
 
     # display the playlist data in a table
     st.write(f"## {playlist['name']}")
-    st.image(playlist_cover, caption="Playlist Cover", use_column_width=True)
+    st.image(playlist_cover)
     st.write(f"**Description:** {playlist['description']}")
     st.write(f"**Number of tracks:** {len(tracks)}")
     # st.write("")
