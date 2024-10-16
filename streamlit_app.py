@@ -74,6 +74,7 @@ else:
 if playlist_id:
     playlist = sp.playlist(playlist_id)
     tracks = playlist["tracks"]["items"]
+    track_id = [track["track"]["id"] for track in tracks]
     track_names = [track["track"]["name"] for track in tracks]
     track_artists = [", ".join([artist["name"] for artist in track["track"]["artists"]]) for track in tracks]
     track_popularity = [track["track"]["popularity"] for track in tracks]
@@ -96,15 +97,15 @@ if playlist_id:
     track_speechiness = [track["speechiness"] for track in audio_features]
     track_key = [track["key"] for track in audio_features]
 
-    # display the playlist data in a table
-    st.write(f"## {playlist['name']}")
-    st.write(f"**Description:** {playlist['description']}")
-    st.write(f"**Number of tracks:** {len(tracks)}")
-    st.write("")
-    st.write("### Tracklist")
-    st.write("| Name | Artist | Release Date | :blue[Popularity] | :green[Danceability] | :orange[Energy] | :red[Happiness] | :violet[Speechiness] | :gray[Tempo] |")
-    for i in range(len(tracks)):
-        st.write(f"| {track_names[i]} | {track_artists[i]} | {track_release_date[i]} | :blue[{track_popularity[i]}] | :green[{track_danceability[i]}] | :orange[{track_energy[i]}] | :red[{track_valence[i]}] | :violet[{track_speechiness[i]}] | :gray[{track_tempo[i]}] |")
+    # # display the playlist data in a table
+    # st.write(f"## {playlist['name']}")
+    # st.write(f"**Description:** {playlist['description']}")
+    # st.write(f"**Number of tracks:** {len(tracks)}")
+    # st.write("")
+    # st.write("### Tracklist")
+    # st.write("| Name | Artist | Release Date | :blue[Popularity] | :green[Danceability] | :orange[Energy] | :red[Happiness] | :violet[Speechiness] | :gray[Tempo] |")
+    # for i in range(len(tracks)):
+    #     st.write(f"| {track_names[i]} | {track_artists[i]} | {track_release_date[i]} | :blue[{track_popularity[i]}] | :green[{track_danceability[i]}] | :orange[{track_energy[i]}] | :red[{track_valence[i]}] | :violet[{track_speechiness[i]}] | :gray[{track_tempo[i]}] |")
 
 # data = {"Image": track_image, "Name": track_names, "Preview": track_preview, "Artist": track_artists, "Release Date": track_release_date, "Popularity": track_popularity, "Duration (ms)": track_duration, "Acoustic": track_acousticness, "Dance": track_danceability, "Energy": track_energy, "Happy": track_valence, "Instrumental": track_instrumentalness, "Key": track_key, "Live": track_liveness, "Loud (Db)": track_loudness, "Speech": track_speechiness, "Tempo": track_tempo}
 if playlist_id:
@@ -119,6 +120,14 @@ if playlist_id:
         },
         disabled=True,
     )
+    data2 = {"Name": track_names, "ID": track_id}
+    df2 = pd.DataFrame(data2)
+    selected_audio = st.selectbox("Select a song from the playlist to play its preview:", df2["Name"])
+    if selected_audio:
+        selected_url = df2[df2["Name"] == selected_audio]["ID"].values[0]
+        embed_url = f"https://open.spotify.com/embed/track/{selected_url}"
+        st.markdown(f'<iframe src="{embed_url}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>', unsafe_allow_html=True)
+    st.markdown("<br><br>", unsafe_allow_html=True)
 
     # # analyze the playlist data
     # st.write("")
