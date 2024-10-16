@@ -1,3 +1,6 @@
+with open( "app\style.css" ) as css:
+    st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
+
 import streamlit as st
 
 hide_streamlit_style = """
