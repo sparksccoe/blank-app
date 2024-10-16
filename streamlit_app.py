@@ -57,7 +57,7 @@ st.sidebar.image(image)
 st.title("Data Adventures in Music")
 st.write('Let’s dive into a Data Adventure with your playlist!')
 
-playlist_name = st.sidebar.text_input("Enter the name of the Spotify playlist:")
+playlist_name = st.sidebar.text_input("Enter the public Spotify playlist name:")
 
 # search for the playlist ID based on the name
 if playlist_name:
@@ -97,11 +97,11 @@ if playlist_id:
     track_speechiness = [track["speechiness"] for track in audio_features]
     track_key = [track["key"] for track in audio_features]
 
-    # # display the playlist data in a table
-    # st.write(f"## {playlist['name']}")
-    # st.write(f"**Description:** {playlist['description']}")
-    # st.write(f"**Number of tracks:** {len(tracks)}")
-    # st.write("")
+    # display the playlist data in a table
+    st.write(f"## {playlist['name']}")
+    st.write(f"**Description:** {playlist['description']}")
+    st.write(f"**Number of tracks:** {len(tracks)}")
+    st.write("")
     # st.write("### Tracklist")
     # st.write("| Name | Artist | Release Date | :blue[Popularity] | :green[Danceability] | :orange[Energy] | :red[Happiness] | :violet[Speechiness] | :gray[Tempo] |")
     # for i in range(len(tracks)):
