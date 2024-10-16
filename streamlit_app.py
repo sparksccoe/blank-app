@@ -13,10 +13,9 @@ import pandas as pd
 import plotly.express as px
 from datetime import datetime
 
-hide_streamlit_style = """
-            <style>
-            [data-testid="stToolbar"] {visibility: hidden !important;}
-            footer {visibility: hidden !important;}
+<style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
             </style>
             """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
