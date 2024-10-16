@@ -159,10 +159,10 @@ if playlist_id:
     selected_feature = st.selectbox("Select an audio feature to rank tracks by:", features)
     num_tracks = st.slider(f"How many tracks do you want to display?", min_value=1, max_value=num_total_tracks, value=3)
     sorted_df = df.sort_values(by=selected_feature, ascending=False)
-    st.write(f"### Top 5 Tracks by {selected_feature}")
+    st.write(f"### Top {num_tracks} Tracks by {selected_feature}")
     st.dataframe(sorted_df.head(num_tracks)[["Name", "Artist", selected_feature]], hide_index=True)
     sorted_df_ascending = df.sort_values(by=selected_feature, ascending=True)
-    st.write(f"### Lowest 5 Tracks by {selected_feature}")
+    st.write(f"### Lowest {num_tracks} Tracks by {selected_feature}")
     st.dataframe(sorted_df_ascending.head(num_tracks)[["Name", "Artist", selected_feature]], hide_index=True) 
 
 
