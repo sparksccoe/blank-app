@@ -119,7 +119,7 @@ if playlist_id:
 
     # display the playlist data in a table
     st.write(f"## {playlist['name']}")
-    st.image(playlist_cover, width=200)
+    st.image(playlist_cover, width=300)
     st.write(f"**Description:** {playlist['description']}")
     st.write(f"**Number of tracks:** {len(tracks)}")
     # st.write("")
@@ -138,7 +138,7 @@ if playlist_id:
         df,
         column_config={
             "Image": st.column_config.ImageColumn(
-                "Album Art",
+                "Album Art", help="Click twice on the album cover to enlarge"
             )
         },
         disabled=True,
@@ -150,7 +150,18 @@ if playlist_id:
         selected_url = df2[df2["Name"] == selected_audio]["ID"].values[0]
         embed_url = f"https://open.spotify.com/embed/track/{selected_url}"
         st.markdown(f'<iframe src="{embed_url}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>', unsafe_allow_html=True)
-    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
+
+     # Features to choose from in the dropdown
+    features = ["Popularity", "Duration (ms)", "Acoustic", "Dance", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo"]
+    selected_feature = st.selectbox("Select an audio feature to rank tracks by:", features)
+    sorted_df = df.sort_values(by=selected_feature, ascending=False)
+    st.write(f"### Top 5 Tracks by {selected_feature}")
+    st.dataframe(sorted_df.head(5)[["Name", "Artist", selected_feature]], hide_index=True)
+    sorted_df_ascending = df.sort_values(by=selected_feature, ascending=True)
+    st.write(f"### Lowest 5 Tracks by {selected_feature}")
+    st.dataframe(sorted_df_ascending.head(5)[["Name", "Artist", selected_feature]], hide_index=True) 
+
 
     # # analyze the playlist data
     # st.write("")
