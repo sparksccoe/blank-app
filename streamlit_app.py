@@ -132,6 +132,7 @@ if playlist_id:
 if playlist_id:
     data = {"Image": track_image, "Name": track_names, "Artist": track_artists, "Release Date": track_release_date, "Popularity": track_popularity, "Duration (ms)": track_duration, "Acoustic": track_acousticness, "Dance": track_danceability, "Energy": track_energy, "Happy": track_valence, "Instrumental": track_instrumentalness, "Key": track_key, "Live": track_liveness, "Loud (Db)": track_loudness, "Speech": track_speechiness, "Tempo": track_tempo}
     df = pd.DataFrame(data)
+    num_total_tracks = len(df)
     df.index += 1
     st.write("The table below is scrollable both horizontally and vertically. Each column can be clicked to sort in ascending or descending order.")
     st.data_editor(
@@ -155,12 +156,13 @@ if playlist_id:
      # Features to choose from in the dropdown
     features = ["Popularity", "Duration (ms)", "Acoustic", "Dance", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo"]
     selected_feature = st.selectbox("Select an audio feature to rank tracks by:", features)
+    num_tracks = st.slider(f"How many tracks do you want to display?", min_value=1, max_value=num_total_tracks, value=3)
     sorted_df = df.sort_values(by=selected_feature, ascending=False)
     st.write(f"### Top 5 Tracks by {selected_feature}")
-    st.dataframe(sorted_df.head(5)[["Name", "Artist", selected_feature]], hide_index=True)
+    st.dataframe(sorted_df.head(num_tracks)[["Name", "Artist", selected_feature]], hide_index=True)
     sorted_df_ascending = df.sort_values(by=selected_feature, ascending=True)
     st.write(f"### Lowest 5 Tracks by {selected_feature}")
-    st.dataframe(sorted_df_ascending.head(5)[["Name", "Artist", selected_feature]], hide_index=True) 
+    st.dataframe(sorted_df_ascending.head(num_tracks)[["Name", "Artist", selected_feature]], hide_index=True) 
 
 
     # # analyze the playlist data
