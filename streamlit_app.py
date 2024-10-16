@@ -79,6 +79,8 @@ if playlist_id:
     track_popularity = [track["track"]["popularity"] for track in tracks]
     track_duration = [track["track"]["duration_ms"] for track in tracks]
     track_album = [track["track"]["album"]["name"] for track in tracks]
+    track_preview = [track["track"]["preview_url"] for track in tracks]
+    track_image = [track["track"]["album"]["images"][0]["url"] for track in tracks]
     track_release_date = [track["track"]["album"]["release_date"] for track in tracks]
     track_url = [track["track"]["external_urls"]["spotify"] for track in tracks]
     audio_features = sp.audio_features(track_url)
