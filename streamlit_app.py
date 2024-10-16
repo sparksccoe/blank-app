@@ -73,6 +73,7 @@ else:
 # retrieve data from the Spotify API
 if playlist_id:
     playlist = sp.playlist(playlist_id)
+    playlist_cover = playlist["images"][0]["url"]
     tracks = playlist["tracks"]["items"]
     track_id = [track["track"]["id"] for track in tracks]
     track_names = [track["track"]["name"] for track in tracks]
@@ -99,6 +100,7 @@ if playlist_id:
 
     # display the playlist data in a table
     st.write(f"## {playlist['name']}")
+    st.image(playlist_cover, caption="Playlist Cover", use_column_width=True)
     st.write(f"**Description:** {playlist['description']}")
     st.write(f"**Number of tracks:** {len(tracks)}")
     # st.write("")
