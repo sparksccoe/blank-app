@@ -1,17 +1,4 @@
-import spotipy
-from PIL import Image
-from spotipy.oauth2 import SpotifyClientCredentials
-
-client_id = '922604ee2b934fbd9d1223f4ec023fba'
-client_secret = '1bdf88cb16d64e54ba30220a8f126997'
-
-client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
-sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
-
 import streamlit as st
-import pandas as pd
-import plotly.express as px
-from datetime import datetime
 
 hide_streamlit_style = """
                 <style>
@@ -45,6 +32,22 @@ hide_streamlit_style = """
                 </style>
                 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+import spotipy
+from PIL import Image
+from spotipy.oauth2 import SpotifyClientCredentials
+
+client_id = '922604ee2b934fbd9d1223f4ec023fba'
+client_secret = '1bdf88cb16d64e54ba30220a8f126997'
+
+client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
+sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+
+
+import pandas as pd
+import plotly.express as px
+from datetime import datetime
+
 
 image = Image.open('data_adventures_logo.png')
 st.sidebar.image(image)
