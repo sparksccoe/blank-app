@@ -1,6 +1,3 @@
-with open( "app\style.css" ) as css:
-    st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
-
 import streamlit as st
 
 hide_streamlit_style = """
@@ -35,6 +32,9 @@ hide_streamlit_style = """
                 </style>
                 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+with open( "app\style.css" ) as css:
+    st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
+
 
 import spotipy
 from PIL import Image
