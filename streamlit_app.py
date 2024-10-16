@@ -201,6 +201,23 @@ if playlist_id:
 
      # Features to choose from in the dropdown
     features = ["Popularity", "Duration (ms)", "Acoustic", "Dance", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo"]
+    features_with_descriptions = [
+    "Popularity: The popularity score of the track (0 to 100)",
+    "Duration (ms): The duration of the track in milliseconds",
+    "Acoustic: A measure of the acoustic quality of the track (0 to 1)",
+    "Dance: How suitable the track is for dancing (0 to 1)",
+    "Energy: The intensity and activity level of the track (0 to 1)",
+    "Happy: A measure of the musical positivity of the track (0 to 1)",
+    "Instrumental: The likelihood that the track is instrumental (0 to 1)",
+    "Key: The musical key the track is composed in (0 to 11)",
+    "Live: The probability that the track was performed live (0 to 1)",
+    "Loud (Db): The overall loudness of the track in decibels",
+    "Speech: The presence of spoken words in the track (0 to 1)",
+    "Tempo: The tempo of the track in beats per minute (BPM)"
+    ]
+    selected_feature_with_description = st.selectbox("Select an audio feature to rank tracks by:", features_with_descriptions)
+    # Extract the feature name from the selected option (before the colon)
+    selected_feature = selected_feature_with_description.split(":")[0]
     selected_feature = st.selectbox("Select an audio feature to rank tracks by:", features)
     num_tracks = st.slider(f"How many tracks do you want to display?", min_value=1, max_value=num_total_tracks, value=3)
     sorted_df = df.sort_values(by=selected_feature, ascending=False)
