@@ -120,11 +120,12 @@ if playlist_id:
     # Extract genres by fetching artist details
     track_genres = []
     for track in tracks:
-        artist_id = track["track"]["artists"][0]["id"]  # Taking the first artist for simplicity
-        artist = sp.artist(artist_id)  # Get artist information
+        artist_id = track["track"]["artists"][0]["id"]  # Get the first artist for simplicity
+        artist = sp.artist(artist_id)  # Fetch artist information
+        genres = artist.get("genres", [])  # Extract genres from artist
         first_genre = genres[0] if genres else "No genre available"  # Get the first genre, or a default if no genres exist
         track_genres.append(first_genre)
-        
+
     # display the playlist data in a table
     st.write(f"## {playlist['name']}")
     st.image(playlist_cover, width=300)
