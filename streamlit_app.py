@@ -277,6 +277,40 @@ if playlist_id:
 
     # Display the bar chart in Streamlit
     st.plotly_chart(fig)
+
+    # Calculate the average popularity
+    if track_popularity:
+        average_popularity = sum(track_popularity) / len(track_popularity)
+    else:
+        average_popularity = 0
+
+    # Display the average popularity
+    st.write(f"The average popularity of the songs in this playlist is: {int(average_popularity)}/100")
+    # Show horizontal progress bar for average popularity (scaled between 0 and 100)
+    st.progress(int(average_popularity))
+    # Create a DataFrame to hold track names and popularity
+    df_popularity = pd.DataFrame({
+        'Track': track_names,
+        'Popularity': track_popularity
+    })
+    # Define the bins for popularity (0-10%, 10-20%, etc.)
+    bins = [i for i in range(0, 101, 10)]  # Create bins for every 10%
+    # Assign each track to a bin
+    df_popularity['Popularity Bin'] = pd.cut(df_popularity['Popularity'], bins=bins, right=False)
+    # Calculate the percentage of songs in each popularity bin
+    bin_counts = df_popularity['Popularity Bin'].value_counts(normalize=True) * 100
+    # Sort the bins so they appear in order
+    bin_counts = bin_counts.sort_index()
+    # Create a DataFrame for the bar chart
+    df_bins = pd.DataFrame({
+        'Popularity Range': [f"{int(interval.left)}-{int(interval.right)}" for interval in bin_counts.index],
+        'Percentage of Songs (%)': bin_counts.values
+    })
+    # Set the Popularity Range as the index for the chart
+    df_bins.set_index('Popularity Range', inplace=True)
+    # Display the bar chart of popularity ranges using st.bar_chart
+    st.bar_chart(df_bins, x_label="Popularity Score", y_label="Percent of songs")
+
     # # analyze the playlist data
     # st.write("")
     # st.write("### Playlist Analysis")
