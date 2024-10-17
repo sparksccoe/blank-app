@@ -127,6 +127,17 @@ if playlist_id:
         track_genres.append(first_genre)
 
 
+    # Function to convert duration from milliseconds to minutes:seconds
+    def ms_to_minutes_seconds(ms):
+        minutes = ms // 60000  # Get minutes
+        seconds = (ms % 60000) // 1000  # Get remaining seconds
+        return f"{minutes}:{seconds:02d}"  # Format as mm:ss with zero-padded seconds
+
+    # Apply the conversion to the track durations
+    track_duration_formatted = [ms_to_minutes_seconds(duration) for duration in track_duration]
+    
+
+
     # Convert track keys to pitch class notation
     # Map numeric key values to pitch class notation
     key_mapping = {
@@ -163,7 +174,7 @@ if playlist_id:
 
 # data = {"Image": track_image, "Name": track_names, "Preview": track_preview, "Artist": track_artists, "Release Date": track_release_date, "Popularity": track_popularity, "Duration (ms)": track_duration, "Acoustic": track_acousticness, "Dance": track_danceability, "Energy": track_energy, "Happy": track_valence, "Instrumental": track_instrumentalness, "Key": track_key, "Live": track_liveness, "Loud (Db)": track_loudness, "Speech": track_speechiness, "Tempo": track_tempo}
 if playlist_id:
-    data = {"Image": track_image, "Name": track_names, "Artist": track_artists, "Genre": track_genres, "Release Date": track_release_date, "Popularity": track_popularity, "Duration (ms)": track_duration, "Acoustic": track_acousticness, "Dance": track_danceability, "Energy": track_energy, "Happy": track_valence, "Instrumental": track_instrumentalness, "Key": track_keys_converted, "Live": track_liveness, "Loud (Db)": track_loudness, "Speech": track_speechiness, "Tempo": track_tempo}
+    data = {"Image": track_image, "Name": track_names, "Artist": track_artists, "Genre": track_genres, "Release Date": track_release_date, "Popularity": track_popularity, "Duration": track_duration_formatted, "Acoustic": track_acousticness, "Dance": track_danceability, "Energy": track_energy, "Happy": track_valence, "Instrumental": track_instrumentalness, "Key": track_keys_converted, "Live": track_liveness, "Loud (Db)": track_loudness, "Speech": track_speechiness, "Tempo": track_tempo}
     df = pd.DataFrame(data)
     num_total_tracks = len(df)
     df.index += 1
@@ -189,8 +200,8 @@ if playlist_id:
             "Popularity": st.column_config.NumberColumn(
                 "Popularity", help="The popularity score of the track (0 to 100)"
             ),
-            "Duration (ms)": st.column_config.NumberColumn(
-                "Duration (ms)", help="The duration of the track in milliseconds"
+            "Duration": st.column_config.TextColumn(
+                "Duration", help="The duration of the track"
             ),
             "Acoustic": st.column_config.NumberColumn(
                 "Acousticness", help="A measure of the acoustic quality of the track (0 to 1)"
@@ -235,10 +246,10 @@ if playlist_id:
     st.markdown("<br>", unsafe_allow_html=True)
 
      # Features to choose from in the dropdown
-    features = ["Popularity", "Duration (ms)", "Acoustic", "Dance", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo"]
+    features = ["Popularity", "Duration", "Acoustic", "Dance", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo"]
     features_with_descriptions = [
     "Popularity: The popularity score of the track (0 to 100)",
-    "Duration (ms): The duration of the track in milliseconds",
+    "Duration: The duration of the track",
     "Acoustic: A measure of the acoustic quality of the track (0 to 1)",
     "Dance: How suitable the track is for dancing (0 to 1)",
     "Energy: The intensity and activity level of the track (0 to 1)",
