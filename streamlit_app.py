@@ -207,7 +207,7 @@ if playlist_id:
             "Instrumental": st.column_config.NumberColumn(
                 "Instrumental", help="The likelihood that the track is instrumental (0 to 1)"
             ),
-            "Key": st.column_config.NumberColumn(
+            "Key": st.column_config.TextColumn(
                 "Key", help="The musical key the track is composed in (0 to 11)"
             ),
             "Live": st.column_config.NumberColumn(
