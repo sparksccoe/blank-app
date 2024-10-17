@@ -485,6 +485,51 @@ if playlist_id:
     st.bar_chart(df_bins, x_label="Happiness Score", y_label="Percentage of Songs (%)")
 
 
+
+
+ # Calculate the average instrumentalness
+    if track_instrumentalness:
+        average_instrumentalness = sum(track_instrumentalness) / len(track_instrumentalness)
+    else:
+        average_instrumentalness = 0
+
+    # Display the average instrumentalness (0-1 scale)
+    st.write(f"The average instrumentalness of the songs in this playlist is: {average_instrumentalness:.2f} / 1")
+
+    # Show horizontal progress bar for average instrumentalness (scaled between 0 and 1)
+    st.progress(int(average_instrumentalness * 100))  # Multiply by 100 for progress bar
+
+    # Create a DataFrame to hold track names and instrumentalness
+    df_instrumentalness = pd.DataFrame({
+        'Track': track_names,
+        'Instrumentalness': track_instrumentalness  # Keep instrumentalness in 0-1 range
+    })
+
+    # Define the bins for instrumentalness (0-0.1, 0.1-0.2, etc.)
+    bins = [i/10 for i in range(0, 11)]  # Create bins for every 0.1
+
+    # Assign each track to a bin
+    df_instrumentalness['Instrumentalness Bin'] = pd.cut(df_instrumentalness['Instrumentalness'], bins=bins, right=False)
+
+    # Calculate the percentage of songs in each instrumentalness bin
+    bin_counts = df_instrumentalness['Instrumentalness Bin'].value_counts(normalize=True) * 100
+
+    # Sort the bins so they appear in order
+    bin_counts = bin_counts.sort_index()
+
+    # Create a DataFrame for the bar chart
+    df_bins = pd.DataFrame({
+        'Instrumentalness Range': [f"{interval.left:.1f} - {interval.right:.1f}" for interval in bin_counts.index],
+        'Percentage of Songs (%)': bin_counts.values
+    })
+
+    # Set the Instrumentalness Range as the index for the chart
+    df_bins.set_index('Instrumentalness Range', inplace=True)
+
+    # Display the bar chart of instrumentalness ranges using st.bar_chart
+    st.bar_chart(df_bins, x_label="Instrulmentalness Score", y_label="Percentage of Songs (%)")
+
+
     # # analyze the playlist data
     # st.write("")
     # st.write("### Playlist Analysis")
