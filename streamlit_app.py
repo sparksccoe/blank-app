@@ -345,6 +345,41 @@ if playlist_id:
     # Display the bar chart of popularity ranges using st.bar_chart
     st.bar_chart(df_bins_popularity, x_label="Popularity Score", y_label="Percentage of songs")
 
+
+    # Function to convert duration from milliseconds to minutes
+    def ms_to_minutes(ms):
+        return ms // 60000  # Convert milliseconds to minutes
+
+    # Apply the conversion to the track durations
+    track_durations_minutes = [ms_to_minutes(duration) for duration in track_duration]
+
+    # Create bins for the durations (0-1 mins, 1-2 mins, etc.)
+    bins = pd.cut(track_durations_minutes, bins=range(0, max(track_durations_minutes)+2), right=False)
+
+    # Count the occurrences in each bin
+    duration_counts = pd.value_counts(bins).sort_index()
+
+    # Calculate the percentage of each bin
+    total_tracks = len(track_durations_minutes)
+    duration_percentages = (duration_counts / total_tracks) * 100  # Calculate percentage
+
+    # Convert the bin intervals to strings for labeling
+    duration_labels = [f"{int(interval.left)}-{int(interval.right)} mins" for interval in duration_counts.index]
+
+    # Create a DataFrame for the donut chart
+    df_durations = pd.DataFrame({
+        'Duration Range': duration_labels,
+        'Percentage': duration_percentages.round(1)  # Round to 1 decimal place
+    })
+
+    # Create the donut chart using Plotly
+    fig_duration = px.pie(df_durations, values='Percentage', names='Duration Range', title='Track Durations by Minutes (Percentage)',
+                hole=0.4)  # hole=0.4 makes it a donut chart
+
+    # Display the donut chart in Streamlit
+    st.plotly_chart(fig_duration)
+
+
     # Calculate the average acousticness
     if track_acousticness:
         average_acousticness = sum(track_acousticness) / len(track_acousticness)
