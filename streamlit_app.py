@@ -1,5 +1,7 @@
 import streamlit as st
 
+st.set_page_config(page_title=None, page_icon=None, layout="centered", initial_sidebar_state="expanded", menu_items=None)
+
 hide_streamlit_style = """
                 <style>
                 div[data-testid="stToolbar"] {
