@@ -49,6 +49,7 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 from datetime import datetime
 
 
