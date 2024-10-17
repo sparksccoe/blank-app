@@ -575,6 +575,54 @@ if playlist_id:
     st.bar_chart(df_bins, x_label="Liveness Score", y_label="Percentage of Songs (%)")
 
 
+
+
+   # Calculate the average speechiness
+    if track_speechiness:
+        average_speechiness = sum(track_speechiness) / len(track_speechiness)
+    else:
+        average_speechiness = 0
+
+    # Display the average speechiness (0-1 scale)
+    st.write(f"The average speechiness of the songs in this playlist is: {average_speechiness:.2f} / 1")
+
+    # Show horizontal progress bar for average speechiness (scaled between 0 and 1)
+    st.progress(int(average_speechiness * 100))  # Multiply by 100 for progress bar
+
+    # Create a DataFrame to hold track names and speechiness
+    df_speechiness = pd.DataFrame({
+        'Track': track_names,
+        'Speechiness': track_speechiness  # Keep speechiness in 0-1 range
+    })
+
+    # Define the bins for speechiness (0-0.1, 0.1-0.2, etc.)
+    bins = [i/10 for i in range(0, 11)]  # Create bins for every 0.1
+
+    # Assign each track to a bin
+    df_speechiness['Speechiness Bin'] = pd.cut(df_speechiness['Speechiness'], bins=bins, right=False)
+
+    # Calculate the percentage of songs in each speechiness bin
+    bin_counts = df_speechiness['Speechiness Bin'].value_counts(normalize=True) * 100
+
+    # Sort the bins so they appear in order
+    bin_counts = bin_counts.sort_index()
+
+    # Create a DataFrame for the bar chart
+    df_bins = pd.DataFrame({
+        'Speechiness Range': [f"{interval.left:.1f} - {interval.right:.1f}" for interval in bin_counts.index],
+        'Percentage of Songs (%)': bin_counts.values
+    })
+
+    # Set the Speechiness Range as the index for the chart
+    df_bins.set_index('Speechiness Range', inplace=True)
+
+    # Display the bar chart of speechiness ranges using st.bar_chart
+    st.bar_chart(df_bins, x_label="Speechiness Score", y_label="Percentage of Songs (%)")
+
+
+
+
+
     # # analyze the playlist data
     # st.write("")
     # st.write("### Playlist Analysis")
