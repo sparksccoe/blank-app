@@ -660,6 +660,52 @@ if playlist_id:
 
 
 
+# Create bins for track loudness based on suggested ranges
+    bins_loudness = [-60, -40, -30, -20, -10, 0]  # Define the bin edges
+    labels_loudness = ['-60 to -40 dB', '-40 to -30 dB', '-30 to -20 dB', '-20 to -10 dB', '-10 to 0 dB']  # Labels for each bin
+
+    # Categorize the loudness values into bins
+    loudness_binned = pd.cut(track_loudness, bins=bins_loudness, labels=labels_loudness, right=False)
+
+    # Count the occurrences of each bin
+    loudness_binned_counts = loudness_binned.value_counts().sort_index()
+
+    # Calculate the percentage for each bin
+    total_tracks = len(track_loudness)
+    loudness_binned_percentages = (loudness_binned_counts / total_tracks) * 100
+
+    # Create a Plotly stacked horizontal bar chart using the calculated percentages
+    fig_loudness = go.Figure()
+
+    # Add the bar (each segment of the bar represents a loudness bin)
+    fig_loudness.add_trace(go.Bar(
+        x=loudness_binned_percentages.values,  # Use the calculated percentages
+        y=['Loudness Distribution'],  # One bar for all loudness bins
+        orientation='h',
+        text=[f"{perc:.1f}%" for perc in loudness_binned_percentages.values],  # Add text labels showing the percentages
+        textposition='inside',  # Place the text labels inside the bar
+        marker=dict(color=['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A']),  # Colors for the segments
+        hoverinfo='text',  # Show the text on hover
+        hovertext=[f"{label}: {perc:.1f}%" for label, perc in zip(labels_loudness, loudness_binned_percentages.values)]  # Hover info
+    ))
+
+    # Update the layout to include custom x-axis ticks and a title
+    fig_loudness.update_layout(
+        title_text='Distribution of Songs by Loudness Range',
+        xaxis_title='Percentage of Tracks (%)',
+        yaxis_title='',
+        xaxis=dict(
+            tickvals=[0, 20, 40, 60, 80, 100],  # Custom ticks at 0, 20, 40, 60, 80, 100
+            ticktext=['0%', '20%', '40%', '60%', '80%', '100%'],  # Display percentage symbols on the x-axis
+            range=[0, 100]  # Ensure the x-axis covers the full range from 0 to 100
+        ),
+        barmode='stack',
+        showlegend=False  # Disable the legend as it is not needed
+    )
+
+    # Display the chart in Streamlit
+    st.plotly_chart(fig_loudness)
+
 
    # Calculate the average speechiness
     if track_speechiness:
