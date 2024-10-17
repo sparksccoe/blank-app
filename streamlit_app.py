@@ -285,7 +285,7 @@ if playlist_id:
         average_popularity = 0
 
     # Display the average popularity
-    st.write(f"The average popularity of the songs in this playlist is: {int(average_popularity)}/100")
+    st.write(f"The average popularity of the songs in this playlist is: {int(average_popularity)} / 100")
     # Show horizontal progress bar for average popularity (scaled between 0 and 100)
     st.progress(int(average_popularity))
     # Create a DataFrame to hold track names and popularity
@@ -318,7 +318,7 @@ if playlist_id:
         average_acousticness = 0
 
     # Display the average acousticness (0-1 scale)
-    st.write(f"The average acousticness of the songs in this playlist is: {average_acousticness:.2f}/1")
+    st.write(f"The average acousticness of the songs in this playlist is: {average_acousticness:.2f} / 1")
 
     # Show horizontal progress bar for average acousticness (scaled between 0 and 1)
     st.progress(int(average_acousticness * 100))  # Multiply by 100 for progress bar
@@ -353,6 +353,49 @@ if playlist_id:
     # Display the bar chart of acousticness ranges using st.bar_chart
     st.bar_chart(df_bins, x_label="Acousticness Score", y_label="Percent of songs")
 
+
+
+# Calculate the average danceability
+    if track_danceability:
+        average_danceability = sum(track_danceability) / len(track_danceability)
+    else:
+        average_danceability = 0
+
+    # Display the average danceability (0-1 scale)
+    st.write(f"The average danceability of the songs in this playlist is: {average_danceability:.2f} / 1")
+
+    # Show horizontal progress bar for average danceability (scaled between 0 and 1)
+    st.progress(int(average_danceability * 100))  # Multiply by 100 for progress bar
+
+    # Create a DataFrame to hold track names and danceability
+    df_danceability = pd.DataFrame({
+        'Track': track_names,
+        'Danceability': track_danceability  # Keep danceability in 0-1 range
+    })
+
+    # Define the bins for danceability (0-0.1, 0.1-0.2, etc.)
+    bins = [i/10 for i in range(0, 11)]  # Create bins for every 0.1
+
+    # Assign each track to a bin
+    df_danceability['Danceability Bin'] = pd.cut(df_danceability['Danceability'], bins=bins, right=False)
+
+    # Calculate the percentage of songs in each danceability bin
+    bin_counts = df_danceability['Danceability Bin'].value_counts(normalize=True) * 100
+
+    # Sort the bins so they appear in order
+    bin_counts = bin_counts.sort_index()
+
+    # Create a DataFrame for the bar chart
+    df_bins = pd.DataFrame({
+        'Danceability Range': [f"{interval.left:.1f} - {interval.right:.1f}" for interval in bin_counts.index],
+        'Percentage of Songs (%)': bin_counts.values
+    })
+
+    # Set the Danceability Range as the index for the chart
+    df_bins.set_index('Danceability Range', inplace=True)
+
+    # Display the bar chart of danceability ranges using st.bar_chart
+    st.bar_chart(df_bins, x_label="Danceability Score", y_label="Percent of songs")
 
     # # analyze the playlist data
     # st.write("")
