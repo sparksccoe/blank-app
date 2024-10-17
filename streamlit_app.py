@@ -441,6 +441,50 @@ if playlist_id:
     st.bar_chart(df_bins, x_label="Energy Score", y_label="Percentage of Songs (%)")
 
 
+
+   # Calculate the average happiness (valence)
+    if track_valence:
+        average_happiness = sum(track_valence) / len(track_valence)
+    else:
+        average_happiness = 0
+
+    # Display the average happiness (valence) (0-1 scale)
+    st.write(f"The average happiness of the songs in this playlist is: {average_happiness:.2f} / 1")
+
+    # Show horizontal progress bar for average happiness (scaled between 0 and 1)
+    st.progress(int(average_happiness * 100))  # Multiply by 100 for progress bar
+
+    # Create a DataFrame to hold track names and happiness (valence)
+    df_happiness = pd.DataFrame({
+        'Track': track_names,
+        'Happiness': track_valence  # Keep valence (happiness) in 0-1 range
+    })
+
+    # Define the bins for happiness (0-0.1, 0.1-0.2, etc.)
+    bins = [i/10 for i in range(0, 11)]  # Create bins for every 0.1
+
+    # Assign each track to a bin
+    df_happiness['Happiness Bin'] = pd.cut(df_happiness['Happiness'], bins=bins, right=False)
+
+    # Calculate the percentage of songs in each happiness bin
+    bin_counts = df_happiness['Happiness Bin'].value_counts(normalize=True) * 100
+
+    # Sort the bins so they appear in order
+    bin_counts = bin_counts.sort_index()
+
+    # Create a DataFrame for the bar chart
+    df_bins = pd.DataFrame({
+        'Happiness Range': [f"{interval.left:.1f} - {interval.right:.1f}" for interval in bin_counts.index],
+        'Percentage of Songs (%)': bin_counts.values
+    })
+
+    # Set the Happiness Range as the index for the chart
+    df_bins.set_index('Happiness Range', inplace=True)
+
+    # Display the bar chart of happiness ranges using st.bar_chart
+    st.bar_chart(df_bins, x_label="Happiness Score", y_label="Percentage of Songs (%)")
+
+
     # # analyze the playlist data
     # st.write("")
     # st.write("### Playlist Analysis")
