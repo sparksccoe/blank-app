@@ -554,6 +554,21 @@ if playlist_id:
 
 
 
+# Create a DataFrame to hold track keys and their occurrences
+    df_keys = pd.DataFrame(track_keys_converted, columns=['Key'])
+
+    # Count the occurrences of each key
+    key_counts = df_keys['Key'].value_counts(normalize=True) * 100  # Calculate percentage
+    key_counts = key_counts.round(1).reset_index()  # Round the percentage values to one decimal place
+    key_counts.columns = ['Key', 'Percentage']
+
+    # Create the pie chart using Plotly
+    fig_keys = px.pie(key_counts, values='Percentage', names='Key', title='Distribution of Musical Keys in Playlist (Percentage)')
+
+    # Display the pie chart in Streamlit
+    st.plotly_chart(fig_keys)
+
+
 
 # Calculate the average liveness
     if track_liveness:
