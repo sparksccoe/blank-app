@@ -325,14 +325,14 @@ if playlist_id:
     # Sort the bins so they appear in order
     bin_counts = bin_counts.sort_index()
     # Create a DataFrame for the bar chart
-    df_bins = pd.DataFrame({
+    df_bins_popularity = pd.DataFrame({
         'Popularity Range': [f"{int(interval.left)}-{int(interval.right)}" for interval in bin_counts.index],
         'Percentage of Songs (%)': bin_counts.values
     })
     # Set the Popularity Range as the index for the chart
-    df_bins.set_index('Popularity Range', inplace=True)
+    df_bins_popularity.set_index('Popularity Range', inplace=True)
     # Display the bar chart of popularity ranges using st.bar_chart
-    st.bar_chart(df_bins, x_label="Popularity Score", y_label="Percent of songs")
+    st.bar_chart(df_bins_popularity, x_label="Popularity Score", y_label="Percentage of songs")
 
     # Calculate the average acousticness
     if track_acousticness:
@@ -365,16 +365,16 @@ if playlist_id:
     bin_counts = bin_counts.sort_index()
 
     # Create a DataFrame for the bar chart
-    df_bins = pd.DataFrame({
+    df_bins_acousticness = pd.DataFrame({
         'Acousticness Range': [f"{interval.left:.1f} - {interval.right:.1f}" for interval in bin_counts.index],
         'Percentage of Songs (%)': bin_counts.values
     })
 
     # Set the Acousticness Range as the index for the chart
-    df_bins.set_index('Acousticness Range', inplace=True)
+    df_bins_acousticness.set_index('Acousticness Range', inplace=True)
 
     # Display the bar chart of acousticness ranges using st.bar_chart
-    st.bar_chart(df_bins, x_label="Acousticness Score", y_label="Percent of songs")
+    st.bar_chart(df_bins_acousticness, x_label="Acousticness Score", y_label="Percentage of songs")
 
 
 
@@ -409,16 +409,16 @@ if playlist_id:
     bin_counts = bin_counts.sort_index()
 
     # Create a DataFrame for the bar chart
-    df_bins = pd.DataFrame({
+    df_bins_danceability = pd.DataFrame({
         'Danceability Range': [f"{interval.left:.1f} - {interval.right:.1f}" for interval in bin_counts.index],
         'Percentage of Songs (%)': bin_counts.values
     })
 
     # Set the Danceability Range as the index for the chart
-    df_bins.set_index('Danceability Range', inplace=True)
+    df_bins_danceability.set_index('Danceability Range', inplace=True)
 
     # Display the bar chart of danceability ranges using st.bar_chart
-    st.bar_chart(df_bins, x_label="Danceability Score", y_label="Percent of songs")
+    st.bar_chart(df_bins_danceability, x_label="Danceability Score", y_label="Percentage of songs")
 
 
 # Calculate the average energy
@@ -452,16 +452,16 @@ if playlist_id:
     bin_counts = bin_counts.sort_index()
 
     # Create a DataFrame for the bar chart
-    df_bins = pd.DataFrame({
+    df_bins_energy = pd.DataFrame({
         'Energy Range': [f"{interval.left:.1f} - {interval.right:.1f}" for interval in bin_counts.index],
         'Percentage of Songs (%)': bin_counts.values
     })
 
     # Set the Energy Range as the index for the chart
-    df_bins.set_index('Energy Range', inplace=True)
+    df_bins_energy.set_index('Energy Range', inplace=True)
 
     # Display the bar chart of energy ranges using st.bar_chart
-    st.bar_chart(df_bins, x_label="Energy Score", y_label="Percentage of Songs (%)")
+    st.bar_chart(df_bins_energy, x_label="Energy Score", y_label="Percentage of Songs (%)")
 
 
 
@@ -496,16 +496,16 @@ if playlist_id:
     bin_counts = bin_counts.sort_index()
 
     # Create a DataFrame for the bar chart
-    df_bins = pd.DataFrame({
+    df_bins_happiness = pd.DataFrame({
         'Happiness Range': [f"{interval.left:.1f} - {interval.right:.1f}" for interval in bin_counts.index],
         'Percentage of Songs (%)': bin_counts.values
     })
 
     # Set the Happiness Range as the index for the chart
-    df_bins.set_index('Happiness Range', inplace=True)
+    df_bins_happiness.set_index('Happiness Range', inplace=True)
 
     # Display the bar chart of happiness ranges using st.bar_chart
-    st.bar_chart(df_bins, x_label="Happiness Score", y_label="Percentage of Songs (%)")
+    st.bar_chart(df_bins_happiness, x_label="Happiness Score", y_label="Percentage of Songs (%)")
 
 
 
@@ -541,16 +541,16 @@ if playlist_id:
     bin_counts = bin_counts.sort_index()
 
     # Create a DataFrame for the bar chart
-    df_bins = pd.DataFrame({
+    df_bins_instrumentalness = pd.DataFrame({
         'Instrumentalness Range': [f"{interval.left:.1f} - {interval.right:.1f}" for interval in bin_counts.index],
         'Percentage of Songs (%)': bin_counts.values
     })
 
     # Set the Instrumentalness Range as the index for the chart
-    df_bins.set_index('Instrumentalness Range', inplace=True)
+    df_bins_instrumentalness.set_index('Instrumentalness Range', inplace=True)
 
     # Display the bar chart of instrumentalness ranges using st.bar_chart
-    st.bar_chart(df_bins, x_label="Instrulmentalness Score", y_label="Percentage of Songs (%)")
+    st.bar_chart(df_bins_instrumentalness, x_label="Instrulmentalness Score", y_label="Percentage of Songs (%)")
 
 
 
@@ -586,16 +586,16 @@ if playlist_id:
     bin_counts = bin_counts.sort_index()
 
     # Create a DataFrame for the bar chart
-    df_bins = pd.DataFrame({
+    df_bins_liveness = pd.DataFrame({
         'Liveness Range': [f"{interval.left:.1f} - {interval.right:.1f}" for interval in bin_counts.index],
         'Percentage of Songs (%)': bin_counts.values
     })
 
     # Set the Liveness Range as the index for the chart
-    df_bins.set_index('Liveness Range', inplace=True)
+    df_bins_liveness.set_index('Liveness Range', inplace=True)
 
     # Display the bar chart of liveness ranges using st.bar_chart
-    st.bar_chart(df_bins, x_label="Liveness Score", y_label="Percentage of Songs (%)")
+    st.bar_chart(df_bins_liveness, x_label="Liveness Score", y_label="Percentage of Songs (%)")
 
 
 
@@ -631,16 +631,16 @@ if playlist_id:
     bin_counts = bin_counts.sort_index()
 
     # Create a DataFrame for the bar chart
-    df_bins = pd.DataFrame({
+    df_bins_speechiness = pd.DataFrame({
         'Speechiness Range': [f"{interval.left:.1f} - {interval.right:.1f}" for interval in bin_counts.index],
         'Percentage of Songs (%)': bin_counts.values
     })
 
     # Set the Speechiness Range as the index for the chart
-    df_bins.set_index('Speechiness Range', inplace=True)
+    df_bins_speechiness.set_index('Speechiness Range', inplace=True)
 
     # Display the bar chart of speechiness ranges using st.bar_chart
-    st.bar_chart(df_bins, x_label="Speechiness Score", y_label="Percentage of Songs (%)")
+    st.bar_chart(df_bins_speechiness, x_label="Speechiness Score", y_label="Percentage of Songs (%)")
 
 
 
