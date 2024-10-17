@@ -678,49 +678,49 @@ if playlist_id:
     # Create a Plotly stacked horizontal bar chart using the calculated percentages
     fig_loudness = go.Figure()
 
-# Add the bar (each segment of the bar represents a loudness bin)
-fig_loudness.add_trace(go.Bar(
-    x=loudness_binned_percentages.values,  # Use the calculated percentages
-    y=loudness_binned_percentages.index,  
-    orientation='h',
-    text=[f"{perc:.1f}%" for perc in loudness_binned_percentages.values],  # Add text labels showing the percentages
-    textposition='inside',  # Place the text labels inside the bar
-    marker=dict(color=['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A']),  # Colors for the segments
-    hoverinfo='text',  # Show the text on hover
-    hovertext=[f"{label}: {perc:.1f}%" for label, perc in zip(labels_loudness, loudness_binned_percentages.values)]  # Hover info
-))
+    # Add the bar (each segment of the bar represents a loudness bin)
+    fig_loudness.add_trace(go.Bar(
+        x=loudness_binned_percentages.values,  # Use the calculated percentages
+        y=loudness_binned_percentages.index,  
+        orientation='h',
+        text=[f"{perc:.1f}%" for perc in loudness_binned_percentages.values],  # Add text labels showing the percentages
+        textposition='inside',  # Place the text labels inside the bar
+        marker=dict(color=['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A']),  # Colors for the segments
+        hoverinfo='text',  # Show the text on hover
+        hovertext=[f"{label}: {perc:.1f}%" for label, perc in zip(labels_loudness, loudness_binned_percentages.values)]  # Hover info
+    ))
 
-# Update the layout to include custom x-axis ticks and a title
-fig_loudness.update_layout(
-    title_text='Distribution of Songs by Loudness Range',
-    xaxis_title='Percentage of Tracks (%)',
-    yaxis_title='',
-    xaxis=dict(
-        tickvals=[0, 20, 40, 60, 80, 100],  # Custom ticks at 0, 20, 40, 60, 80, 100
-        ticktext=['0%', '20%', '40%', '60%', '80%', '100%'],  # Display percentage symbols on the x-axis
-        range=[0, 100]  # Ensure the x-axis covers the full range from 0 to 100
-    ),
-    barmode='stack',
-    showlegend=False,  # Disable the legend as it is not needed,
-    annotations=[
-        dict(
-            x=105,  # Positioning to the right of the chart
-            y=0,  # Align with the y-axis
-            xref="x",  # Refer to the x-axis
-            yref="y",  # Refer to the y-axis
-            text=(
-                "-60 dB to -40 dB: Very quiet or background noise.<br>"
-                "-40 dB to -30 dB: Soft, likely ambient or very quiet tracks.<br>"
-                "-30 dB to -20 dB: Moderately soft tracks.<br>"
-                "-20 dB to -10 dB: Typical dynamic range for commercial music.<br>"
-                "-10 dB to 0 dB: Loud, compressed, heavily mastered tracks."
-            ),
-            showarrow=False,  # No arrow needed, just text
-            align="left",
-            font=dict(size=10)  # Adjust the font size for the helper text
-        )
-    ]
-)
+    # Update the layout to include custom x-axis ticks and a title
+    fig_loudness.update_layout(
+        title_text='Distribution of Songs by Loudness Range',
+        xaxis_title='Percentage of Tracks (%)',
+        yaxis_title='',
+        xaxis=dict(
+            tickvals=[0, 20, 40, 60, 80, 100],  # Custom ticks at 0, 20, 40, 60, 80, 100
+            ticktext=['0%', '20%', '40%', '60%', '80%', '100%'],  # Display percentage symbols on the x-axis
+            range=[0, 100]  # Ensure the x-axis covers the full range from 0 to 100
+        ),
+        barmode='stack',
+        showlegend=False,  # Disable the legend as it is not needed,
+        annotations=[
+            dict(
+                x=105,  # Positioning to the right of the chart
+                y=0,  # Align with the y-axis
+                xref="x",  # Refer to the x-axis
+                yref="y",  # Refer to the y-axis
+                text=(
+                    "-60 dB to -40 dB: Very quiet or background noise.<br>"
+                    "-40 dB to -30 dB: Soft, likely ambient or very quiet tracks.<br>"
+                    "-30 dB to -20 dB: Moderately soft tracks.<br>"
+                    "-20 dB to -10 dB: Typical dynamic range for commercial music.<br>"
+                    "-10 dB to 0 dB: Loud, compressed, heavily mastered tracks."
+                ),
+                showarrow=False,  # No arrow needed, just text
+                align="left",
+                font=dict(size=10)  # Adjust the font size for the helper text
+            )
+        ]
+    )
 
     # Display the chart in Streamlit
     st.plotly_chart(fig_loudness)
