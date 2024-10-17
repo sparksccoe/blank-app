@@ -299,7 +299,7 @@ if playlist_id:
     )
 
     # Display the bar chart in Streamlit
-    st.plotly_chart(fig)
+    st.plotly_chart(fig, theme="streamlit")
 
     # Calculate the average popularity
     if track_popularity:
