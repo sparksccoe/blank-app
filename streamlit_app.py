@@ -126,6 +126,29 @@ if playlist_id:
         first_genre = genres[0] if genres else "No genre available"  # Get the first genre, or a default if no genres exist
         track_genres.append(first_genre)
 
+
+    # Convert track keys to pitch class notation
+    # Map numeric key values to pitch class notation
+    key_mapping = {
+        -1: 'None',
+        0: 'C',
+        1: 'C# / Db',
+        2: 'D',
+        3: 'D# / Eb',
+        4: 'E',
+        5: 'F',
+        6: 'F# / Gb',
+        7: 'G',
+        8: 'G# / Ab',
+        9: 'A',
+        10: 'A# / Bb',
+        11: 'B'
+    }
+
+    # Convert track keys to pitch class notation
+    track_keys_converted = [key_mapping[key] for key in track_keys]
+
+
     # display the playlist data in a table
     st.write(f"## {playlist['name']}")
     st.image(playlist_cover, width=300)
@@ -140,7 +163,7 @@ if playlist_id:
 
 # data = {"Image": track_image, "Name": track_names, "Preview": track_preview, "Artist": track_artists, "Release Date": track_release_date, "Popularity": track_popularity, "Duration (ms)": track_duration, "Acoustic": track_acousticness, "Dance": track_danceability, "Energy": track_energy, "Happy": track_valence, "Instrumental": track_instrumentalness, "Key": track_key, "Live": track_liveness, "Loud (Db)": track_loudness, "Speech": track_speechiness, "Tempo": track_tempo}
 if playlist_id:
-    data = {"Image": track_image, "Name": track_names, "Artist": track_artists, "Genre": track_genres, "Release Date": track_release_date, "Popularity": track_popularity, "Duration (ms)": track_duration, "Acoustic": track_acousticness, "Dance": track_danceability, "Energy": track_energy, "Happy": track_valence, "Instrumental": track_instrumentalness, "Key": track_key, "Live": track_liveness, "Loud (Db)": track_loudness, "Speech": track_speechiness, "Tempo": track_tempo}
+    data = {"Image": track_image, "Name": track_names, "Artist": track_artists, "Genre": track_genres, "Release Date": track_release_date, "Popularity": track_popularity, "Duration (ms)": track_duration, "Acoustic": track_acousticness, "Dance": track_danceability, "Energy": track_energy, "Happy": track_valence, "Instrumental": track_instrumentalness, "Key": track_keys_converted, "Live": track_liveness, "Loud (Db)": track_loudness, "Speech": track_speechiness, "Tempo": track_tempo}
     df = pd.DataFrame(data)
     num_total_tracks = len(df)
     df.index += 1
@@ -182,7 +205,7 @@ if playlist_id:
                 "Valence", help="A measure of the musical positivity of the track (0 to 1)"
             ),
             "Instrumental": st.column_config.NumberColumn(
-                "Instrumentalness", help="The likelihood that the track is instrumental (0 to 1)"
+                "Instrumental", help="The likelihood that the track is instrumental (0 to 1)"
             ),
             "Key": st.column_config.NumberColumn(
                 "Key", help="The musical key the track is composed in (0 to 11)"
