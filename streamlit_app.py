@@ -311,6 +311,49 @@ if playlist_id:
     # Display the bar chart of popularity ranges using st.bar_chart
     st.bar_chart(df_bins, x_label="Popularity Score", y_label="Percent of songs")
 
+    # Calculate the average acousticness
+    if track_acousticness:
+        average_acousticness = sum(track_acousticness) / len(track_acousticness)
+    else:
+        average_acousticness = 0
+
+    # Display the average acousticness (0-1 scale)
+    st.write(f"The average acousticness of the songs in this playlist is: {average_acousticness:.2f}/1")
+
+    # Show horizontal progress bar for average acousticness (scaled between 0 and 1)
+    st.progress(int(average_acousticness * 100))  # Multiply by 100 for progress bar
+
+    # Create a DataFrame to hold track names and acousticness
+    df_acousticness = pd.DataFrame({
+        'Track': track_names,
+        'Acousticness': track_acousticness  # Keep acousticness in 0-1 range
+    })
+
+    # Define the bins for acousticness (0-0.1, 0.1-0.2, etc.)
+    bins = [i/10 for i in range(0, 11)]  # Create bins for every 0.1
+
+    # Assign each track to a bin
+    df_acousticness['Acousticness Bin'] = pd.cut(df_acousticness['Acousticness'], bins=bins, right=False)
+
+    # Calculate the percentage of songs in each acousticness bin
+    bin_counts = df_acousticness['Acousticness Bin'].value_counts(normalize=True) * 100
+
+    # Sort the bins so they appear in order
+    bin_counts = bin_counts.sort_index()
+
+    # Create a DataFrame for the bar chart
+    df_bins = pd.DataFrame({
+        'Acousticness Range': [f"{interval.left:.1f} - {interval.right:.1f}" for interval in bin_counts.index],
+        'Percentage of Songs (%)': bin_counts.values
+    })
+
+    # Set the Acousticness Range as the index for the chart
+    df_bins.set_index('Acousticness Range', inplace=True)
+
+    # Display the bar chart of acousticness ranges using st.bar_chart
+    st.bar_chart(df_bins, x_label="Acousticness Score", y_label="Percent of songs")
+
+
     # # analyze the playlist data
     # st.write("")
     # st.write("### Playlist Analysis")
