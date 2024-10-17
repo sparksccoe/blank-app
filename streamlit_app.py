@@ -146,7 +146,7 @@ if playlist_id:
     }
 
     # Convert track keys to pitch class notation
-    track_keys_converted = [key_mapping[key] for key in track_keys]
+    track_keys_converted = [key_mapping[key] for key in track_key]
 
 
     # display the playlist data in a table
