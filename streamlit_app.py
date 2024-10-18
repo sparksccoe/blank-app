@@ -822,6 +822,41 @@ if playlist_id:
     st.plotly_chart(fig_tempo)
 
 
+    # Convert the list of audio features into a DataFrame
+df_audio_features = pd.DataFrame(audio_features)
+
+# Calculate the average values of each audio feature
+average_audio_features = df_audio_features.mean()
+
+# Define the features to plot
+features = ['danceability', 'energy', 'valence', 'acousticness', 'instrumentalness', 'liveness', 'speechiness']
+
+# Create the radar chart using Plotly
+fig_audio_features = go.Figure()
+
+# Add the average values to the radar chart
+fig_audio_features.add_trace(go.Scatterpolar(
+    r=average_audio_features[features].values,  # Average values of the audio features
+    theta=features,  # The audio features
+    fill='toself',  # Fill the area inside the chart
+    name='Average Audio Features'
+))
+
+# Update the layout of the chart
+fig_audio_features.update_layout(
+    polar=dict(
+        radialaxis=dict(
+            visible=True,
+            range=[0, 1]  # Since audio features are typically between 0 and 1
+        )
+    ),
+    title="Average Audio Features of Songs in the Playlist",
+    showlegend=False
+)
+
+# Display the radar chart in Streamlit
+st.plotly_chart(fig_audio_features)
+
     # # analyze the playlist data
     # st.write("")
     # st.write("### Playlist Analysis")
