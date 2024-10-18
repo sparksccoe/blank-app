@@ -113,7 +113,7 @@ if playlist_id:
     track_instrumentalness = [track["instrumentalness"] for track in audio_features]
     track_liveness = [track["liveness"] for track in audio_features]
     track_valence = [track["valence"] for track in audio_features]
-    track_tempo = [track["tempo"] for track in audio_features]
+    track_tempo = [round(track["tempo"]) for track in audio_features]
     track_signature = [track["time_signature"] for track in audio_features]
     track_speechiness = [track["speechiness"] for track in audio_features]
     track_key = [track["key"] for track in audio_features]
