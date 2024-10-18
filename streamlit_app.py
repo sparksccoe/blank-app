@@ -822,36 +822,40 @@ if playlist_id:
     # Display the chart in Streamlit
     st.plotly_chart(fig_tempo)
 
-
-    # Create a DataFrame with all the extracted features
+# Create a DataFrame with all the extracted features
     audio_features_for_spider = pd.DataFrame({
+        'name': track_names,
         'danceability': track_danceability,
         'energy': track_energy,
         'loudness': track_loudness,
         'acousticness': track_acousticness,
         'instrumentalness': track_instrumentalness,
         'liveness': track_liveness,
-        'valence': track_valence,
+        'happiness': track_valence,
         'tempo': track_tempo,
         'speechiness': track_speechiness,
         'key': track_key
     })
 
+    # Convert the list of audio features into a DataFrame
+    df_audio_features_for_spider = pd.DataFrame(audio_features_for_spider)
+
     # Apply MinMaxScaler to scale the features between 0 and 1
     scaler = MinMaxScaler()
-    audio_features_scaled = pd.DataFrame(scaler.fit_transform(audio_features_for_spider), columns=audio_features_for_spider.columns)
+    audio_features_without_name = df_audio_features_for_spider.drop(columns=['name'])
+    audio_features_scaled = pd.DataFrame(scaler.fit_transform(audio_features_without_name), columns=audio_features_without_name.columns)
 
     # Calculate the average values of each feature
     average_audio_features = audio_features_scaled.mean()
 
     # Define the features to plot
-    features = list(audio_features_scaled.columns)
+    features = ['danceability', 'energy', 'loudness', 'acousticness', 'instrumentalness', 'liveness', 'happiness', 'tempo', 'speechiness', 'key']
 
     # Create the radar chart using Plotly
-    fig_audio_features = go.Figure()
+    # fig_audio_features = go.Figure()
 
     # Add the average values to the radar chart
-    fig_audio_features.add_trace(go.Scatterpolar(
+    fig_audio_features = go.Figure(data=go.Scatterpolar(
         r=average_audio_features.values,  # Average values of the audio features
         theta=features,  # The audio features
         fill='toself',  # Fill the area inside the chart
@@ -871,7 +875,61 @@ if playlist_id:
     )
 
     # Display the radar chart
-    fig_audio_features.show()
+    st.plotly_chart(fig_audio_features)
+
+
+    # Merge the scaled data with track names
+    df_audio_features_scaled = pd.concat([df_audio_features_for_spider[['name']], audio_features_scaled], axis=1)
+    
+    st.write("## Compare the audio features of 2 songs")
+
+    # Create two dropdowns to select tracks
+    track1 = st.selectbox("Select Song 1", df_audio_features_scaled['name'].unique())
+    track2 = st.selectbox("Select Song 2", df_audio_features_scaled['name'].unique())
+
+    # Filter the data for the selected tracks
+    track1_data = df_audio_features_scaled[df_audio_features_scaled['name'] == track1]
+    track2_data = df_audio_features_scaled[df_audio_features_scaled['name'] == track2]
+
+    # Prepare data for radar chart
+    track1_values = track1_data[features].values.flatten()
+    track2_values = track2_data[features].values.flatten()
+
+    # Create the radar chart using regular Plotly
+    fig_compare_two = go.Figure()
+
+    # Add trace for Track 1
+    fig_compare_two.add_trace(go.Scatterpolar(
+        r=track1_values,
+        theta=features,
+        fill='toself',
+        name=track1,
+        line=dict(color='blue')  # Set contrasting color for Track 1
+    ))
+
+    # Add trace for Track 2
+    fig_compare_two.add_trace(go.Scatterpolar(
+        r=track2_values,
+        theta=features,
+        fill='toself',
+        name=track2,
+        line=dict(color='orange')  # Set contrasting color for Track 1
+    ))
+
+    # Update the layout of the radar chart
+    fig_compare_two.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0, 1]  # Audio features are scaled between 0 and 1
+            )
+        ),
+        title="Comparison of Audio Features Between Two Tracks"
+    )
+
+    # Display the radar chart in Streamlit
+    st.plotly_chart(fig_compare_two)
+
 
     # # Convert the list of audio features into a DataFrame
     # df_audio_features = pd.DataFrame(audio_features)
