@@ -769,7 +769,56 @@ if playlist_id:
     st.bar_chart(df_bins_speechiness, x_label="Speechiness Score", y_label="Percentage of Songs (%)")
 
 
+    # Define tempo categories with their corresponding ranges
+    def categorize_tempo(tempo):
+        if tempo < 60:
+            return "Largo (Very Slow)"
+        elif 60 <= tempo < 76:
+            return "Adagio (Slow)"
+        elif 76 <= tempo < 108:
+            return "Andante (Moderate)"
+        elif 108 <= tempo < 120:
+            return "Moderato (Moderate/Fast)"
+        elif 120 <= tempo < 156:
+            return "Allegro (Fast)"
+        elif 156 <= tempo < 200:
+            return "Presto (Very Fast)"
+        else:
+            return "Prestissimo (Extremely Fast)"
 
+    # Apply the categorization to the track_tempo list
+    track_tempo_categories = [categorize_tempo(tempo) for tempo in track_tempo]
+
+    # Create a DataFrame to count the occurrences of each tempo category
+    df_tempo = pd.DataFrame({
+        'Tempo Category': track_tempo_categories
+    })
+
+    # Count the occurrences of each tempo category and calculate percentages
+    tempo_counts = df_tempo['Tempo Category'].value_counts(normalize=True) * 100
+    tempo_counts = tempo_counts.sort_index()  # Sort categories alphabetically or based on a custom order
+
+    # Create a Plotly horizontal bar chart
+    fig_tempo = go.Figure(go.Bar(
+        x=tempo_counts.values,  # The percentages
+        y=tempo_counts.index,  # The tempo categories
+        orientation='h',  # Horizontal bar chart
+        text=[f"{perc:.1f}%" for perc in tempo_counts.values],  # Display percentages as text inside the bars
+        textposition='auto',  # Position the text inside the bars automatically
+        marker=dict(color=['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692'])  # Custom colors
+    ))
+
+    # Update layout for the bar chart
+    fig_tempo.update_layout(
+        title_text='Percentage of Songs by Tempo Category',
+        xaxis_title='Percentage of Songs (%)',
+        yaxis_title='Tempo Category',
+        xaxis=dict(tickvals=[0, 20, 40, 60, 80, 100]),  # Custom x-axis ticks for percentage
+        showlegend=False  # Disable the legend
+    )
+
+    # Display the chart in Streamlit
+    st.plotly_chart(fig_tempo)
 
 
     # # analyze the playlist data
