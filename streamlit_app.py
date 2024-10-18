@@ -805,7 +805,7 @@ if playlist_id:
         orientation='h',  # Horizontal bar chart
         text=[f"{perc:.1f}%" for perc in tempo_counts.values],  # Display percentages as text inside the bars
         textposition='auto',  # Position the text inside the bars automatically
-        marker=dict(color=['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692'])  # Custom colors
+        marker=dict(color=['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692']),  # Custom colors
         hoverinfo='skip'
     ))
 
