@@ -50,6 +50,7 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from sklearn.preprocessing import MinMaxScaler
 from datetime import datetime
 
 
@@ -821,6 +822,56 @@ if playlist_id:
     # Display the chart in Streamlit
     st.plotly_chart(fig_tempo)
 
+
+    # Create a DataFrame with all the extracted features
+    audio_features_for_spider = pd.DataFrame({
+        'danceability': track_danceability,
+        'energy': track_energy,
+        'loudness': track_loudness,
+        'acousticness': track_acousticness,
+        'instrumentalness': track_instrumentalness,
+        'liveness': track_liveness,
+        'valence': track_valence,
+        'tempo': track_tempo,
+        'speechiness': track_speechiness,
+        'key': track_key
+    })
+
+    # Apply MinMaxScaler to scale the features between 0 and 1
+    scaler = MinMaxScaler()
+    audio_features_scaled = pd.DataFrame(scaler.fit_transform(audio_features_for_spider), columns=audio_features_for_spider.columns)
+
+    # Calculate the average values of each feature
+    average_audio_features = audio_features_scaled.mean()
+
+    # Define the features to plot
+    features = list(audio_features_scaled.columns)
+
+    # Create the radar chart using Plotly
+    fig_audio_features = go.Figure()
+
+    # Add the average values to the radar chart
+    fig_audio_features.add_trace(go.Scatterpolar(
+        r=average_audio_features.values,  # Average values of the audio features
+        theta=features,  # The audio features
+        fill='toself',  # Fill the area inside the chart
+        name='Average Audio Features'
+    ))
+
+    # Update the layout of the chart
+    fig_audio_features.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0, 1]  # All values are between 0 and 1 due to MinMax scaling
+            )
+        ),
+        title="Average Audio Features of Songs in the Playlist",
+        showlegend=False
+    )
+
+    # Display the radar chart
+    fig_audio_features.show()
 
     # # Convert the list of audio features into a DataFrame
     # df_audio_features = pd.DataFrame(audio_features)
