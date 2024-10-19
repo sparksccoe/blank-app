@@ -931,6 +931,48 @@ if playlist_id:
     st.plotly_chart(fig_compare_two)
 
 
+    # Calculate the number of tracks and features
+    num_tracks = len(df_audio_features_scaled)
+    num_features = len(df_audio_features_scaled.columns) - 1  # Exclude the 'name' column
+
+    # Set the desired cell height and calculate the total width and height
+    cell_height = 40  # Height of each cell in pixels
+    cell_width = cell_height * 3  # Width of each cell is double the height
+
+    # Calculate the total dimensions of the heatmap
+    heatmap_width = cell_width * num_features
+    heatmap_height = cell_height * num_tracks
+
+    # Create a heatmap using Plotly
+    fig_heatmap = px.imshow(
+        df_audio_features_scaled.drop(columns=['name']),  # Keep the original data structure
+        labels=dict(x="Audio Features", y="Tracks", color="Scaled Value"),
+        x=df_audio_features_scaled.columns[1:],  # Audio feature names on x-axis
+        y=df_audio_features_scaled['name'],  # Track names on y-axis
+        color_continuous_scale='Turbo',  # Blue to red color scale
+    )
+
+    # Update the layout for better readability and increase the size of the heatmap
+    fig_heatmap.update_layout(
+        title="Heatmap of Audio Features for Songs in Playlist",
+        xaxis_title="Audio Features",
+        yaxis_title="Songs",
+        width=heatmap_width,  # Set the width based on the calculated value
+        height=heatmap_height,  # Set the height based on the calculated value
+        coloraxis_colorbar=dict(
+            title_side='top',  # Position the title on the right side of the color bar
+            title=dict(text="Scaled Value", font=dict(size=12)),  # Set title size
+            title_font_size=12,  # Title font size
+            tickfont=dict(size=10),  # Tick font size
+            yanchor="bottom",  # Anchor the title lower
+            y=0.12,  # Adjust the position of the color bar title to be lower
+            yref="paper",
+        )
+    )
+
+    # Display the heatmap in Streamlit
+    st.plotly_chart(fig_heatmap, use_container_width=True)
+
     # # Convert the list of audio features into a DataFrame
     # df_audio_features = pd.DataFrame(audio_features)
 
