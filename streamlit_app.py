@@ -52,6 +52,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from sklearn.preprocessing import MinMaxScaler
 from datetime import datetime
+from plotly.colors import qualitative
 
 
 image = Image.open('data_adventures_logo.png')
@@ -931,6 +932,9 @@ if playlist_id:
     st.plotly_chart(fig_compare_two)
 
 
+
+    st.write("## Heatmap of Audio Features for Songs in Playlist")
+
     # Calculate the number of tracks and features
     num_tracks = len(df_audio_features_scaled)
     num_features = len(df_audio_features_scaled.columns) - 1  # Exclude the 'name' column
@@ -954,7 +958,7 @@ if playlist_id:
 
     # Update the layout for better readability and increase the size of the heatmap
     fig_heatmap.update_layout(
-        title="Heatmap of Audio Features for Songs in Playlist",
+        # title="Heatmap of Audio Features for Songs in Playlist",
         xaxis_title="Audio Features",
         yaxis_title="Songs",
         width=heatmap_width,  # Set the width based on the calculated value
@@ -972,6 +976,36 @@ if playlist_id:
 
     # Display the heatmap in Streamlit
     st.plotly_chart(fig_heatmap, use_container_width=True)
+
+    histogram_numeric_columns = ["Popularity", "Acoustic", "Dance", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo"]
+
+    # Dropdown menu for selecting which column to display in the histogram
+    selected_column = st.selectbox("Choose a feature to display in the histogram", histogram_numeric_columns)
+
+    # Plotly's qualitative color scale
+    color_scale = qualitative.Prism
+
+    # Create the histogram using Plotly's go.Figure with nbinsx=20
+    fig_histogram = go.Figure()
+
+    # Add the histogram trace with Prism colors and nbinsx=20
+    fig_histogram.add_trace(go.Histogram(
+        x=df[selected_column],  # The selected data
+        nbinsx=20,  # Set the number of bins to 20
+        marker=dict(color=color_scale * (len(df[selected_column]) // len(color_scale) + 1)),  # Repeat colors for the bars
+        name=f"{selected_column} Distribution"
+    ))
+
+    # Update the layout for better visuals
+    fig_histogram.update_layout(
+        title=f"{selected_column} Distribution",
+        xaxis_title=selected_column,
+        yaxis_title="Count",
+        bargap=0.1  # Adjust gap between bars for a better appearance
+    )
+
+    # Display the Plotly chart in Streamlit
+    st.plotly_chart(fig_histogram)
 
     # # Convert the list of audio features into a DataFrame
     # df_audio_features = pd.DataFrame(audio_features)
