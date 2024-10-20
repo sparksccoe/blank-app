@@ -239,14 +239,22 @@ if playlist_id:
         },
         disabled=True,
     )
-    data2 = {"Name": track_names, "ID": track_id}
-    df2 = pd.DataFrame(data2)
-    selected_audio = st.selectbox("Select a song from the playlist to play its preview:", df2["Name"])
-    if selected_audio:
-        selected_url = df2[df2["Name"] == selected_audio]["ID"].values[0]
-        embed_url = f"https://open.spotify.com/embed/track/{selected_url}"
-        st.markdown(f'<iframe src="{embed_url}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>', unsafe_allow_html=True)
-    st.markdown("<br>", unsafe_allow_html=True)
+    # data2 = {"Name": track_names, "ID": track_id}
+    # df2 = pd.DataFrame(data2)
+    # selected_audio = st.selectbox("Select a song from the playlist to play its preview:", df2["Name"])
+    # if selected_audio:
+    #     selected_url = df2[df2["Name"] == selected_audio]["ID"].values[0]
+    #     embed_url = f"https://open.spotify.com/embed/track/{selected_url}"
+    #     st.markdown(f'<iframe src="{embed_url}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>', unsafe_allow_html=True)
+    # st.markdown("<br>", unsafe_allow_html=True)
+
+
+    # Display the full playlist player
+    playlist_embed_url = f"https://open.spotify.com/embed/playlist/{playlist_id}"
+    st.markdown(f'<iframe src="{playlist_embed_url}" width="100%" height="400" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>', unsafe_allow_html=True)
+
+    # Add some spacing
+    st.markdown("<br><br>", unsafe_allow_html=True)
 
      # Features to choose from in the dropdown
     features = ["Popularity", "Duration", "Acoustic", "Dance", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo"]
