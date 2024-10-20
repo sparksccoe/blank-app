@@ -1051,39 +1051,39 @@ if playlist_id:
     fig_bivariate.update_layout(height=700)
     st.plotly_chart(fig_bivariate)
 
-    # Multivariate Analysis
-    st.write("### Multivariate Analysis")
+    # # Multivariate Analysis
+    # st.write("### Multivariate Analysis")
  
-    # Convert duration formatted as "minutes:seconds" to total seconds (replace with actual conversion)
-    def convert_duration(duration_str):
-        # Example conversion of "mm:ss" to seconds
-        minutes, seconds = map(int, duration_str.split(':'))
-        return minutes * 60 + seconds
+    # # Convert duration formatted as "minutes:seconds" to total seconds (replace with actual conversion)
+    # def convert_duration(duration_str):
+    #     # Example conversion of "mm:ss" to seconds
+    #     minutes, seconds = map(int, duration_str.split(':'))
+    #     return minutes * 60 + seconds
     
-    # Append "Duration (s)" column to the existing DataFrame `df`
-    df['Duration (s)'] = df['Duration'].apply(convert_duration) 
+    # # Append "Duration (s)" column to the existing DataFrame `df`
+    # df['Duration (s)'] = df['Duration'].apply(convert_duration) 
 
-    # Define the numeric columns including the new "Duration (s)" for further analysis
-    numeric_columns = ["Popularity", "Acoustic", "Dance", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo", "Duration (s)"]
+    # # Define the numeric columns including the new "Duration (s)" for further analysis
+    # numeric_columns = ["Popularity", "Acoustic", "Dance", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo", "Duration (s)"]
 
-    # Define all analysis columns including "Duration" and "Duration (s)" for color
-    analysis_columns = ["Name", "Artist", "Release Date", "Genre"] + numeric_columns
+    # # Define all analysis columns including "Duration" and "Duration (s)" for color
+    # analysis_columns = ["Name", "Artist", "Release Date", "Genre"] + numeric_columns
 
-    # Select variables for the x-axis, y-axis, color, and size
-    x_axis = st.selectbox("Select a variable for the x-axis:", numeric_columns)
-    y_axis = st.selectbox("Select a variable for the y-axis:", numeric_columns)
-    color_by = st.selectbox("Select a variable to color by:", analysis_columns)
-    size_by = st.selectbox("Select a variable to size by:", numeric_columns)
+    # # Select variables for the x-axis, y-axis, color, and size
+    # x_axis = st.selectbox("Select a variable for the x-axis:", numeric_columns)
+    # y_axis = st.selectbox("Select a variable for the y-axis:", numeric_columns)
+    # color_by = st.selectbox("Select a variable to color by:", analysis_columns)
+    # size_by = st.selectbox("Select a variable to size by:", numeric_columns)
 
-    # Create the multivariate scatter plot with dynamic x and y
-    fig_multivariate = px.scatter(df, x=x_axis, y=y_axis, color=color_by, size=size_by, hover_name="Name", 
-                                title=f"{x_axis} vs. {y_axis} Colored by {color_by} and Sized by {size_by}")
+    # # Create the multivariate scatter plot with dynamic x and y
+    # fig_multivariate = px.scatter(df, x=x_axis, y=y_axis, color=color_by, size=size_by, hover_name="Name", 
+    #                             title=f"{x_axis} vs. {y_axis} Colored by {color_by} and Sized by {size_by}")
 
-    # Make the chart wider using the update_layout() method
-    fig_multivariate.update_layout(width=1000, height=700)  # Adjust the width and height
+    # # Make the chart wider using the update_layout() method
+    # fig_multivariate.update_layout(width=1000, height=700)  # Adjust the width and height
 
-    # Display the chart in Streamlit
-    st.plotly_chart(fig_multivariate)
+    # # Display the chart in Streamlit
+    # st.plotly_chart(fig_multivariate)
 
 
     # # add a dropdown menu for bivariate analysis
