@@ -56,12 +56,30 @@ from plotly.colors import qualitative
 
 
 image = Image.open('data_adventures_logo.png')
-st.sidebar.image(image)
+col1, col2, col3 = st.columns([1,6,1])
+
+with col1:
+    st.write("")
+
+with col2:
+    st.image(image, use_column_width=False, width=int(image.width * 0.4))
+
+with col3:
+    st.write("")
+
 st.title("Data Adventures in Music")
 st.write('Let’s dive into a Data Adventure with your playlist!')
 
 # Add radio button for choosing between entering playlist name or URL
-input_choice = st.sidebar.radio("How would you like to enter the playlist?", ("by name", "by URL"))
+input_choice = st.radio("How would you like to enter the playlist?", ("by name", "by URL"))
+
+# image = Image.open('data_adventures_logo.png')
+# st.sidebar.image(image)
+# st.title("Data Adventures in Music")
+# st.write('Let’s dive into a Data Adventure with your playlist!')
+
+# # Add radio button for choosing between entering playlist name or URL
+# input_choice = st.sidebar.radio("How would you like to enter the playlist?", ("by name", "by URL"))
 
 # Initialize playlist_id as None
 playlist_id = None
