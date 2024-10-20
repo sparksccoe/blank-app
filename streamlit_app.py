@@ -1035,21 +1035,21 @@ if playlist_id:
         bargap=0.1  # Adjust gap between bars for a better appearance
     )
 
-    # Display the Plotly chart in Streamlit
-    st.plotly_chart(fig_histogram)
+    # # Display the Plotly chart in Streamlit
+    # st.plotly_chart(fig_histogram)
 
 
 
-    analysis_numeric_columns = ["Name", "Artist", "Release Date", "Genre", "Popularity", "Acoustic", "Dance", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo"]
+    # analysis_numeric_columns = ["Name", "Artist", "Release Date", "Genre", "Popularity", "Acoustic", "Dance", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo"]
 
-    # Bivariate Analysis
-    st.write("### Bivariate Analysis")
-    x_axis = st.selectbox("Select a variable for the x-axis:", analysis_numeric_columns)
-    y_axis = st.selectbox("Select a variable for the y-axis:", analysis_numeric_columns)
+    # # Bivariate Analysis
+    # st.write("### Bivariate Analysis")
+    # x_axis = st.selectbox("Select a variable for the x-axis:", analysis_numeric_columns)
+    # y_axis = st.selectbox("Select a variable for the y-axis:", analysis_numeric_columns)
 
-    fig_bivariate = px.scatter(df, x=x_axis, y=y_axis, title=f"{x_axis} vs. {y_axis}")
-    fig_bivariate.update_layout(height=700)
-    st.plotly_chart(fig_bivariate)
+    # fig_bivariate = px.scatter(df, x=x_axis, y=y_axis, title=f"{x_axis} vs. {y_axis}")
+    # fig_bivariate.update_layout(height=700)
+    # st.plotly_chart(fig_bivariate)
 
     # # Multivariate Analysis
     # st.write("### Multivariate Analysis")
