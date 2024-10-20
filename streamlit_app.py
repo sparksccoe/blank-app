@@ -284,6 +284,7 @@ if playlist_id:
 
     # Calculate the percentage for each genre
     genre_percentages = (genre_counts / genre_counts.sum()) * 100
+
     # Sort genres by their percentage in descending order
     genre_percentages_sorted = genre_percentages.sort_values(ascending=False)
 
@@ -291,29 +292,36 @@ if playlist_id:
     cumulative_percentages = genre_percentages_sorted.cumsum()
     top_genres_80 = genre_percentages_sorted[cumulative_percentages <= 80]
 
+    # Display the title for the chart
     st.write(f"### Main Genres of Songs")
-    # Create a horizontal bar chart using Plotly to display top genres contributing to 80%
-    fig = px.bar(
+
+    # Create a colorful horizontal bar chart using Plotly
+    fig_genres = px.bar(
         top_genres_80,
         x=top_genres_80.values,
         y=top_genres_80.index,
         orientation='h',  # Horizontal bar chart
         labels={'x': 'Percentage of Songs (%)', 'y': 'Genres'},
-        # title='Main Genres of Songs',
+        color=top_genres_80.index,  # Use the genre names to create color categories
+        color_discrete_sequence=px.colors.qualitative.Set3  # Set a qualitative color palette
     )
+
     # Customize hovertemplate to show only the percentage
-    fig.update_traces(hovertemplate='%{x:.2f}%<extra></extra>')
+    fig_genres.update_traces(hovertemplate='%{x:.1f}%<extra></extra>')
+
     # Customize the bar chart's appearance
-    fig.update_layout(
+    fig_genres.update_layout(
         xaxis_title="Percentage of Songs (%)",
         yaxis_title="Genres",
         xaxis=dict(range=[0, 100]),  # Set x-axis range from 0 to 100
-        margin=dict(t=0)  # Remove the space at the top of the chart
-        # title_x=0  # Center the title
+        margin=dict(t=0),  # Remove the space at the top of the chart
+        showlegend=False
     )
 
     # Display the bar chart in Streamlit
-    st.plotly_chart(fig, theme="streamlit")
+    st.plotly_chart(fig_genres)
+
+
 
     # Calculate the average popularity
     if track_popularity:
