@@ -86,7 +86,7 @@ playlist_id = None
 
 # Conditional input based on the user's choice
 if input_choice == "by name":
-    playlist_name = st.sidebar.text_input("Enter the public Spotify playlist name:")
+    playlist_name = st.text_input("Enter the public Spotify playlist name:")
 
     # Search for the playlist ID based on the name
     if playlist_name:
@@ -100,7 +100,7 @@ if input_choice == "by name":
             st.write("Error occurred while searching for the playlist.")
             st.write(f"Error: {e}")
 else:
-    playlist_url = st.sidebar.text_input("Enter the Spotify playlist URL:")
+    playlist_url = st.text_input("Enter the Spotify playlist URL:")
 
     # Extract the playlist ID from the URL
     if playlist_url:
