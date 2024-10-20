@@ -619,17 +619,30 @@ if playlist_id:
 
 
 
-# Calculate the average liveness
+    # Calculate the average liveness
     if track_liveness:
         average_liveness = sum(track_liveness) / len(track_liveness)
     else:
         average_liveness = 0
 
+    # Create a thicker progress bar using custom HTML and CSS for liveness
+    progress_percentage = int(average_liveness * 100)  # Multiply by 100 for percentage
+
+    progress_bar_html = f"""
+    <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
+        <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
+            {progress_percentage}%
+        </div>
+    </div>
+    """
+
     # Display the average liveness (0-1 scale)
     st.write(f"The average liveness of the songs in this playlist is: {average_liveness:.2f} / 1")
 
-    # Show horizontal progress bar for average liveness (scaled between 0 and 1)
-    st.progress(int(average_liveness * 100))  # Multiply by 100 for progress bar
+    # Display the custom thicker progress bar
+    st.markdown(progress_bar_html, unsafe_allow_html=True)
+
+    st.write("")
 
     # Create a DataFrame to hold track names and liveness
     df_liveness = pd.DataFrame({
@@ -638,7 +651,7 @@ if playlist_id:
     })
 
     # Define the bins for liveness (0-0.1, 0.1-0.2, etc.)
-    bins = [i/10 for i in range(0, 11)]  # Create bins for every 0.1
+    bins = [i / 10 for i in range(0, 11)]  # Create bins for every 0.1
 
     # Assign each track to a bin
     df_liveness['Liveness Bin'] = pd.cut(df_liveness['Liveness'], bins=bins, right=False)
@@ -655,15 +668,29 @@ if playlist_id:
         'Percentage of Songs (%)': bin_counts.values
     })
 
-    # Set the Liveness Range as the index for the chart
-    df_bins_liveness.set_index('Liveness Range', inplace=True)
+    # Create a vertical bar chart using Plotly
+    fig_liveness = go.Figure(go.Bar(
+        x=df_bins_liveness['Liveness Range'],  # The liveness categories
+        y=df_bins_liveness['Percentage of Songs (%)'],  # The percentages
+        text=[f"{perc:.1f}%" for perc in df_bins_liveness['Percentage of Songs (%)']],  # Display percentages as text inside the bars
+        textposition='auto',  # Position the text inside the bars automatically
+        marker=dict(color=['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692', '#FFB81C', '#B6E880', '#FFA07A']),  # Custom colors
+    ))
 
-    # Display the bar chart of liveness ranges using st.bar_chart
-    st.bar_chart(df_bins_liveness, x_label="Liveness Score", y_label="Percentage of Songs (%)")
+    # Update layout for the vertical bar chart
+    fig_liveness.update_layout(
+        title_text='Percentage of Songs by Liveness Range',
+        xaxis_title='Liveness Range',
+        yaxis_title='Percentage of Songs (%)',
+        yaxis=dict(tickvals=[0, 20, 40, 60, 80, 100]),  # Custom y-axis ticks for percentage
+        showlegend=False  # Disable the legend
+    )
+
+    # Display the vertical bar chart in Streamlit
+    st.plotly_chart(fig_liveness)
 
 
-
-# Create bins for track loudness based on suggested ranges
+    # Create bins for track loudness based on suggested ranges
     bins_loudness = [-60, -40, -30, -20, -10, 0]  # Define the bin edges
     labels_loudness = ['-60 to -40 dB', '-40 to -30 dB', '-30 to -20 dB', '-20 to -10 dB', '-10 to 0 dB']  # Labels for each bin
 
