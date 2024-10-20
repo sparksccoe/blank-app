@@ -1212,9 +1212,10 @@ if playlist_id:
             title_font_size=12,  # Title font size
             tickfont=dict(size=10),  # Tick font size
             yanchor="bottom",  # Anchor the title lower
-            y=0.12,  # Adjust the position of the color bar title to be lower
+            y=0.13,  # Adjust the position of the color bar title to be lower
             yref="paper",
-        )
+        ),
+        margin=dict(t=0),  # Remove the space at the top of the chart
     )
 
     # Display the heatmap in Streamlit
