@@ -427,17 +427,30 @@ if playlist_id:
 
 
 
-# Calculate the average danceability
+    # Calculate the average danceability
     if track_danceability:
         average_danceability = sum(track_danceability) / len(track_danceability)
     else:
         average_danceability = 0
 
+    # Create a thicker progress bar using custom HTML and CSS for danceability
+    progress_percentage = int(average_danceability * 100)  # Multiply by 100 for percentage
+
+    progress_bar_html = f"""
+    <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
+        <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
+            {progress_percentage}%
+        </div>
+    </div>
+    """
+
     # Display the average danceability (0-1 scale)
     st.write(f"The average danceability of the songs in this playlist is: {average_danceability:.2f} / 1")
 
-    # Show horizontal progress bar for average danceability (scaled between 0 and 1)
-    st.progress(int(average_danceability * 100))  # Multiply by 100 for progress bar
+    # Display the custom thicker progress bar
+    st.markdown(progress_bar_html, unsafe_allow_html=True)
+
+    st.write("")
 
     # Create a DataFrame to hold track names and danceability
     df_danceability = pd.DataFrame({
@@ -446,7 +459,7 @@ if playlist_id:
     })
 
     # Define the bins for danceability (0-0.1, 0.1-0.2, etc.)
-    bins = [i/10 for i in range(0, 11)]  # Create bins for every 0.1
+    bins = [i / 10 for i in range(0, 11)]  # Create bins for every 0.1
 
     # Assign each track to a bin
     df_danceability['Danceability Bin'] = pd.cut(df_danceability['Danceability'], bins=bins, right=False)
@@ -463,14 +476,29 @@ if playlist_id:
         'Percentage of Songs (%)': bin_counts.values
     })
 
-    # Set the Danceability Range as the index for the chart
-    df_bins_danceability.set_index('Danceability Range', inplace=True)
+    # Create a vertical bar chart using Plotly
+    fig_danceability = go.Figure(go.Bar(
+        x=df_bins_danceability['Danceability Range'],  # The danceability categories
+        y=df_bins_danceability['Percentage of Songs (%)'],  # The percentages
+        text=[f"{perc:.1f}%" for perc in df_bins_danceability['Percentage of Songs (%)']],  # Display percentages as text inside the bars
+        textposition='auto',  # Position the text inside the bars automatically
+        marker=dict(color=['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692', '#FFB81C', '#B6E880', '#FFA07A']),  # Custom colors
+    ))
 
-    # Display the bar chart of danceability ranges using st.bar_chart
-    st.bar_chart(df_bins_danceability, x_label="Danceability Score", y_label="Percentage of songs")
+    # Update layout for the vertical bar chart
+    fig_danceability.update_layout(
+        title_text='Percentage of Songs by Danceability Range',
+        xaxis_title='Danceability Range',
+        yaxis_title='Percentage of Songs (%)',
+        yaxis=dict(tickvals=[0, 20, 40, 60, 80, 100]),  # Custom y-axis ticks for percentage
+        showlegend=False  # Disable the legend
+    )
+
+    # Display the vertical bar chart in Streamlit
+    st.plotly_chart(fig_danceability)
 
 
-# Calculate the average energy
+    # Calculate the average energy
     if track_energy:
         average_energy = sum(track_energy) / len(track_energy)
     else:
