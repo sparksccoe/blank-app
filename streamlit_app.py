@@ -321,32 +321,69 @@ if playlist_id:
     else:
         average_popularity = 0
 
-    # Display the average popularity
-    st.write(f"The average popularity of the songs in this playlist is: {int(average_popularity)} / 100")
-    # Show horizontal progress bar for average popularity (scaled between 0 and 100)
-    st.progress(int(average_popularity))
+    # Create a thicker progress bar using custom HTML and CSS for popularity
+    progress_percentage = int(average_popularity)  # Popularity is already on a 0-100 scale
+
+    progress_bar_html = f"""
+    <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
+        <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
+            {progress_percentage}%
+        </div>
+    </div>
+    """
+
+    # Display the average popularity (0-100 scale)
+    st.write(f"The average popularity of the songs in this playlist is: {average_popularity:.2f} / 100")
+
+    # Display the custom thicker progress bar
+    st.markdown(progress_bar_html, unsafe_allow_html=True)
+
+    st.write("")
+
     # Create a DataFrame to hold track names and popularity
     df_popularity = pd.DataFrame({
         'Track': track_names,
-        'Popularity': track_popularity
+        'Popularity': track_popularity  # Popularity on 0-100 scale
     })
-    # Define the bins for popularity (0-10%, 10-20%, etc.)
-    bins = [i for i in range(0, 101, 10)]  # Create bins for every 10%
+
+    # Define the bins for popularity (0-10, 10-20, etc.)
+    bins = [i for i in range(0, 101, 10)]  # Create bins for every 10
+
     # Assign each track to a bin
     df_popularity['Popularity Bin'] = pd.cut(df_popularity['Popularity'], bins=bins, right=False)
+
     # Calculate the percentage of songs in each popularity bin
     bin_counts = df_popularity['Popularity Bin'].value_counts(normalize=True) * 100
+
     # Sort the bins so they appear in order
     bin_counts = bin_counts.sort_index()
+
     # Create a DataFrame for the bar chart
     df_bins_popularity = pd.DataFrame({
-        'Popularity Range': [f"{int(interval.left)}-{int(interval.right)}" for interval in bin_counts.index],
+        'Popularity Range': [f"{int(interval.left)} - {int(interval.right)}" for interval in bin_counts.index],
         'Percentage of Songs (%)': bin_counts.values
     })
-    # Set the Popularity Range as the index for the chart
-    df_bins_popularity.set_index('Popularity Range', inplace=True)
-    # Display the bar chart of popularity ranges using st.bar_chart
-    st.bar_chart(df_bins_popularity, x_label="Popularity Score", y_label="Percentage of songs")
+
+    # Create a vertical bar chart using Plotly
+    fig_popularity = go.Figure(go.Bar(
+        x=df_bins_popularity['Popularity Range'],  # The popularity categories
+        y=df_bins_popularity['Percentage of Songs (%)'],  # The percentages
+        text=[f"{perc:.1f}%" for perc in df_bins_popularity['Percentage of Songs (%)']],  # Display percentages as text inside the bars
+        textposition='auto',  # Position the text inside the bars automatically
+        marker=dict(color=['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692', '#FFB81C', '#B6E880', '#FFA07A']),  # Custom colors
+    ))
+
+    # Update layout for the vertical bar chart
+    fig_popularity.update_layout(
+        title_text='Percentage of Songs by Popularity Range',
+        xaxis_title='Popularity Range',
+        yaxis_title='Percentage of Songs (%)',
+        yaxis=dict(tickvals=[0, 20, 40, 60, 80, 100]),  # Custom y-axis ticks for percentage
+        showlegend=False  # Disable the legend
+    )
+
+    # Display the vertical bar chart in Streamlit
+    st.plotly_chart(fig_popularity)
 
 
     # Function to convert duration from milliseconds to minutes
