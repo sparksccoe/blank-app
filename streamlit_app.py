@@ -476,11 +476,24 @@ if playlist_id:
     else:
         average_energy = 0
 
+    # Create a thicker progress bar using custom HTML and CSS for energy
+    progress_percentage = int(average_energy * 100)  # Multiply by 100 for percentage
+
+    progress_bar_html = f"""
+    <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
+        <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
+            {progress_percentage}%
+        </div>
+    </div>
+    """
+
     # Display the average energy (0-1 scale)
     st.write(f"The average energy of the songs in this playlist is: {average_energy:.2f} / 1")
 
-    # Show horizontal progress bar for average energy (scaled between 0 and 1)
-    st.progress(int(average_energy * 100))  # Multiply by 100 for progress bar
+    # Display the custom thicker progress bar
+    st.markdown(progress_bar_html, unsafe_allow_html=True)
+
+    st.write("")
 
     # Create a DataFrame to hold track names and energy
     df_energy = pd.DataFrame({
@@ -489,7 +502,7 @@ if playlist_id:
     })
 
     # Define the bins for energy (0-0.1, 0.1-0.2, etc.)
-    bins = [i/10 for i in range(0, 11)]  # Create bins for every 0.1
+    bins = [i / 10 for i in range(0, 11)]  # Create bins for every 0.1
 
     # Assign each track to a bin
     df_energy['Energy Bin'] = pd.cut(df_energy['Energy'], bins=bins, right=False)
@@ -506,11 +519,27 @@ if playlist_id:
         'Percentage of Songs (%)': bin_counts.values
     })
 
-    # Set the Energy Range as the index for the chart
-    df_bins_energy.set_index('Energy Range', inplace=True)
+    # Create a vertical bar chart using Plotly
+    fig_energy = go.Figure(go.Bar(
+        x=df_bins_energy['Energy Range'],  # The energy categories
+        y=df_bins_energy['Percentage of Songs (%)'],  # The percentages
+        text=[f"{perc:.1f}%" for perc in df_bins_energy['Percentage of Songs (%)']],  # Display percentages as text inside the bars
+        textposition='auto',  # Position the text inside the bars automatically
+        marker=dict(color=['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692', '#FFB81C', '#B6E880', '#FFA07A']),  # Custom colors
+    ))
 
-    # Display the bar chart of energy ranges using st.bar_chart
-    st.bar_chart(df_bins_energy, x_label="Energy Score", y_label="Percentage of Songs (%)")
+    # Update layout for the vertical bar chart
+    fig_energy.update_layout(
+        title_text='Percentage of Songs by Energy Range',
+        xaxis_title='Energy Range',
+        yaxis_title='Percentage of Songs (%)',
+        yaxis=dict(tickvals=[0, 20, 40, 60, 80, 100]),  # Custom y-axis ticks for percentage
+        showlegend=False  # Disable the legend
+    )
+
+    # Display the vertical bar chart in Streamlit
+    st.plotly_chart(fig_energy)
+
 
 
 
@@ -532,7 +561,7 @@ if playlist_id:
     """
 
     # Display the average happiness (0-1 scale)
-    st.write(f"The average happiness (valence) of the songs in this playlist is: {average_happiness:.2f} / 1")
+    st.write(f"The average happiness of the songs in this playlist is: {average_happiness:.2f} / 1")
 
     # Display the custom thicker progress bar
     st.markdown(progress_bar_html, unsafe_allow_html=True)
