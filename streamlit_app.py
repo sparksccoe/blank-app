@@ -1007,52 +1007,83 @@ if playlist_id:
     # Display the Plotly chart in Streamlit
     st.plotly_chart(fig_histogram)
 
-    # # Convert the list of audio features into a DataFrame
-    # df_audio_features = pd.DataFrame(audio_features)
 
-    # # Calculate the average values of each audio feature
-    # average_audio_features = df_audio_features.mean()
+    histogram_numeric_columns = ["Popularity", "Acoustic", "Dance", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo"]
 
-    # # Define the features to plot
-    # features = ['danceability', 'energy', 'valence', 'acousticness', 'instrumentalness', 'liveness', 'speechiness']
+    # Dropdown menu for selecting which column to display in the histogram
+    selected_column = st.selectbox("Choose a feature to display in the histogram", histogram_numeric_columns)
 
-    # # Create the radar chart using Plotly
-    # fig_audio_features = go.Figure()
+    # Plotly's qualitative color scale
+    color_scale = qualitative.Prism
 
-    # # Add the average values to the radar chart
-    # fig_audio_features.add_trace(go.Scatterpolar(
-    #     r=average_audio_features[features].values,  # Average values of the audio features
-    #     theta=features,  # The audio features
-    #     fill='toself',  # Fill the area inside the chart
-    #     name='Average Audio Features'
-    # ))
+    # Create the histogram using Plotly's go.Figure with nbinsx=20
+    fig_histogram = go.Figure()
 
-    # # Update the layout of the chart
-    # fig_audio_features.update_layout(
-    #     polar=dict(
-    #         radialaxis=dict(
-    #             visible=True,
-    #             range=[0, 1]  # Since audio features are typically between 0 and 1
-    #         )
-    #     ),
-    #     title="Average Audio Features of Songs in the Playlist",
-    #     showlegend=False
-    # )
+    # Add the histogram trace with Prism colors and nbinsx=20
+    fig_histogram.add_trace(go.Histogram(
+        x=df[selected_column],  # The selected data
+        nbinsx=20,  # Set the number of bins to 20
+        marker=dict(color=color_scale * (len(df[selected_column]) // len(color_scale) + 1)),  # Repeat colors for the bars
+        name=f"{selected_column} Distribution"
+    ))
 
-    # # Display the radar chart in Streamlit
-    # st.plotly_chart(fig_audio_features)
+    # Update the layout for better visuals
+    fig_histogram.update_layout(
+        title=f"{selected_column} Distribution",
+        xaxis_title=selected_column,
+        yaxis_title="Count",
+        bargap=0.1  # Adjust gap between bars for a better appearance
+    )
 
-    # # analyze the playlist data
-    # st.write("")
-    # st.write("### Playlist Analysis")
+    # Display the Plotly chart in Streamlit
+    st.plotly_chart(fig_histogram)
 
-    # # create a dataframe from the playlist data
-    # data = {"Name": track_names, "Artist": track_artists, "Album": track_album, "Release Date": track_release_date, "Popularity": track_popularity, "Duration (ms)": track_duration}
-    # df = pd.DataFrame(data)
 
-    # # display a histogram of track popularity
-    # fig_popularity = px.histogram(df, x="Popularity", nbins=20, title="Track Popularity Distribution")
-    # st.plotly_chart(fig_popularity)
+
+    analysis_numeric_columns = ["Name", "Artist", "Release Date", "Genre", "Popularity", "Acoustic", "Dance", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo"]
+
+    # Bivariate Analysis
+    st.write("### Bivariate Analysis")
+    x_axis = st.selectbox("Select a variable for the x-axis:", analysis_numeric_columns)
+    y_axis = st.selectbox("Select a variable for the y-axis:", analysis_numeric_columns)
+
+    fig_bivariate = px.scatter(df, x=x_axis, y=y_axis, title=f"{x_axis} vs. {y_axis}")
+    fig_bivariate.update_layout(height=700)
+    st.plotly_chart(fig_bivariate)
+
+    # Multivariate Analysis
+    st.write("### Multivariate Analysis")
+ 
+    # Convert duration formatted as "minutes:seconds" to total seconds (replace with actual conversion)
+    def convert_duration(duration_str):
+        # Example conversion of "mm:ss" to seconds
+        minutes, seconds = map(int, duration_str.split(':'))
+        return minutes * 60 + seconds
+    
+    # Append "Duration (s)" column to the existing DataFrame `df`
+    df['Duration (s)'] = df['Duration'].apply(convert_duration) 
+
+    # Define the numeric columns including the new "Duration (s)" for further analysis
+    numeric_columns = ["Popularity", "Acoustic", "Dance", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo", "Duration (s)"]
+
+    # Define all analysis columns including "Duration" and "Duration (s)" for color
+    analysis_columns = ["Name", "Artist", "Release Date", "Genre"] + numeric_columns
+
+    # Select variables for the x-axis, y-axis, color, and size
+    x_axis = st.selectbox("Select a variable for the x-axis:", numeric_columns)
+    y_axis = st.selectbox("Select a variable for the y-axis:", numeric_columns)
+    color_by = st.selectbox("Select a variable to color by:", analysis_columns)
+    size_by = st.selectbox("Select a variable to size by:", numeric_columns)
+
+    # Create the multivariate scatter plot with dynamic x and y
+    fig_multivariate = px.scatter(df, x=x_axis, y=y_axis, color=color_by, size=size_by, hover_name="Name", 
+                                title=f"{x_axis} vs. {y_axis} Colored by {color_by} and Sized by {size_by}")
+
+    # Make the chart wider using the update_layout() method
+    fig_multivariate.update_layout(width=1000, height=700)  # Adjust the width and height
+
+    # Display the chart in Streamlit
+    st.plotly_chart(fig_multivariate)
 
 
     # # add a dropdown menu for bivariate analysis
@@ -1068,9 +1099,3 @@ if playlist_id:
     # size_by = st.selectbox("Select a variable to size by:", ["Popularity", "Duration (ms)"])
     # fig_multivariate = px.scatter(df, x="Duration (ms)", y="Popularity", color=color_by, size=size_by, hover_name="Name", title="Duration vs. Popularity Colored by Artist")
     # st.plotly_chart(fig_multivariate)
-
-    # # add a summary of the playlist data
-    # st.write("")
-    # st.write("### Playlist Summary")
-    # st.write(f"**Most popular track:** {df.iloc[df['Popularity'].idxmax()]['Name']} by {df.iloc[df['Popularity'].idxmax()]['Artist']} ({df['Popularity'].max()} popularity)")
-    # st.write(f"**Least popular track:** {df.iloc[df['Popularity'].idxmin()]['Name']} by {df.iloc[df['Popularity'].idxmin()]['Artist']} ({df['Popularity'].min()} popularity)")
