@@ -103,7 +103,7 @@ if icsc_toggle:
 
     # Create a dropdown menu with the playlist names, starting with no pre-selection
     selected_playlist = st.selectbox("Choose your playlist to explore:", list(playlists.keys()), index=None)
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<br><br>", unsafe_allow_html=True)
 
     # Check if the user has selected a valid playlist (not the placeholder)
     if selected_playlist != None:
