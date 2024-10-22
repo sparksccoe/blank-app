@@ -405,13 +405,13 @@ if playlist_id:
     progress_bar_html = f"""
     <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
         <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
-            {progress_percentage}%
+            {progress_percentage}
         </div>
     </div>
     """
 
     # Display the average popularity (0-100 scale)
-    st.write(f"The average popularity of the songs in this playlist is: {average_popularity:.2f} / 100")
+    st.write(f"The average popularity of the songs in this playlist is: {average_popularity:.1f} / 100")
 
     # Display the custom thicker progress bar
     st.markdown(progress_bar_html, unsafe_allow_html=True)
