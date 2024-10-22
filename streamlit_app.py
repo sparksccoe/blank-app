@@ -1302,7 +1302,14 @@ if playlist_id:
                 range=[0, 1]  # Audio features are scaled between 0 and 1
             )
         ),
-        title="Comparison of Audio Features Between Two Tracks"
+        title="Comparison of Audio Features Between Two Tracks",
+        legend=dict(
+        orientation='h',  # Horizontal legend
+        yanchor='top',
+        y=-0.2,  # Position below the chart
+        xanchor='center',
+        x=0.5
+        )
     )
 
     # Display the radar chart in Streamlit
