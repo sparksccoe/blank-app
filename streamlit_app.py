@@ -55,7 +55,7 @@ from datetime import datetime
 from plotly.colors import qualitative
 
 image = Image.open('da_music_logo_reduced.png')
-left_co, cent_co,last_co = st.columns(1,3,1)
+left_co, cent_co,last_co = st.columns([1,3,1])
 with cent_co:
     st.image(image)
 # col1, col2, col3 = st.columns([1,6,1])
