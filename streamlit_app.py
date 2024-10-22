@@ -55,16 +55,17 @@ from datetime import datetime
 from plotly.colors import qualitative
 
 image = Image.open('data_adventures_logo.png')
-col1, col2, col3 = st.columns([1,6,1])
+st.image(image)
+# col1, col2, col3 = st.columns([1,6,1])
 
-with col1:
-    st.write("")
+# with col1:
+#     st.write("")
 
-with col2:
-    st.image(image, use_column_width=False, width=int(image.width * 0.4))
+# with col2:
+#     st.image(image, use_column_width=False, width=int(image.width * 0.4))
 
-with col3:
-    st.write("")
+# with col3:
+#     st.write("")
 
 st.title("Data Adventures in Music")
 
