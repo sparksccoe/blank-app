@@ -54,7 +54,7 @@ from sklearn.preprocessing import MinMaxScaler
 from datetime import datetime
 from plotly.colors import qualitative
 
-image = Image.open('data_adventures_logo.png')
+image = Image.open('da_music_logo_reduced.png')
 st.image(image)
 # col1, col2, col3 = st.columns([1,6,1])
 
