@@ -120,7 +120,7 @@ else:
     # Conditional input based on the user's choice
     if input_choice == "by name":
         playlist_name = st.text_input("Enter the public Spotify playlist name:")
-
+        st.markdown("<br><br>", unsafe_allow_html=True)
         # Search for the playlist ID based on the name
         if playlist_name:
             try:
