@@ -193,7 +193,8 @@ if playlist_id:
     # Apply the conversion to the track durations
     track_duration_formatted = [ms_to_minutes_seconds(duration) for duration in track_duration]
     
-
+    # ask to scroll down
+    st.write("Scroll down to explore data from the playlist")
 
     # Convert track keys to pitch class notation
     # Map numeric key values to pitch class notation
