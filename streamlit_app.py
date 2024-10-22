@@ -509,7 +509,7 @@ if playlist_id:
     progress_bar_html = f"""
     <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
         <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
-            {progress_percentage}%
+            {progress_percentage}
         </div>
     </div>
     """
@@ -580,7 +580,7 @@ if playlist_id:
     progress_bar_html = f"""
     <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
         <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
-            {progress_percentage}%
+            {progress_percentage}
         </div>
     </div>
     """
@@ -652,7 +652,7 @@ if playlist_id:
     progress_bar_html = f"""
     <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
         <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
-            {progress_percentage}%
+            {progress_percentage}
         </div>
     </div>
     """
@@ -723,7 +723,7 @@ if playlist_id:
     progress_bar_html = f"""
     <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
         <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
-            {progress_percentage}%
+            {progress_percentage}
         </div>
     </div>
     """
@@ -794,7 +794,7 @@ if playlist_id:
     progress_bar_html = f"""
     <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
         <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
-            {progress_percentage}%
+            {progress_percentage}
         </div>
     </div>
     """
@@ -882,7 +882,7 @@ if playlist_id:
     progress_bar_html = f"""
     <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
         <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
-            {progress_percentage}%
+            {progress_percentage}
         </div>
     </div>
     """
@@ -1021,7 +1021,7 @@ if playlist_id:
     progress_bar_html = f"""
     <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
         <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
-            {progress_percentage}%
+            {progress_percentage}
         </div>
     </div>
     """
