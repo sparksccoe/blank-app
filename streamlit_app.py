@@ -55,17 +55,9 @@ from datetime import datetime
 from plotly.colors import qualitative
 
 image = Image.open('da_music_logo_reduced.png')
-st.image(image)
-
-# Use HTML to center the image and set the width to 50% of its original size
-st.markdown(
-    f"""
-    <div style="display: flex; justify-content: center;">
-        <img src="data:image/png;base64,{st.image_to_base64(image)}" width="{image.width // 2}">
-    </div>
-    """, 
-    unsafe_allow_html=True
-)
+left_co, cent_co,last_co = st.columns(3)
+with cent_co:
+    st.image(image)
 # col1, col2, col3 = st.columns([1,6,1])
 
 # with col1:
