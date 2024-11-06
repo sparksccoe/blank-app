@@ -4,3 +4,4 @@ plotly
 plotly.express
 pandas
 scikit-learn
+sklearn.preprocessing
