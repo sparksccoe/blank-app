@@ -74,7 +74,7 @@ st.markdown(
 st.write('Let’s go on a Data Adventure with our Warmenhoven Jams!')
 
 # Initialize playlist_id as None
-playlist_id = "6tFvWS5aBEb5qD9g10F53X"
+playlist_id = "4mTuRYyxHhFxoemBGQuSxF"
 
 # retrieve data from the Spotify API
 if playlist_id:
@@ -92,7 +92,7 @@ if playlist_id:
     track_release_date = [track["track"]["album"]["release_date"] for track in tracks]
     track_url = [track["track"]["external_urls"]["spotify"] for track in tracks]
     
-    df = pd.read_csv("Joyful Jams ICSC.csv")
+    df = pd.read_csv("Warmenhoven Jams.csv")
     track_danceability = df["Dance"].tolist()
     track_energy = df["Energy"].tolist()
     track_loudness = df["Loud (Db)"].tolist()
@@ -335,7 +335,7 @@ if playlist_id:
     """
 
     # Display the average popularity (0-100 scale)
-    st.write(f"The average popularity of the songs in this playlist is: {round(average_popularity)} / 100")
+    st.write(f"The average popularity of the songs in this playlist is: {int(average_popularity)} / 100")
 
     # Display the custom thicker progress bar
     st.markdown(progress_bar_html, unsafe_allow_html=True)
@@ -449,14 +449,18 @@ if playlist_id:
     # Create a DataFrame to hold track names and acousticness
     df_acousticness = pd.DataFrame({
         'Track': track_names,
-        'Acousticness': track_acousticness  # Keep acousticness in 0-1 range
+        'Acousticness': track_acousticness  # Now assumed to be in the range 0-100
     })
 
-    # Define the bins for acousticness (0-0.1, 0.1-0.2, etc.)
-    bins = [i / 10 for i in range(0, 11)]  # Create bins for every 0.1
+    # Define the bins for acousticness (0–10, 10–20, 20–30, ..., 90–100)
+    bins = list(range(0, 101, 10))  # [0, 10, 20, ..., 100]
 
     # Assign each track to a bin
-    df_acousticness['Acousticness Bin'] = pd.cut(df_acousticness['Acousticness'], bins=bins, right=False)
+    df_acousticness['Acousticness Bin'] = pd.cut(
+        df_acousticness['Acousticness'],
+        bins=bins,
+        right=False  # [0,10), [10,20), etc.
+    )
 
     # Calculate the percentage of songs in each acousticness bin
     bin_counts = df_acousticness['Acousticness Bin'].value_counts(normalize=True) * 100
@@ -466,9 +470,12 @@ if playlist_id:
 
     # Create a DataFrame for the bar chart
     df_bins_acousticness = pd.DataFrame({
-        'Acousticness Range': [f"{interval.left:.1f} - {interval.right:.1f}" for interval in bin_counts.index],
+        'Acousticness Range': [
+            f"{interval.left:.0f} - {interval.right:.0f}" for interval in bin_counts.index
+        ],
         'Percentage of Songs (%)': bin_counts.values
     })
+
 
     # Create a vertical bar chart using Plotly
     fig_acousticness = go.Figure(go.Bar(
@@ -499,18 +506,18 @@ if playlist_id:
         average_danceability = 0
 
     # Create a thicker progress bar using custom HTML and CSS for danceability
-    progress_percentage = int(average_danceability * 100)  # Multiply by 100 for percentage
+    progress_percentage = int(average_danceability)  # Multiply by 100 for percentage
 
     progress_bar_html = f"""
     <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
         <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
-            {progress_percentage}%
+            {progress_percentage}
         </div>
     </div>
     """
 
     # Display the average danceability (0-1 scale)
-    st.write(f"The average danceability of the songs in this playlist is: {average_danceability:.2f} / 1")
+    st.write(f"The average danceability of the songs in this playlist is: {int(average_danceability)} / 100")
 
     # Display the custom thicker progress bar
     st.markdown(progress_bar_html, unsafe_allow_html=True)
@@ -518,16 +525,22 @@ if playlist_id:
     st.write("")
 
     # Create a DataFrame to hold track names and danceability
+    # Create a DataFrame to hold track names and danceability
+    # Create a DataFrame to hold track names and danceability
     df_danceability = pd.DataFrame({
         'Track': track_names,
-        'Danceability': track_danceability  # Keep danceability in 0-1 range
+        'Danceability': track_danceability  # Now assumed to be in the range 0-100
     })
 
-    # Define the bins for danceability (0-0.1, 0.1-0.2, etc.)
-    bins = [i / 10 for i in range(0, 11)]  # Create bins for every 0.1
+    # Define the bins for danceability (0–10, 10–20, 20–30, ..., 90–100)
+    bins = list(range(0, 101, 10))  # [0, 10, 20, ..., 100]
 
     # Assign each track to a bin
-    df_danceability['Danceability Bin'] = pd.cut(df_danceability['Danceability'], bins=bins, right=False)
+    df_danceability['Danceability Bin'] = pd.cut(
+        df_danceability['Danceability'],
+        bins=bins,
+        right=False  # [0,10), [10,20), etc.
+    )
 
     # Calculate the percentage of songs in each danceability bin
     bin_counts = df_danceability['Danceability Bin'].value_counts(normalize=True) * 100
@@ -537,7 +550,9 @@ if playlist_id:
 
     # Create a DataFrame for the bar chart
     df_bins_danceability = pd.DataFrame({
-        'Danceability Range': [f"{interval.left:.1f} - {interval.right:.1f}" for interval in bin_counts.index],
+        'Danceability Range': [
+            f"{interval.left:.0f} - {interval.right:.0f}" for interval in bin_counts.index
+        ],
         'Percentage of Songs (%)': bin_counts.values
     })
 
@@ -545,9 +560,12 @@ if playlist_id:
     fig_danceability = go.Figure(go.Bar(
         x=df_bins_danceability['Danceability Range'],  # The danceability categories
         y=df_bins_danceability['Percentage of Songs (%)'],  # The percentages
-        text=[f"{perc:.1f}%" for perc in df_bins_danceability['Percentage of Songs (%)']],  # Display percentages as text inside the bars
-        textposition='auto',  # Position the text inside the bars automatically
-        marker=dict(color=['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692', '#FFB81C', '#B6E880', '#FFA07A']),  # Custom colors
+        text=[f"{perc:.1f}%" for perc in df_bins_danceability['Percentage of Songs (%)']],  # Display percentages as text
+        textposition='auto',  # Position the text inside the bars
+        marker=dict(
+            color=['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', 
+                '#19D3F3', '#FF6692', '#FFB81C', '#B6E880', '#FFA07A']
+        ),
     ))
 
     # Update layout for the vertical bar chart
@@ -571,18 +589,18 @@ if playlist_id:
         average_energy = 0
 
     # Create a thicker progress bar using custom HTML and CSS for energy
-    progress_percentage = int(average_energy * 100)  # Multiply by 100 for percentage
+    progress_percentage = int(average_energy)  # Multiply by 100 for percentage
 
     progress_bar_html = f"""
     <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
         <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
-            {progress_percentage}%
+            {progress_percentage}
         </div>
     </div>
     """
 
     # Display the average energy (0-1 scale)
-    st.write(f"The average energy of the songs in this playlist is: {average_energy:.2f} / 1")
+    st.write(f"The average energy of the songs in this playlist is: {int(average_energy)} / 100")
 
     # Display the custom thicker progress bar
     st.markdown(progress_bar_html, unsafe_allow_html=True)
@@ -590,50 +608,64 @@ if playlist_id:
     st.write("")
 
     # Create a DataFrame to hold track names and energy
+    # Create a DataFrame to hold track names and energy
     df_energy = pd.DataFrame({
         'Track': track_names,
-        'Energy': track_energy  # Keep energy in 0-1 range
+        # If your energy values are originally 0–1, multiply them by 100:
+        'Energy': track_energy
     })
 
-    # Define the bins for energy (0-0.1, 0.1-0.2, etc.)
-    bins = [i / 10 for i in range(0, 11)]  # Create bins for every 0.1
+    # Define bins for energy (0–10, 10–20, ..., 90–100)
+    bins = list(range(0, 101, 10))  # [0, 10, 20, ..., 100]
 
     # Assign each track to a bin
-    df_energy['Energy Bin'] = pd.cut(df_energy['Energy'], bins=bins, right=False)
+    df_energy['Energy Bin'] = pd.cut(
+        df_energy['Energy'], 
+        bins=bins, 
+        right=False  # intervals: [0,10), [10,20), etc.
+    )
 
     # Calculate the percentage of songs in each energy bin
     bin_counts = df_energy['Energy Bin'].value_counts(normalize=True) * 100
 
-    # Sort the bins so they appear in order
+    # Sort the bins so they appear in ascending order
     bin_counts = bin_counts.sort_index()
 
     # Create a DataFrame for the bar chart
     df_bins_energy = pd.DataFrame({
-        'Energy Range': [f"{interval.left:.1f} - {interval.right:.1f}" for interval in bin_counts.index],
+        'Energy Range': [
+            f"{interval.left:.0f} - {interval.right:.0f}" for interval in bin_counts.index
+        ],
         'Percentage of Songs (%)': bin_counts.values
     })
 
     # Create a vertical bar chart using Plotly
-    fig_energy = go.Figure(go.Bar(
-        x=df_bins_energy['Energy Range'],  # The energy categories
-        y=df_bins_energy['Percentage of Songs (%)'],  # The percentages
-        text=[f"{perc:.1f}%" for perc in df_bins_energy['Percentage of Songs (%)']],  # Display percentages as text inside the bars
-        textposition='auto',  # Position the text inside the bars automatically
-        marker=dict(color=['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692', '#FFB81C', '#B6E880', '#FFA07A']),  # Custom colors
-    ))
+    fig_energy = go.Figure(
+        go.Bar(
+            x=df_bins_energy['Energy Range'],  # The energy categories
+            y=df_bins_energy['Percentage of Songs (%)'],  # The percentages
+            text=[f"{perc:.1f}%" for perc in df_bins_energy['Percentage of Songs (%)']],  # Text inside the bars
+            textposition='auto',  
+            marker=dict(
+                color=[
+                    '#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A',
+                    '#19D3F3', '#FF6692', '#FFB81C', '#B6E880', '#FFA07A'
+                ]
+            ),
+        )
+    )
 
     # Update layout for the vertical bar chart
     fig_energy.update_layout(
         title_text='Percentage of Songs by Energy Range',
         xaxis_title='Energy Range',
         yaxis_title='Percentage of Songs (%)',
-        yaxis=dict(tickvals=[0, 20, 40, 60, 80, 100]),  # Custom y-axis ticks for percentage
+        yaxis=dict(tickvals=[0, 20, 40, 60, 80, 100]),  # Custom y-axis ticks
         showlegend=False  # Disable the legend
     )
 
     # Display the vertical bar chart in Streamlit
     st.plotly_chart(fig_energy)
-
 
     # Calculate the average happiness (valence)
     if track_valence:
@@ -642,18 +674,18 @@ if playlist_id:
         average_happiness = 0
 
     # Create a thicker progress bar using custom HTML and CSS for happiness
-    progress_percentage = int(average_happiness * 100)  # Multiply by 100 for percentage
+    progress_percentage = int(average_happiness)  # Multiply by 100 for percentage
 
     progress_bar_html = f"""
     <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
         <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
-            {progress_percentage}%
+            {progress_percentage}
         </div>
     </div>
     """
 
     # Display the average happiness (0-1 scale)
-    st.write(f"The average happiness of the songs in this playlist is: {average_happiness:.2f} / 1")
+    st.write(f"The average happiness of the songs in this playlist is: {int(average_happiness)} / 100")
 
     # Display the custom thicker progress bar
     st.markdown(progress_bar_html, unsafe_allow_html=True)
@@ -661,16 +693,22 @@ if playlist_id:
     st.write("")
 
     # Create a DataFrame to hold track names and happiness (valence)
+    # Create a DataFrame to hold track names and happiness (valence)
     df_happiness = pd.DataFrame({
         'Track': track_names,
-        'Happiness (Valence)': track_valence  # Keep happiness (valence) in 0-1 range
+        # If your valence (happiness) values are in 0–1, multiply by 100 here:
+        'Happiness (Valence)': track_valence
     })
 
-    # Define the bins for happiness (0-0.1, 0.1-0.2, etc.)
-    bins = [i / 10 for i in range(0, 11)]  # Create bins for every 0.1
+    # Define the bins for happiness (valence) (0–10, 10–20, ..., 90–100)
+    bins = list(range(0, 101, 10))
 
     # Assign each track to a bin
-    df_happiness['Happiness Bin'] = pd.cut(df_happiness['Happiness (Valence)'], bins=bins, right=False)
+    df_happiness['Happiness Bin'] = pd.cut(
+        df_happiness['Happiness (Valence)'], 
+        bins=bins, 
+        right=False  # intervals: [0,10), [10,20), etc.
+    )
 
     # Calculate the percentage of songs in each happiness bin
     bin_counts = df_happiness['Happiness Bin'].value_counts(normalize=True) * 100
@@ -680,9 +718,12 @@ if playlist_id:
 
     # Create a DataFrame for the bar chart
     df_bins_happiness = pd.DataFrame({
-        'Happiness Range': [f"{interval.left:.1f} - {interval.right:.1f}" for interval in bin_counts.index],
+        'Happiness Range': [
+            f"{interval.left:.0f} - {interval.right:.0f}" for interval in bin_counts.index
+        ],
         'Percentage of Songs (%)': bin_counts.values
     })
+
 
     # Create a vertical bar chart using Plotly
     fig_happiness = go.Figure(go.Bar(
@@ -713,18 +754,18 @@ if playlist_id:
         average_instrumentalness = 0
 
     # Create a thicker progress bar using custom HTML and CSS for instrumentalness
-    progress_percentage = int(average_instrumentalness * 100)  # Multiply by 100 for percentage
+    progress_percentage = int(average_instrumentalness)  # Multiply by 100 for percentage
 
     progress_bar_html = f"""
     <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
         <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
-            {progress_percentage}%
+            {progress_percentage}
         </div>
     </div>
     """
 
     # Display the average instrumentalness (0-1 scale)
-    st.write(f"The average instrumentalness of the songs in this playlist is: {average_instrumentalness:.2f} / 1")
+    st.write(f"The average instrumentalness of the songs in this playlist is: {int(average_instrumentalness)} / 100")
 
     # Display the custom thicker progress bar
     st.markdown(progress_bar_html, unsafe_allow_html=True)
@@ -732,16 +773,22 @@ if playlist_id:
     st.write("")
 
     # Create a DataFrame to hold track names and instrumentalness
+    # Create a DataFrame to hold track names and instrumentalness
     df_instrumentalness = pd.DataFrame({
         'Track': track_names,
-        'Instrumentalness': track_instrumentalness  # Keep instrumentalness in 0-1 range
+        # If your instrumentalness values are originally 0–1, multiply by 100 here:
+        'Instrumentalness': track_instrumentalness
     })
 
-    # Define the bins for instrumentalness (0-0.1, 0.1-0.2, etc.)
-    bins = [i / 10 for i in range(0, 11)]  # Create bins for every 0.1
+    # Define the bins for instrumentalness (0–10, 10–20, ..., 90–100)
+    bins = list(range(0, 101, 10))
 
     # Assign each track to a bin
-    df_instrumentalness['Instrumentalness Bin'] = pd.cut(df_instrumentalness['Instrumentalness'], bins=bins, right=False)
+    df_instrumentalness['Instrumentalness Bin'] = pd.cut(
+        df_instrumentalness['Instrumentalness'],
+        bins=bins,
+        right=False  # intervals: [0,10), [10,20), etc.
+    )
 
     # Calculate the percentage of songs in each instrumentalness bin
     bin_counts = df_instrumentalness['Instrumentalness Bin'].value_counts(normalize=True) * 100
@@ -751,9 +798,12 @@ if playlist_id:
 
     # Create a DataFrame for the bar chart
     df_bins_instrumentalness = pd.DataFrame({
-        'Instrumentalness Range': [f"{interval.left:.1f} - {interval.right:.1f}" for interval in bin_counts.index],
+        'Instrumentalness Range': [
+            f"{interval.left:.0f} - {interval.right:.0f}" for interval in bin_counts.index
+        ],
         'Percentage of Songs (%)': bin_counts.values
     })
+
 
     # Create a vertical bar chart using Plotly
     fig_instrumentalness = go.Figure(go.Bar(
@@ -801,18 +851,18 @@ if playlist_id:
         average_liveness = 0
 
     # Create a thicker progress bar using custom HTML and CSS for liveness
-    progress_percentage = int(average_liveness * 100)  # Multiply by 100 for percentage
+    progress_percentage = int(average_liveness)  # Multiply by 100 for percentage
 
     progress_bar_html = f"""
     <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
         <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
-            {progress_percentage}%
+            {progress_percentage}
         </div>
     </div>
     """
 
     # Display the average liveness (0-1 scale)
-    st.write(f"The average liveness of the songs in this playlist is: {average_liveness:.2f} / 1")
+    st.write(f"The average liveness of the songs in this playlist is: {int(average_liveness)} / 100")
 
     # Display the custom thicker progress bar
     st.markdown(progress_bar_html, unsafe_allow_html=True)
@@ -820,28 +870,37 @@ if playlist_id:
     st.write("")
 
     # Create a DataFrame to hold track names and liveness
+    # Create a DataFrame to hold track names and liveness
     df_liveness = pd.DataFrame({
         'Track': track_names,
-        'Liveness': track_liveness  # Keep liveness in 0-1 range
+        # If your liveness values are originally 0–1, multiply by 100 here:
+        'Liveness': track_liveness
     })
 
-    # Define the bins for liveness (0-0.1, 0.1-0.2, etc.)
-    bins = [i / 10 for i in range(0, 11)]  # Create bins for every 0.1
+    # Define the bins for liveness (0–10, 10–20, ..., 90–100)
+    bins = list(range(0, 101, 10))
 
     # Assign each track to a bin
-    df_liveness['Liveness Bin'] = pd.cut(df_liveness['Liveness'], bins=bins, right=False)
+    df_liveness['Liveness Bin'] = pd.cut(
+        df_liveness['Liveness'],
+        bins=bins,
+        right=False  # intervals: [0,10), [10,20), etc.
+    )
 
     # Calculate the percentage of songs in each liveness bin
     bin_counts = df_liveness['Liveness Bin'].value_counts(normalize=True) * 100
 
-    # Sort the bins so they appear in order
+    # Sort the bins in ascending order
     bin_counts = bin_counts.sort_index()
 
     # Create a DataFrame for the bar chart
     df_bins_liveness = pd.DataFrame({
-        'Liveness Range': [f"{interval.left:.1f} - {interval.right:.1f}" for interval in bin_counts.index],
+        'Liveness Range': [
+            f"{interval.left:.0f} - {interval.right:.0f}" for interval in bin_counts.index
+        ],
         'Percentage of Songs (%)': bin_counts.values
     })
+
 
     # Create a vertical bar chart using Plotly
     fig_liveness = go.Figure(go.Bar(
@@ -940,18 +999,18 @@ if playlist_id:
         average_speechiness = 0
 
     # Create a thicker progress bar using custom HTML and CSS
-    progress_percentage = int(average_speechiness * 100)  # Multiply by 100 for percentage
+    progress_percentage = int(average_speechiness)  # Multiply by 100 for percentage
 
     progress_bar_html = f"""
     <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
         <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
-            {progress_percentage}%
+            {progress_percentage}
         </div>
     </div>
     """
 
     # Display the average speechiness (0-1 scale)
-    st.write(f"The average speechiness of the songs in this playlist is: {average_speechiness:.2f} / 1")
+    st.write(f"The average speechiness of the songs in this playlist is: {int(average_speechiness)} / 100")
 
     # Display the custom thicker progress bar
     st.markdown(progress_bar_html, unsafe_allow_html=True)
@@ -959,16 +1018,22 @@ if playlist_id:
     st.write("")
 
     # Create a DataFrame to hold track names and speechiness
+    # Create a DataFrame to hold track names and speechiness
     df_speechiness = pd.DataFrame({
         'Track': track_names,
-        'Speechiness': track_speechiness  # Keep speechiness in 0-1 range
+        # If your speechiness values are originally 0–1, multiply by 100 here:
+        'Speechiness': track_speechiness
     })
 
-    # Define the bins for speechiness (0-0.1, 0.1-0.2, etc.)
-    bins = [i / 10 for i in range(0, 11)]  # Create bins for every 0.1
+    # Define bins for speechiness (0–10, 10–20, ..., 90–100)
+    bins = list(range(0, 101, 10))
 
     # Assign each track to a bin
-    df_speechiness['Speechiness Bin'] = pd.cut(df_speechiness['Speechiness'], bins=bins, right=False)
+    df_speechiness['Speechiness Bin'] = pd.cut(
+        df_speechiness['Speechiness'],
+        bins=bins,
+        right=False  # intervals: [0,10), [10,20), etc.
+    )
 
     # Calculate the percentage of songs in each speechiness bin
     bin_counts = df_speechiness['Speechiness Bin'].value_counts(normalize=True) * 100
@@ -978,9 +1043,12 @@ if playlist_id:
 
     # Create a DataFrame for the bar chart
     df_bins_speechiness = pd.DataFrame({
-        'Speechiness Range': [f"{interval.left:.1f} - {interval.right:.1f}" for interval in bin_counts.index],
+        'Speechiness Range': [
+            f"{interval.left:.0f} - {interval.right:.0f}" for interval in bin_counts.index
+        ],
         'Percentage of Songs (%)': bin_counts.values
     })
+
 
     # Create a vertical bar chart using Plotly
     fig_speechiness = go.Figure(go.Bar(
