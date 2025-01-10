@@ -54,97 +54,27 @@ from sklearn.preprocessing import MinMaxScaler
 from datetime import datetime
 from plotly.colors import qualitative
 
-image = Image.open('da_music_logo_reduced.png')
-left_co, cent_co,last_co = st.columns([1,3,1])
-with cent_co:
-    st.image(image)
-# col1, col2, col3 = st.columns([1,6,1])
+image = Image.open('data_adventures_logo.png')
+col1, col2, col3 = st.columns([1,6,1])
 
-# with col1:
-#     st.write("")
+with col1:
+    st.write("")
 
-# with col2:
-#     st.image(image, use_column_width=False, width=int(image.width * 0.4))
+with col2:
+    st.image(image, use_container_width=False, width=int(image.width * 0.4))
 
-# with col3:
-#     st.write("")
+with col3:
+    st.write("")
 
-st.title("Data Adventures in Music")
+st.markdown(
+    "<h1 style='text-align: center;'>Welcome Warmenhoven Advisory</h1>",
+    unsafe_allow_html=True
+)
 
-st.markdown('----')
-# Create the container with columns
-with st.container():
-    # First row for text and toggle
-    col1, col2 = st.columns([2, 1])
+st.write('Let’s go on a Data Adventure with our Warmenhoven Jams!')
 
-    # Vertically align the text in the first column
-    with col1:
-        st.markdown("#### ICSC Data Adventures Session")
-
-    # Vertically align the toggle switch in the second column
-    with col2:
-        icsc_toggle = st.toggle("", value=True, key="icsc_toggle")
-
-    # Add the question inside the same box, below the toggle
-    st.write("Are you here for the Inclusion Collaborative State Conference Data Adventures session?")
-st.markdown('----')
-
-playlist_id=None
-
-# Respond based on the toggle
-if icsc_toggle:
-    # Define the playlists and their associated playlist IDs
-    playlists = {
-        "Morning Motivation": "5BZTyjEy7c7kWoGoMPx0Yx",
-        "Coffee Break": "6yXIbUaidZP0yxjusbIIDh",
-        "One-person Dance Party": "6kpPauKzfBgznGdFMNe38k",
-        "Summer Cookout": "5Fb8BmGQAxsiUnIQPcM8HM",
-        "Wavey Gravy": "0keTBDMGM8NrKyDMsht13q",
-        "The 2000s": "70LqB9pLsofQiio8iS81Xy",
-        "Joyful Jams": "6tFvWS5aBEb5qD9g10F53X"
-    }
-
-    # Create a dropdown menu with the playlist names, starting with no pre-selection
-    selected_playlist = st.selectbox("Choose your playlist to explore:", list(playlists.keys()), index=None)
-    st.markdown("<br><br>", unsafe_allow_html=True)
-
-    # Check if the user has selected a valid playlist (not the placeholder)
-    if selected_playlist != None:
-        # Get the playlist ID associated with the selected playlist
-        playlist_id = playlists[selected_playlist]
-else:
-    st.write('Let’s dive into a Data Adventure with your own playlist!')
-    # Add radio button for choosing between entering playlist name or URL
-    input_choice = st.radio("How would you like to enter the playlist?", ("by name", "by URL"))
-
-    # Initialize playlist_id as None
-    playlist_id = None
-
-    # Conditional input based on the user's choice
-    if input_choice == "by name":
-        playlist_name = st.text_input("Enter the public Spotify playlist name:")
-        st.markdown("<br><br>", unsafe_allow_html=True)
-        # Search for the playlist ID based on the name
-        if playlist_name:
-            try:
-                playlists = sp.search(playlist_name, type="playlist")["playlists"]["items"]
-                if playlists:
-                    playlist_id = playlists[0]["id"]
-                else:
-                    st.write("No playlists found with that name.")
-            except Exception as e:
-                st.write("Error occurred while searching for the playlist.")
-                st.write(f"Error: {e}")
-    else:
-        playlist_url = st.text_input("Enter the Spotify playlist URL:")
-
-        # Extract the playlist ID from the URL
-        if playlist_url:
-            try:
-                playlist_id = playlist_url.split("/")[-1].split("?")[0]  # Handles URLs with or without query params
-            except Exception as e:
-                st.write("Error occurred while extracting the playlist ID.")
-                st.write(f"Error: {e}")
+# Initialize playlist_id as None
+playlist_id = "6tFvWS5aBEb5qD9g10F53X"
 
 # retrieve data from the Spotify API
 if playlist_id:
@@ -161,18 +91,19 @@ if playlist_id:
     track_image = [track["track"]["album"]["images"][0]["url"] for track in tracks]
     track_release_date = [track["track"]["album"]["release_date"] for track in tracks]
     track_url = [track["track"]["external_urls"]["spotify"] for track in tracks]
-    audio_features = sp.audio_features(track_url)
-    track_danceability = [track["danceability"] for track in audio_features]
-    track_energy = [track["energy"] for track in audio_features]
-    track_loudness = [track["loudness"] for track in audio_features]
-    track_acousticness = [track["acousticness"] for track in audio_features]
-    track_instrumentalness = [track["instrumentalness"] for track in audio_features]
-    track_liveness = [track["liveness"] for track in audio_features]
-    track_valence = [track["valence"] for track in audio_features]
-    track_tempo = [round(track["tempo"]) for track in audio_features]
-    track_signature = [track["time_signature"] for track in audio_features]
-    track_speechiness = [track["speechiness"] for track in audio_features]
-    track_key = [track["key"] for track in audio_features]
+    
+    df = pd.read_csv("Joyful Jams ICSC.csv")
+    track_danceability = df["Dance"].tolist()
+    track_energy = df["Energy"].tolist()
+    track_loudness = df["Loud (Db)"].tolist()
+    track_acousticness = df["Acoustic"].tolist()
+    track_instrumentalness = df["Instrumental"].tolist()
+    track_liveness = df["Live"].tolist()
+    track_valence = df["Happy"].tolist()
+    track_tempo = df["BPM"].apply(round).tolist()
+    track_signature = df["Time Signature"].tolist()
+    track_speechiness = df["Speech"].tolist()
+    track_keys_converted = df["Key"].tolist()
 
     # Extract genres by fetching artist details
     track_genres = []
@@ -197,24 +128,24 @@ if playlist_id:
 
     # Convert track keys to pitch class notation
     # Map numeric key values to pitch class notation
-    key_mapping = {
-        -1: 'None',
-        0: 'C',
-        1: 'C# / Db',
-        2: 'D',
-        3: 'D# / Eb',
-        4: 'E',
-        5: 'F',
-        6: 'F# / Gb',
-        7: 'G',
-        8: 'G# / Ab',
-        9: 'A',
-        10: 'A# / Bb',
-        11: 'B'
-    }
+    # key_mapping = {
+    #     -1: 'None',
+    #     0: 'C',
+    #     1: 'C# / Db',
+    #     2: 'D',
+    #     3: 'D# / Eb',
+    #     4: 'E',
+    #     5: 'F',
+    #     6: 'F# / Gb',
+    #     7: 'G',
+    #     8: 'G# / Ab',
+    #     9: 'A',
+    #     10: 'A# / Bb',
+    #     11: 'B'
+    # }
 
-    # Convert track keys to pitch class notation
-    track_keys_converted = [key_mapping[key] for key in track_key]
+    # # Convert track keys to pitch class notation
+    # track_keys_converted = [key_mapping[key] for key in track_key]
 
 
     # display the playlist data in a table
@@ -386,13 +317,6 @@ if playlist_id:
     st.plotly_chart(fig_genres)
 
 
-
-    # Calculate the average popularity
-    if track_popularity:
-        average_popularity = sum(track_popularity) / len(track_popularity)
-    else:
-        average_popularity = 0
-
     # Calculate the average popularity
     if track_popularity:
         average_popularity = sum(track_popularity) / len(track_popularity)
@@ -411,7 +335,7 @@ if playlist_id:
     """
 
     # Display the average popularity (0-100 scale)
-    st.write(f"The average popularity of the songs in this playlist is: {average_popularity:.1f} / 100")
+    st.write(f"The average popularity of the songs in this playlist is: {round(average_popularity)} / 100")
 
     # Display the custom thicker progress bar
     st.markdown(progress_bar_html, unsafe_allow_html=True)
@@ -504,7 +428,7 @@ if playlist_id:
         average_acousticness = 0
 
     # Create a thicker progress bar using custom HTML and CSS for acousticness
-    progress_percentage = int(average_acousticness * 100)  # Multiply by 100 for percentage
+    progress_percentage = int(average_acousticness)  # Multiply by 100 for percentage
 
     progress_bar_html = f"""
     <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
@@ -514,8 +438,8 @@ if playlist_id:
     </div>
     """
 
-    # Display the average acousticness (0-1 scale)
-    st.write(f"The average acousticness of the songs in this playlist is: {average_acousticness:.2f} / 1")
+    # Display the average acousticness (0-100 scale)
+    st.write(f"The average acousticness of the songs in this playlist is: {int(average_acousticness)} / 100")
 
     # Display the custom thicker progress bar
     st.markdown(progress_bar_html, unsafe_allow_html=True)
@@ -580,7 +504,7 @@ if playlist_id:
     progress_bar_html = f"""
     <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
         <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
-            {progress_percentage}
+            {progress_percentage}%
         </div>
     </div>
     """
@@ -652,7 +576,7 @@ if playlist_id:
     progress_bar_html = f"""
     <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
         <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
-            {progress_percentage}
+            {progress_percentage}%
         </div>
     </div>
     """
@@ -723,7 +647,7 @@ if playlist_id:
     progress_bar_html = f"""
     <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
         <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
-            {progress_percentage}
+            {progress_percentage}%
         </div>
     </div>
     """
@@ -794,7 +718,7 @@ if playlist_id:
     progress_bar_html = f"""
     <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
         <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
-            {progress_percentage}
+            {progress_percentage}%
         </div>
     </div>
     """
@@ -882,7 +806,7 @@ if playlist_id:
     progress_bar_html = f"""
     <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
         <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
-            {progress_percentage}
+            {progress_percentage}%
         </div>
     </div>
     """
@@ -1021,7 +945,7 @@ if playlist_id:
     progress_bar_html = f"""
     <div style="width: 100%; background-color: #ddd; height: 30px; border-radius: 10px; overflow: hidden;">
         <div style="width: {progress_percentage}%; background-color: #4CAF50; height: 100%; text-align: center; line-height: 30px; color: white; border-radius: 10px 0 0 10px;">
-            {progress_percentage}
+            {progress_percentage}%
         </div>
     </div>
     """
@@ -1213,8 +1137,8 @@ if playlist_id:
         'liveness': track_liveness,
         'happiness': track_valence,
         'tempo': track_tempo,
-        'speechiness': track_speechiness,
-        'key': track_key
+        'speechiness': track_speechiness
+        # 'key': track_keys
     })
 
     # Convert the list of audio features into a DataFrame
@@ -1229,7 +1153,7 @@ if playlist_id:
     average_audio_features = audio_features_scaled.mean()
 
     # Define the features to plot
-    features = ['danceability', 'energy', 'loudness', 'acousticness', 'instrumentalness', 'liveness', 'happiness', 'tempo', 'speechiness', 'key']
+    features = ['danceability', 'energy', 'loudness', 'acousticness', 'instrumentalness', 'liveness', 'happiness', 'tempo', 'speechiness']
 
     # Create the radar chart using Plotly
     # fig_audio_features = go.Figure()
@@ -1263,14 +1187,9 @@ if playlist_id:
     
     st.write("## Compare the audio features of 2 songs")
 
-    # Get the first two unique songs for default selection
-    unique_songs = df_audio_features_scaled['name'].unique()
-    default_song1 = unique_songs[0] if len(unique_songs) > 0 else None
-    default_song2 = unique_songs[1] if len(unique_songs) > 1 else None
-
-    # Create two dropdowns to select tracks with default values
-    track1 = st.selectbox("Select Song 1", unique_songs, index=0 if default_song1 else None)
-    track2 = st.selectbox("Select Song 2", unique_songs, index=1 if default_song2 else None)
+    # Create two dropdowns to select tracks
+    track1 = st.selectbox("Select Song 1", df_audio_features_scaled['name'].unique())
+    track2 = st.selectbox("Select Song 2", df_audio_features_scaled['name'].unique())
 
     # Filter the data for the selected tracks
     track1_data = df_audio_features_scaled[df_audio_features_scaled['name'] == track1]
@@ -1309,14 +1228,7 @@ if playlist_id:
                 range=[0, 1]  # Audio features are scaled between 0 and 1
             )
         ),
-        title="Comparison of Audio Features Between Two Tracks",
-        legend=dict(
-        orientation='h',  # Horizontal legend
-        yanchor='top',
-        y=-0.2,  # Position below the chart
-        xanchor='center',
-        x=0.5
-        )
+        title="Comparison of Audio Features Between Two Tracks"
     )
 
     # Display the radar chart in Streamlit
