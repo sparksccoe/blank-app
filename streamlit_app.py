@@ -73,7 +73,7 @@ st.markdown(
 
 st.write('Let’s go on a Data Adventure with our Warmenhoven Jams!')
 
-# Initialize playlist_id as None
+# Initialize playlist_id as None or hardcoded here
 playlist_id = "4mTuRYyxHhFxoemBGQuSxF"
 
 # retrieve data from the Spotify API
@@ -275,7 +275,7 @@ if playlist_id:
     df_genres = pd.DataFrame(track_genres, columns=["Genre"])
 
     # Count occurrences of each genre
-    genre_counts = df_genres["Genre"].value_counts()
+    genre_counts = pd.Series(df_genres["Genre"]).value_counts()
 
     # Calculate the percentage for each genre
     genre_percentages = (genre_counts / genre_counts.sum()) * 100
@@ -355,7 +355,7 @@ if playlist_id:
     df_popularity['Popularity Bin'] = pd.cut(df_popularity['Popularity'], bins=bins, right=False)
 
     # Calculate the percentage of songs in each popularity bin
-    bin_counts = df_popularity['Popularity Bin'].value_counts(normalize=True) * 100
+    bin_counts = pd.Series(df_popularity['Popularity Bin']).value_counts(normalize=True) * 100
 
     # Sort the bins so they appear in order
     bin_counts = bin_counts.sort_index()
@@ -398,7 +398,7 @@ if playlist_id:
     bins = pd.cut(track_durations_minutes, bins=range(0, max(track_durations_minutes)+2), right=False)
 
     # Count the occurrences in each bin
-    duration_counts = pd.value_counts(bins).sort_index()
+    duration_counts = pd.Series(bins).value_counts().sort_index()
 
     # Calculate the percentage of each bin
     total_tracks = len(track_durations_minutes)
@@ -463,7 +463,7 @@ if playlist_id:
     )
 
     # Calculate the percentage of songs in each acousticness bin
-    bin_counts = df_acousticness['Acousticness Bin'].value_counts(normalize=True) * 100
+    bin_counts = pd.Series(df_acousticness['Acousticness Bin']).value_counts(normalize=True) * 100
 
     # Sort the bins so they appear in order
     bin_counts = bin_counts.sort_index()
@@ -543,7 +543,7 @@ if playlist_id:
     )
 
     # Calculate the percentage of songs in each danceability bin
-    bin_counts = df_danceability['Danceability Bin'].value_counts(normalize=True) * 100
+    bin_counts = pd.Series(df_danceability['Danceability Bin']).value_counts(normalize=True) * 100
 
     # Sort the bins so they appear in order
     bin_counts = bin_counts.sort_index()
@@ -626,7 +626,7 @@ if playlist_id:
     )
 
     # Calculate the percentage of songs in each energy bin
-    bin_counts = df_energy['Energy Bin'].value_counts(normalize=True) * 100
+    bin_counts = pd.Series(df_energy['Energy Bin']).value_counts(normalize=True) * 100
 
     # Sort the bins so they appear in ascending order
     bin_counts = bin_counts.sort_index()
@@ -711,7 +711,7 @@ if playlist_id:
     )
 
     # Calculate the percentage of songs in each happiness bin
-    bin_counts = df_happiness['Happiness Bin'].value_counts(normalize=True) * 100
+    bin_counts = pd.Series(df_happiness['Happiness Bin']).value_counts(normalize=True) * 100
 
     # Sort the bins so they appear in order
     bin_counts = bin_counts.sort_index()
@@ -791,7 +791,7 @@ if playlist_id:
     )
 
     # Calculate the percentage of songs in each instrumentalness bin
-    bin_counts = df_instrumentalness['Instrumentalness Bin'].value_counts(normalize=True) * 100
+    bin_counts = pd.Series(df_instrumentalness['Instrumentalness Bin']).value_counts(normalize=True) * 100
 
     # Sort the bins so they appear in order
     bin_counts = bin_counts.sort_index()
@@ -832,7 +832,7 @@ if playlist_id:
     df_keys = pd.DataFrame(track_keys_converted, columns=['Key'])
 
     # Count the occurrences of each key
-    key_counts = df_keys['Key'].value_counts(normalize=True) * 100  # Calculate percentage
+    key_counts = pd.Series(df_keys['Key']).value_counts(normalize=True) * 100  # Calculate percentage
     key_counts = key_counts.round(1).reset_index()  # Round the percentage values to one decimal place
     key_counts.columns = ['Key', 'Percentage']
 
@@ -888,8 +888,7 @@ if playlist_id:
     )
 
     # Calculate the percentage of songs in each liveness bin
-    bin_counts = df_liveness['Liveness Bin'].value_counts(normalize=True) * 100
-
+    bin_counts = pd.Series(df_liveness['Liveness Bin']).value_counts(normalize=True) * 100
     # Sort the bins in ascending order
     bin_counts = bin_counts.sort_index()
 
@@ -933,7 +932,7 @@ if playlist_id:
     loudness_binned = pd.cut(track_loudness, bins=bins_loudness, labels=labels_loudness, right=False)
 
     # Count the occurrences of each bin
-    loudness_binned_counts = loudness_binned.value_counts().sort_index()
+    loudness_binned_counts = pd.Series(loudness_binned).value_counts().sort_index()
 
     # Calculate the percentage for each bin
     total_tracks = len(track_loudness)
@@ -1036,7 +1035,7 @@ if playlist_id:
     )
 
     # Calculate the percentage of songs in each speechiness bin
-    bin_counts = df_speechiness['Speechiness Bin'].value_counts(normalize=True) * 100
+    bin_counts = pd.Series(df_speechiness['Speechiness Bin']).value_counts(normalize=True) * 100
 
     # Sort the bins so they appear in order
     bin_counts = bin_counts.sort_index()
@@ -1165,7 +1164,7 @@ if playlist_id:
     })
 
     # Count the occurrences of each tempo category and calculate percentages
-    tempo_counts = df_tempo['Tempo Category'].value_counts(normalize=True) * 100
+    tempo_counts = pd.Series(df_tempo['Tempo Category']).value_counts(normalize=True) * 100
     tempo_counts = tempo_counts.sort_index()  # Sort categories alphabetically or based on a custom order
 
     # Create a Plotly horizontal bar chart
