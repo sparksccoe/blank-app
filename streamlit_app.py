@@ -61,7 +61,7 @@ with col1:
     st.write("")
 
 with col2:
-    st.image(image, use_container_width=False, width=int(image.width * 0.4))
+    st.image(image, use_column_width=False, width=int(image.width * 0.4))
 
 with col3:
     st.write("")
