@@ -1256,8 +1256,12 @@ if playlist_id:
 
     # Create two dropdowns to select tracks
     track1 = st.selectbox("Select Song 1", df_audio_features_scaled['name'].unique())
-    track2 = st.selectbox("Select Song 2", df_audio_features_scaled['name'].unique())
-
+    track2 = st.selectbox(
+        "Select Song 2", 
+        df_audio_features_scaled['name'].unique(), 
+        index=1  # Default to the second item in the unique list
+    )
+    
     # Filter the data for the selected tracks
     track1_data = df_audio_features_scaled[df_audio_features_scaled['name'] == track1]
     track2_data = df_audio_features_scaled[df_audio_features_scaled['name'] == track2]
