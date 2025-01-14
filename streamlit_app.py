@@ -1,4 +1,5 @@
 import streamlit as st
+import requests
 
 hide_streamlit_style = """
                 <style>
@@ -265,6 +266,66 @@ if playlist_id:
                 allowfullscreen>
         </iframe>
     """, height=315)
+
+    # Function to fetch playlist details using the YouTube API
+    def fetch_playlist_videos(api_key, playlist_id):
+        base_url = "https://www.googleapis.com/youtube/v3/playlistItems"
+        params = {
+            "part": "snippet",
+            "playlistId": playlist_id,
+            "maxResults": 50,  # Max number of videos per API call (can paginate if needed)
+            "key": api_key
+        }
+        response = requests.get(base_url, params=params)
+        if response.status_code == 200:
+            data = response.json()
+            videos = [
+                {
+                    "title": item["snippet"]["title"],
+                    "id": item["snippet"]["resourceId"]["videoId"]
+                }
+                for item in data["items"]
+            ]
+            return videos
+        else:
+            st.error("Failed to fetch playlist details. Check your API key and playlist ID.")
+            return []
+
+    # YouTube API key and playlist ID (replace with your own)
+    api_key = "YOUR_YOUTUBE_API_KEY"  # Replace with your API key
+    playlist_url = "https://www.youtube.com/playlist?list=PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr"
+    playlist_id = playlist_url.split("list=")[-1]
+
+    # Fetch playlist details
+    videos = fetch_playlist_videos(api_key, playlist_id)
+
+    if videos:
+        # Default video (first video in the playlist)
+        default_video = videos[0]["id"]
+
+        # Create a dropdown menu for video selection
+        selected_video = st.selectbox(
+            "Choose a video to watch:",
+            options=videos,
+            format_func=lambda video: video["title"]  # Use the video title as the dropdown label
+        )
+
+        # Get the selected video ID
+        selected_video_id = selected_video["id"]
+
+        # Embed the selected video
+        st.components.v1.html(f"""
+            <iframe width="560" height="315" 
+                    src="https://www.youtube.com/embed/{selected_video_id}" 
+                    title="YouTube video player" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    referrerpolicy="strict-origin-when-cross-origin" 
+                    allowfullscreen>
+            </iframe>
+        """, height=315)
+    else:
+        st.write("No videos found in the playlist.")
 
     # Add some spacing
     st.markdown("<br><br>", unsafe_allow_html=True)
