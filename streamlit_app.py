@@ -268,12 +268,13 @@ if playlist_id:
     """, height=315)
 
     # Function to fetch playlist details using the YouTube API
+    # Function to fetch playlist details using the YouTube API
     def fetch_playlist_videos(api_key, playlist_id):
         base_url = "https://www.googleapis.com/youtube/v3/playlistItems"
         params = {
             "part": "snippet",
             "playlistId": playlist_id,
-            "maxResults": 50,  # Max number of videos per API call (can paginate if needed)
+            "maxResults": 50,  # Max number of videos per API call
             "key": api_key
         }
         response = requests.get(base_url, params=params)
@@ -282,7 +283,7 @@ if playlist_id:
             videos = [
                 {
                     "title": item["snippet"]["title"],
-                    "id": item["snippet"]["resourceId"]["videoId"]
+                    "url": f"https://www.youtube.com/watch?v={item['snippet']['resourceId']['videoId']}"
                 }
                 for item in data["items"]
             ]
@@ -293,7 +294,7 @@ if playlist_id:
 
     # YouTube API key and playlist ID (replace with your own)
     api_key = "AIzaSyAxHBK8MxzePcos86BOaBwUtTurr_ZbpNg"  # Replace with your API key
-    playlist_url = "https://youtube.com/playlist?list=PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr"
+    playlist_url = "https://www.youtube.com/playlist?list=PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr"
     playlist_id = playlist_url.split("list=")[-1]
 
     # Fetch playlist details
@@ -301,7 +302,7 @@ if playlist_id:
 
     if videos:
         # Default video (first video in the playlist)
-        default_video = videos[0]["id"]
+        default_video_url = videos[0]["url"]
 
         # Create a dropdown menu for video selection
         selected_video = st.selectbox(
@@ -310,20 +311,11 @@ if playlist_id:
             format_func=lambda video: video["title"]  # Use the video title as the dropdown label
         )
 
-        # Get the selected video ID
-        selected_video_id = selected_video["id"]
+        # Get the selected video URL
+        selected_video_url = selected_video["url"]
 
-        # Embed the selected video
-        st.components.v1.html(f"""
-            <iframe width="560" height="315" 
-                    src="https://www.youtube.com/embed/{selected_video_id}" 
-                    title="YouTube video player" 
-                    frameborder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                    referrerpolicy="strict-origin-when-cross-origin" 
-                    allowfullscreen>
-            </iframe>
-        """, height=315)
+        # Embed the selected video using st.video
+        st.video(selected_video_url)
     else:
         st.write("No videos found in the playlist.")
 
