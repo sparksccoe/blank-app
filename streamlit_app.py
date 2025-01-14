@@ -258,7 +258,7 @@ if playlist_id:
     st.write(f"### {playlist['name']} on YouTube")
     st.components.v1.html("""
         <iframe width="560" height="315" 
-                src="https://youtube.com/playlist?list=PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr" 
+                src="https://www.youtube.com/watch?v=fLi0EJfi_vg&list=PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr" 
                 title="YouTube video player" 
                 frameborder="0" 
                 allow="picture-in-picture; fullscreen"  
