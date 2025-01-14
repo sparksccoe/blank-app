@@ -266,6 +266,45 @@ if playlist_id:
         </iframe>
     """, height=315)
 
+    # Define constants
+    video_id = "fLi0EJfi_vg"  # Replace with your YouTube video ID
+    playlist_url = f"https://www.youtube.com/embed/{video_id}"
+    AGE_RESTRICTED_URLS = ["age_restricted", "some_age_restriction_indicator"]  # Update with actual indicators
+
+    # Make a GET request to the YouTube embed URL
+    headers = {
+        "Referer": "http://youtube.com"
+    }
+
+    response = requests.get(playlist_url, headers=headers)
+
+    # Check if the URL is age-restricted
+    def is_age_restricted(url, restricted_urls):
+        return any(restricted_url in url for restricted_url in restricted_urls)
+
+    # Check the response and age restriction
+    if response.status_code == 200:
+        # Simulate media data (replace with actual logic if available)
+        media = {"url": playlist_url}
+
+        # Check for age restriction
+        age_restricted = is_age_restricted(playlist_url, AGE_RESTRICTED_URLS)
+
+        if age_restricted:
+            st.warning("This video is age-restricted and cannot be displayed.")
+        else:
+            st.components.v1.html(f"""
+                <iframe width="560" height="315" 
+                        src="{playlist_url}" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                </iframe>
+            """, height=315)
+    else:
+        st.error(f"Failed to fetch the video. Status Code: {response.status_code}")
+        st.text(f"Response: {response.text}")
+
     # Define the video or playlist ID
     video_id = "PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr"  # Replace with your YouTube video ID
     playlist_url = "https://www.youtube.com/embed/fLi0EJfi_vg?si=kLtgW-kqKjSz8fcM"
