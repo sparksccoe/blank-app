@@ -262,7 +262,6 @@ if playlist_id:
                 title="YouTube video player" 
                 frameborder="0" 
                 allow="picture-in-picture; fullscreen" 
-                referrerpolicy="origin-when-cross-origin"
                 allowfullscreen>
         </iframe>
     """, height=315)
