@@ -268,7 +268,7 @@ if playlist_id:
 
     # Define the video or playlist ID
     video_id = "PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr"  # Replace with your YouTube video ID
-    playlist_url = f"https://www.youtube.com/playlist?list={video_id}"
+    playlist_url = "https://www.youtube.com/embed/fLi0EJfi_vg?si=kLtgW-kqKjSz8fcM"
 
     # Make a GET request to the YouTube embed URL
     headers = {
