@@ -292,8 +292,8 @@ if playlist_id:
             return []
 
     # YouTube API key and playlist ID (replace with your own)
-    api_key = "YOUR_YOUTUBE_API_KEY"  # Replace with your API key
-    playlist_url = "https://www.youtube.com/playlist?list=PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr"
+    api_key = "AIzaSyAxHBK8MxzePcos86BOaBwUtTurr_ZbpNg"  # Replace with your API key
+    playlist_url = "https://youtube.com/playlist?list=PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr"
     playlist_id = playlist_url.split("list=")[-1]
 
     # Fetch playlist details
