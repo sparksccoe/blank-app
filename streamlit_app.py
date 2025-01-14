@@ -258,7 +258,7 @@ if playlist_id:
     st.write(f"### {playlist['name']} on YouTube")
     st.components.v1.html("""
         <iframe width="560" height="315" 
-                src="https://www.youtube.com/embed/fLi0EJfi_vg?si=kLtgW-kqKjSz8fcM?rel=0" 
+                src="https://youtube.com/playlist?list=PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr" 
                 title="YouTube video player" 
                 frameborder="0" 
                 allow="picture-in-picture; fullscreen"  
@@ -273,7 +273,7 @@ if playlist_id:
 
     # Make a GET request to the YouTube embed URL
     headers = {
-        "Referer": "http://www.dataadventures.org"
+        "Referer": "https://www.youtube.com"
     }
 
     response = requests.get(playlist_url, headers=headers)
