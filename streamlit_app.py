@@ -254,6 +254,7 @@ if playlist_id:
     st.markdown(f'<iframe src="{playlist_embed_url}" width="100%" height="400" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>', unsafe_allow_html=True)
 
     # Embed YouTube video iframe
+    st.write(f"### {playlist['name']} on YouTube")
     st.components.v1.html("""
         <iframe width="560" height="315" 
                 src="https://www.youtube.com/embed/fLi0EJfi_vg?si=kLtgW-kqKjSz8fcM" 
