@@ -272,7 +272,7 @@ if playlist_id:
 
     # Make a GET request to the YouTube embed URL
     headers = {
-        "Referer": "http://youtube.com"
+        "Referer": "https://youtube.com"
     }
 
     response = requests.get(playlist_url, headers=headers)
