@@ -92,6 +92,18 @@ if playlist_id:
     track_release_date = [track["track"]["album"]["release_date"] for track in tracks]
     track_url = [track["track"]["external_urls"]["spotify"] for track in tracks]
     
+    # Create a DataFrame named df_decades
+    df_decades = pd.DataFrame({'Release Date': track_release_date})
+
+    # Convert to datetime and extract the year
+    df_decades['Year'] = pd.to_datetime(df_decades['Release Date']).dt.year
+
+    # Compute the decade (numerically, e.g., 1970, 1980, 1990...)
+    df_decades['Decade'] = (df_decades['Year'] // 10) * 10
+
+    # Convert decade to a string ending with 's' (e.g., 1970 -> "1970s")
+    track_decade = df_decades['track_decade'] = df_decades['Decade'].astype(str) + "s"
+
     df = pd.read_csv("Warmenhoven Jams-4.csv")
     track_danceability = df["Dance"].tolist()
     track_energy = df["Energy"].tolist()
@@ -162,7 +174,7 @@ if playlist_id:
 
 # data = {"Image": track_image, "Name": track_names, "Preview": track_preview, "Artist": track_artists, "Release Date": track_release_date, "Popularity": track_popularity, "Duration (ms)": track_duration, "Acoustic": track_acousticness, "Dance": track_danceability, "Energy": track_energy, "Happy": track_valence, "Instrumental": track_instrumentalness, "Key": track_key, "Live": track_liveness, "Loud (Db)": track_loudness, "Speech": track_speechiness, "Tempo": track_tempo}
 if playlist_id:
-    data = {"Image": track_image, "Name": track_names, "Artist": track_artists, "Genre": track_genres, "Release Date": track_release_date, "Popularity": track_popularity, "Duration": track_duration_formatted, "Acoustic": track_acousticness, "Dance": track_danceability, "Energy": track_energy, "Happy": track_valence, "Instrumental": track_instrumentalness, "Key": track_keys_converted, "Live": track_liveness, "Loud (Db)": track_loudness, "Speech": track_speechiness, "Tempo": track_tempo}
+    data = {"Image": track_image, "Name": track_names, "Artist": track_artists, "Genre": track_genres, "Release Date": track_release_date, "Release Decade": track_decade, "Popularity": track_popularity, "Duration": track_duration_formatted, "Acoustic": track_acousticness, "Dance": track_danceability, "Energy": track_energy, "Happy": track_valence, "Instrumental": track_instrumentalness, "Key": track_keys_converted, "Live": track_liveness, "Loud (Db)": track_loudness, "Speech": track_speechiness, "Tempo": track_tempo}
     df = pd.DataFrame(data)
     num_total_tracks = len(df)
     df.index += 1
@@ -184,6 +196,9 @@ if playlist_id:
             ),
             "Release Date": st.column_config.TextColumn(
                 "Release Date", help="The date when the track or album was released"
+            ),
+            "Release Decade": st.column_config.TextColumn(
+                "Release Decade", help="The decade when the track or album was released"
             ),
             "Popularity": st.column_config.NumberColumn(
                 "Popularity", help="The popularity score of the track (0 to 100)"
@@ -316,6 +331,45 @@ if playlist_id:
     # Display the bar chart in Streamlit
     st.plotly_chart(fig_genres)
 
+
+    # Create a DataFrame to hold track names and track_decade
+    df_decades = pd.DataFrame({
+        'Track': track_names,
+        'Decade': track_decade
+    })
+
+    # Calculate the percentage of songs in each decade
+    decade_counts = df_decades['Decade'].value_counts(normalize=True) * 100
+
+    # Sort the decades in chronological order
+    decade_counts = decade_counts.sort_index()
+
+    # Create a DataFrame for the bar chart
+    df_bins_decades = pd.DataFrame({
+        'Decade': decade_counts.index,
+        'Percentage of Songs (%)': decade_counts.values
+    })
+
+    # Create a vertical bar chart using Plotly
+    fig_decades = go.Figure(go.Bar(
+        x=df_bins_decades['Decade'],  # The decade categories
+        y=df_bins_decades['Percentage of Songs (%)'],  # The percentages
+        text=[f"{perc:.1f}%" for perc in df_bins_decades['Percentage of Songs (%)']],  # Display percentages as text inside the bars
+        textposition='auto',  # Position the text inside the bars automatically
+        marker=dict(color=['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692', '#FFB81C', '#B6E880', '#FFA07A']),  # Custom colors
+    ))
+
+    # Update layout for the vertical bar chart
+    fig_decades.update_layout(
+        title_text='Percentage of Songs by Decade',
+        xaxis_title='Decade',
+        yaxis_title='Percentage of Songs (%)',
+        yaxis=dict(tickvals=[0, 20, 40, 60, 80, 100]),  # Custom y-axis ticks for percentage
+        showlegend=False  # Disable the legend
+    )
+
+    # Display the vertical bar chart in Streamlit
+    st.plotly_chart(fig_decades)
 
     # Calculate the average popularity
     if track_popularity:
@@ -525,8 +579,6 @@ if playlist_id:
     st.write("")
 
     # Create a DataFrame to hold track names and danceability
-    # Create a DataFrame to hold track names and danceability
-    # Create a DataFrame to hold track names and danceability
     df_danceability = pd.DataFrame({
         'Track': track_names,
         'Danceability': track_danceability  # Now assumed to be in the range 0-100
@@ -607,7 +659,6 @@ if playlist_id:
 
     st.write("")
 
-    # Create a DataFrame to hold track names and energy
     # Create a DataFrame to hold track names and energy
     df_energy = pd.DataFrame({
         'Track': track_names,
@@ -772,7 +823,7 @@ if playlist_id:
 
     st.write("")
 
-    # Create a DataFrame to hold track names and instrumentalness
+    
     # Create a DataFrame to hold track names and instrumentalness
     df_instrumentalness = pd.DataFrame({
         'Track': track_names,
@@ -1261,7 +1312,7 @@ if playlist_id:
         df_audio_features_scaled['name'].unique(), 
         index=1  # Default to the second item in the unique list
     )
-    
+
     # Filter the data for the selected tracks
     track1_data = df_audio_features_scaled[df_audio_features_scaled['name'] == track1]
     track2_data = df_audio_features_scaled[df_audio_features_scaled['name'] == track2]
@@ -1351,9 +1402,12 @@ if playlist_id:
     # Display the heatmap in Streamlit
     st.plotly_chart(fig_heatmap, use_container_width=True)
 
+    # Sort "Release Decade" in chronological order (e.g., 1960s, 1970s, ...)
+    df["Release Decade"] = pd.Categorical(
+        df["Release Decade"], categories=["1960s", "1970s", "1980s", "1990s", "2000s", "2010s", "2020s"], ordered=True
+    )
 
-
-    histogram_numeric_columns = ["Popularity", "Acoustic", "Dance", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo"]
+    histogram_numeric_columns = ["Popularity", "Acoustic", "Dance", "Release Decade", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo"]
 
     # Dropdown menu for selecting which column to display in the histogram
     selected_column = st.selectbox("Choose a feature to display in the histogram", histogram_numeric_columns)
@@ -1364,13 +1418,29 @@ if playlist_id:
     # Create the histogram using Plotly's go.Figure with nbinsx=20
     fig_histogram = go.Figure()
 
-    # Add the histogram trace with Prism colors and nbinsx=20
-    fig_histogram.add_trace(go.Histogram(
-        x=df[selected_column],  # The selected data
-        nbinsx=20,  # Set the number of bins to 20
-        marker=dict(color=color_scale * (len(df[selected_column]) // len(color_scale) + 1)),  # Repeat colors for the bars
-        name=f"{selected_column} Distribution"
-    ))
+    # Create the histogram using Plotly's go.Figure with nbinsx=20
+    fig_histogram = go.Figure()
+
+    if selected_column == "Release Decade":
+        # Handle the "Release Decade" separately to ensure it's sorted correctly
+        sorted_data = df[selected_column].dropna().sort_values()
+        fig_histogram.add_trace(go.Histogram(
+            x=sorted_data,
+            marker=dict(
+                color=color_scale * (len(sorted_data) // len(color_scale) + 1)
+            ),
+            name=f"{selected_column} Distribution"
+        ))
+    else:
+        # Handle numeric columns
+        fig_histogram.add_trace(go.Histogram(
+            x=df[selected_column],
+            nbinsx=20,
+            marker=dict(
+                color=color_scale * (len(df[selected_column]) // len(color_scale) + 1)
+            ),
+            name=f"{selected_column} Distribution"
+        ))
 
     # Update the layout for better visuals
     fig_histogram.update_layout(
@@ -1385,14 +1455,26 @@ if playlist_id:
 
 
 
-    analysis_numeric_columns = ["Name", "Artist", "Release Date", "Genre", "Popularity", "Acoustic", "Dance", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo"]
+    analysis_numeric_columns = ["Name", "Artist", "Release Date", "Release Decade", "Genre", "Popularity", "Acoustic", "Dance", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo"]
 
     # Bivariate Analysis
     st.write("### Bivariate Analysis")
     x_axis = st.selectbox("Select a variable for the x-axis:", analysis_numeric_columns)
     y_axis = st.selectbox("Select a variable for the y-axis:", analysis_numeric_columns)
 
-    fig_bivariate = px.scatter(df, x=x_axis, y=y_axis, title=f"{x_axis} vs. {y_axis}")
+   # Special handling for "Release Decade" if it's on the x-axis or y-axis
+    if x_axis == "Release Decade" or y_axis == "Release Decade":
+        fig_bivariate = px.scatter(
+            df.sort_values("Release Decade"),  # Ensure "Release Decade" is sorted
+            x=x_axis,
+            y=y_axis,
+            title=f"{x_axis} vs. {y_axis}",
+            category_orders={"Release Decade": ["1960s", "1970s", "1980s", "1990s", "2000s", "2010s", "2020s"]}
+        )
+    else:
+        fig_bivariate = px.scatter(df, x=x_axis, y=y_axis, title=f"{x_axis} vs. {y_axis}")
+
+    fig_bivariate.update_traces(marker=dict(size=12))  # Adjust marker size here
     fig_bivariate.update_layout(height=700)
     st.plotly_chart(fig_bivariate)
 
@@ -1412,7 +1494,7 @@ if playlist_id:
     numeric_columns = ["Popularity", "Acoustic", "Dance", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo", "Duration (s)"]
 
     # Define all analysis columns including "Duration" and "Duration (s)" for color
-    analysis_columns = ["Name", "Artist", "Release Date", "Genre"] + numeric_columns
+    analysis_columns = ["Name", "Artist", "Release Date", "Release Decade", "Genre"] + numeric_columns
 
     # Select variables for the x-axis, y-axis, color, and size
     x_axis = st.selectbox("Select a variable for the x-axis:", numeric_columns)
@@ -1420,9 +1502,24 @@ if playlist_id:
     color_by = st.selectbox("Select a variable to color by:", analysis_columns)
     size_by = st.selectbox("Select a variable to size by:", numeric_columns)
 
-    # Create the multivariate scatter plot with dynamic x and y
-    fig_multivariate = px.scatter(df, x=x_axis, y=y_axis, color=color_by, size=size_by, hover_name="Name", 
-                                title=f"{x_axis} vs. {y_axis} Colored by {color_by} and Sized by {size_by}")
+    # Handle "Release Decade" special case for coloring
+    if color_by == "Release Decade":
+        fig_multivariate = px.scatter(
+            df.sort_values("Release Decade"),  # Ensure "Release Decade" is sorted
+            x=x_axis,
+            y=y_axis,
+            color=color_by,
+            size=size_by,
+            hover_name="Name",
+            title=f"{x_axis} vs. {y_axis} Colored by {color_by} and Sized by {size_by}",
+            category_orders={"Release Decade": ["1960s", "1970s", "1980s", "1990s", "2000s", "2010s", "2020s"]}
+        )
+    else:
+        # Default behavior for non-special cases
+        fig_multivariate = px.scatter(
+            df, x=x_axis, y=y_axis, color=color_by, size=size_by, hover_name="Name",
+            title=f"{x_axis} vs. {y_axis} Colored by {color_by} and Sized by {size_by}"
+        )
 
     # Make the chart wider using the update_layout() method
     fig_multivariate.update_layout(width=1000, height=700)  # Adjust the width and height
