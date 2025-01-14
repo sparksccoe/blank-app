@@ -281,7 +281,7 @@ if playlist_id:
     if response.status_code == 200:
         st.components.v1.html(f"""
             <iframe width="560" height="315" 
-                    src="{playlist_url}" 
+                    src="https://www.youtube.com/embed/fLi0EJfi_vg?si=kLtgW-kqKjSz8fcM" 
                     frameborder="0" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                     allowfullscreen>
