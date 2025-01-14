@@ -257,11 +257,11 @@ if playlist_id:
     st.write(f"### {playlist['name']} on YouTube")
     st.components.v1.html("""
         <iframe width="560" height="315" 
-                src="https://www.youtube.com/embed/fLi0EJfi_vg?si=kLtgW-kqKjSz8fcM" 
+                src="https://www.youtube.com/embed/fLi0EJfi_vg?si=kLtgW-kqKjSz8fcM?rel=0" 
                 title="YouTube video player" 
                 frameborder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                referrerpolicy="strict-origin-when-cross-origin" 
+                allow="picture-in-picture; fullscreen" 
+                referrerpolicy="origin-when-cross-origin"
                 allowfullscreen>
         </iframe>
     """, height=315)
