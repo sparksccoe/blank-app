@@ -253,16 +253,14 @@ if playlist_id:
     playlist_embed_url = f"https://open.spotify.com/embed/playlist/{playlist_id}"
     st.markdown(f'<iframe src="{playlist_embed_url}" width="100%" height="400" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>', unsafe_allow_html=True)
 
-# YouTube playlist embed URL (replace with your playlist's ID)
-    playlist_url = "https://www.youtube.com/embed/videoseries?list=PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr"
-
-    # Display the YouTube playlist
-    st.write(f"### {playlist['name']} on YouTube")
-    st.components.v1.html(f"""
+    # Embed YouTube video iframe
+    st.components.v1.html("""
         <iframe width="560" height="315" 
-                src="{playlist_url}" 
+                src="https://www.youtube.com/embed/fLi0EJfi_vg?si=kLtgW-kqKjSz8fcM" 
+                title="YouTube video player" 
                 frameborder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                referrerpolicy="strict-origin-when-cross-origin" 
                 allowfullscreen>
         </iframe>
     """, height=315)
