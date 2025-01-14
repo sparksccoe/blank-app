@@ -266,6 +266,10 @@ if playlist_id:
         </iframe>
     """, height=315)
 
+    # Define the video or playlist ID
+    video_id = "PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr"  # Replace with your YouTube video ID
+    playlist_url = f"https://www.youtube.com/embed/{video_id}"
+
     # Make a GET request to the YouTube embed URL
     headers = {
         "Referer": "http://youtube.com"
