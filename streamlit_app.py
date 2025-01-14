@@ -266,6 +266,39 @@ if playlist_id:
         </iframe>
     """, height=315)
 
+    # Define the YouTube embed URL and headers
+    video_id = "fLi0EJfi_vg"  # Replace with an actual YouTube video ID
+    url = f"https://www.youtube.com/embed/{video_id}"
+    headers = {
+        "Referer": "http://youtube.com"
+    }
+
+    # Display the URL and headers for debugging
+    st.write("### Debugging Information")
+    st.write("**URL:**", url)
+    st.write("**Headers:**", headers)
+
+    # Make the GET request
+    try:
+        response = requests.get(url, headers=headers)
+        st.write("**Status Code:**", response.status_code)
+
+        # Display the response text or a message based on the status code
+        if response.status_code == 200:
+            st.success("Request successful!")
+            st.code(response.text[:1000], language="html")  # Display the first 1000 characters of the response
+        elif response.status_code == 403:
+            st.error("Access forbidden: YouTube may be blocking the request.")
+        elif response.status_code == 404:
+            st.error("Video not found: Check the video ID.")
+        else:
+            st.warning(f"Unexpected status code: {response.status_code}")
+            st.code(response.text[:1000], language="html")  # Display part of the response for debugging
+
+    except requests.RequestException as e:
+        st.error("An error occurred while making the request:")
+        st.exception(e)
+
     # Define constants
     video_id = "fLi0EJfi_vg"  # Replace with your YouTube video ID
     playlist_url = f"https://www.youtube.com/embed/{video_id}&enablejsapi=1"
