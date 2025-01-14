@@ -277,6 +277,8 @@ if playlist_id:
     }
 
     response = requests.get(playlist_url, headers=headers)
+    print("Status Code:", response.status_code)
+    print("Response:", response.text)
 
     # Check if the URL is age-restricted
     def is_age_restricted(url, restricted_urls):
