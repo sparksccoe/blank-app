@@ -266,6 +266,27 @@ if playlist_id:
         </iframe>
     """, height=315)
 
+    # Make a GET request to the YouTube embed URL
+    headers = {
+        "Referer": "http://youtube.com"
+    }
+
+    response = requests.get(playlist_url, headers=headers)
+
+    # Check the response status and use it to embed the video
+    if response.status_code == 200:
+        st.components.v1.html(f"""
+            <iframe width="560" height="315" 
+                    src="{playlist_url}" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+            </iframe>
+        """, height=315)
+    else:
+        st.error(f"Failed to fetch the video. Status Code: {response.status_code}")
+        st.text(f"Response: {response.text}")
+
     # Function to fetch playlist details using the YouTube API
     # Function to fetch playlist details using the YouTube API
     def fetch_playlist_videos(api_key, playlist_id):
