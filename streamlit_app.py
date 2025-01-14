@@ -268,12 +268,12 @@ if playlist_id:
 
     # Define constants
     video_id = "fLi0EJfi_vg"  # Replace with your YouTube video ID
-    playlist_url = f"https://www.youtube.com/embed/{video_id}"
+    playlist_url = f"https://www.youtube.com/embed/{video_id}&origin=https://www.dataadventures.org"
     AGE_RESTRICTED_URLS = ["age_restricted", "some_age_restriction_indicator"]  # Update with actual indicators
 
     # Make a GET request to the YouTube embed URL
     headers = {
-        "Referer": "http://youtube.com"
+        "Referer": "https://www.dataadventures.org"
     }
 
     response = requests.get(playlist_url, headers=headers)
@@ -307,7 +307,7 @@ if playlist_id:
 
     # Define the video or playlist ID
     video_id = "PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr"  # Replace with your YouTube video ID
-    playlist_url = "https://www.youtube.com/embed/fLi0EJfi_vg?si=kLtgW-kqKjSz8fcM"
+    playlist_url = "https://www.youtube.com/embed/fLi0EJfi_vg?si=kLtgW-kqKjSz8fcM&origin=https://www.dataadventures.org"
 
     # Make a GET request to the YouTube embed URL
     headers = {
