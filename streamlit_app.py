@@ -261,7 +261,8 @@ if playlist_id:
                 src="https://www.youtube.com/embed/fLi0EJfi_vg?si=kLtgW-kqKjSz8fcM?rel=0" 
                 title="YouTube video player" 
                 frameborder="0" 
-                allow="picture-in-picture; fullscreen" 
+                allow="picture-in-picture; fullscreen"
+                referrerpolicy="strict-origin-when-cross-origin"  
                 allowfullscreen>
         </iframe>
     """, height=315)
