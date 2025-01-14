@@ -62,7 +62,7 @@ with col1:
     st.write("")
 
 with col2:
-    st.image(image, use_column_width=False, width=int(image.width * 0.4))
+    st.image(image, width=int(image.width * 0.4))
 
 with col3:
     st.write("")
@@ -268,7 +268,7 @@ if playlist_id:
 
     # Define constants
     video_id = "fLi0EJfi_vg"  # Replace with your YouTube video ID
-    playlist_url = f"https://www.youtube.com/embed/{video_id}"
+    playlist_url = f"https://www.youtube.com/embed/{video_id}&enablejsapi=1"
     AGE_RESTRICTED_URLS = ["age_restricted", "some_age_restriction_indicator"]  # Update with actual indicators
 
     # Make a GET request to the YouTube embed URL
