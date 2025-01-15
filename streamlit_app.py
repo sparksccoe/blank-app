@@ -257,8 +257,9 @@ if playlist_id:
 
 
     # Define your domain (replace with your actual domain or localhost for testing)
-    origin_domain = "https://dataadventures.org"
-   
+    origin_domain = "https://www.dataadventures.org"
+
+    
     # Embed YouTube playlist with strict-origin referrer policy
     components.html(f"""
         <iframe 
