@@ -255,10 +255,14 @@ if playlist_id:
     playlist_embed_url = f"https://open.spotify.com/embed/playlist/{playlist_id}"
     st.markdown(f'<iframe src="{playlist_embed_url}" width="100%" height="400" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>', unsafe_allow_html=True)
 
+
+    # Define your domain (replace with your actual domain or localhost for testing)
+    origin_domain = "https://dataadventures.org"
+   
     # Embed YouTube playlist with strict-origin referrer policy
     components.html(f"""
         <iframe 
-            src="https://www.youtube.com/embed/videoseries?list=PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr&enablejsapi=1" 
+            src="https://www.youtube.com/embed/videoseries?list=PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr&enablejsapi=1&origin={origin_domain}" 
             scrolling="yes" 
             height="350" 
             width="100%" 
