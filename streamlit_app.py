@@ -258,7 +258,7 @@ if playlist_id:
     # Embed YouTube playlist with strict-origin referrer policy
     components.html(f"""
         <iframe 
-            src="https://www.youtube.com/embed/videoseries?list=PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr" 
+            src="https://www.youtube.com/embed/videoseries?list=PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr&enablejsapi=1" 
             scrolling="yes" 
             height="350" 
             width="100%" 
