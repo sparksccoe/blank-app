@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import streamlit.components.v1 as components
 
 hide_streamlit_style = """
                 <style>
@@ -253,6 +254,8 @@ if playlist_id:
     # Display the full playlist player
     playlist_embed_url = f"https://open.spotify.com/embed/playlist/{playlist_id}"
     st.markdown(f'<iframe src="{playlist_embed_url}" width="100%" height="400" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>', unsafe_allow_html=True)
+
+    components.iframe("""https://www.youtube.com/embed/videoseries?list=PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr""" , scrolling = True , height = 350)
 
     # Embed YouTube video iframe
     st.write(f"### {playlist['name']} on YouTube")
