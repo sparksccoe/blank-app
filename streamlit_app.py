@@ -290,7 +290,7 @@ if playlist_id:
     video_id = "fLi0EJfi_vg"  # Replace with an actual YouTube video ID
     url = f"https://www.youtube.com/embed/{video_id}"
     headers = {
-        "Referer": "http://youtube.com"
+        "Referer": "https://www.youtube.com"
     }
 
     # Display the URL and headers for debugging
