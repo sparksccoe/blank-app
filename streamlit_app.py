@@ -274,16 +274,6 @@ if playlist_id:
         </iframe>
     """, height=350)
 
-    # Embed YouTube video iframe
-    st.write(f"### {playlist['name']} on YouTube")
-    st.components.v1.html("""
-        <iframe width="560" height="315" 
-                src="https://www.youtube.com/embed/fLi0EJfi_vg&list=PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr" 
-                title="YouTube video player" 
-                frameborder="0"  
-                >
-        </iframe>
-    """, height=315)
 
     # Define the YouTube embed URL and headers
     video_id = "fLi0EJfi_vg"  # Replace with an actual YouTube video ID
