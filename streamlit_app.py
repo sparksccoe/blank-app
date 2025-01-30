@@ -361,7 +361,7 @@ if playlist_id:
     VIDEO_ID = "dQw4w9WgXcQ"
     embed_code = f"""
     <iframe width="560" height="315"
-        src="https://www.youtube.com/embed/{video_id}"
+        src="https://www.youtube.com/embed/{video_id}?embedded=true"
         sandbox="allow-same-origin allow-scripts allow-popups"
         frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
