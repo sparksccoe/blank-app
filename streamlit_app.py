@@ -268,7 +268,6 @@ if playlist_id:
             height="350" 
             width="100%" 
             frameborder="0" 
-            referrerpolicy="strict-origin" 
             allow="accelerometer; autoplay; clipboard-write; gyroscope; web-share" 
             >
         </iframe>
