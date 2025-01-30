@@ -376,10 +376,10 @@ if playlist_id:
     </iframe>
     """
 
-# Render the HTML iframe in Streamlit
-st.markdown(embed_code, unsafe_allow_html=True)
+    # Render the HTML iframe in Streamlit
+    st.markdown(embed_code, unsafe_allow_html=True)
 
-     # Features to choose from in the dropdown
+   # Features to choose from in the dropdown
     features = ["Popularity", "Duration", "Acoustic", "Dance", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo"]
     features_with_descriptions = [
     "Popularity: The popularity score of the track (0 to 100)",
