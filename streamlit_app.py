@@ -292,31 +292,6 @@ if playlist_id:
         "Referer": "https://www.youtube.com"
     }
 
-    # Display the URL and headers for debugging
-    st.write("### Debugging Information")
-    st.write("**URL:**", url)
-    st.write("**Headers:**", headers)
-
-    # Make the GET request
-    try:
-        response = requests.get(url, headers=headers)
-        st.write("**Status Code:**", response.status_code)
-
-        # Display the response text or a message based on the status code
-        if response.status_code == 200:
-            st.success("Request successful!")
-            st.code(response.text[:1000], language="html")  # Display the first 1000 characters of the response
-        elif response.status_code == 403:
-            st.error("Access forbidden: YouTube may be blocking the request.")
-        elif response.status_code == 404:
-            st.error("Video not found: Check the video ID.")
-        else:
-            st.warning(f"Unexpected status code: {response.status_code}")
-            st.code(response.text[:1000], language="html")  # Display part of the response for debugging
-
-    except requests.RequestException as e:
-        st.error("An error occurred while making the request:")
-        st.exception(e)
 
     # Define constants
     video_id = "fLi0EJfi_vg"  # Replace with your YouTube video ID
@@ -385,30 +360,6 @@ if playlist_id:
         st.error(f"Failed to fetch the video. Status Code: {response.status_code}")
         st.text(f"Response: {response.text}")
 
-    # Function to fetch playlist details using the YouTube API
-    # Function to fetch playlist details using the YouTube API
-    def fetch_playlist_videos(api_key, playlist_id):
-        base_url = "https://www.googleapis.com/youtube/v3/playlistItems"
-        params = {
-            "part": "snippet",
-            "playlistId": playlist_id,
-            "maxResults": 50,  # Max number of videos per API call
-            "key": api_key
-        }
-        response = requests.get(base_url, params=params)
-        if response.status_code == 200:
-            data = response.json()
-            videos = [
-                {
-                    "title": item["snippet"]["title"],
-                    "url": f"https://www.youtube.com/watch?v={item['snippet']['resourceId']['videoId']}"
-                }
-                for item in data["items"]
-            ]
-            return videos
-        else:
-            st.error("Failed to fetch playlist details. Check your API key and playlist ID.")
-            return []
 
     # YouTube API key and playlist ID (replace with your own)
     api_key = "AIzaSyAxHBK8MxzePcos86BOaBwUtTurr_ZbpNg"  # Replace with your API key
