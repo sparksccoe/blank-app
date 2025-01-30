@@ -293,9 +293,7 @@ if playlist_id:
         "Referer": "https://www.youtube.com"
     }
 
-    response = requests.get(playlist_url, headers=headers)
-    print("Status Code:", response.status_code)
-    print("Response:", response.text)
+ 
 
    
 
@@ -374,7 +372,7 @@ if playlist_id:
         sandbox="allow-same-origin allow-scripts allow-popups"
         frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
+        >
     </iframe>
     """
 
