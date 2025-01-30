@@ -285,15 +285,8 @@ if playlist_id:
 
     # Define constants
     video_id = "fLi0EJfi_vg"  # Replace with your YouTube video ID
-    playlist_url = f"https://www.youtube.com/embed/{video_id}&enablejsapi=1"
-    AGE_RESTRICTED_URLS = ["age_restricted", "some_age_restriction_indicator"]  # Update with actual indicators
+    playlist_url = f"https://www.youtube.com/embed/{video_id}"
 
-    # Make a GET request to the YouTube embed URL
-    headers = {
-        "Referer": "https://www.youtube.com"
-    }
-
- 
 
    
 
