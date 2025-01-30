@@ -345,22 +345,31 @@ if playlist_id:
 
     response = requests.get(playlist_url, headers=headers)
 
-    # Check the response status and use it to embed the video
-    if response.status_code == 200:
-        st.components.v1.html(f"""
-            <iframe width="560" height="315" 
-                    src="https://www.youtube.com/embed/fLi0EJfi_vg?si=kLtgW-kqKjSz8fcM" 
-                    frameborder="0" 
-                    allow="autoplay; clipboard-write" 
-                    referrerpolicy="strict-origin-when-cross-origin"
-                    >
-            </iframe>
-        """, height=315)
-    else:
-        st.error(f"Failed to fetch the video. Status Code: {response.status_code}")
-        st.text(f"Response: {response.text}")
 
-   
+
+    # Function to fetch playlist details using the YouTube API
+    def fetch_playlist_videos(api_key, playlist_id):
+        base_url = "https://www.googleapis.com/youtube/v3/playlistItems"
+        params = {
+            "part": "snippet",
+            "playlistId": playlist_id,
+            "maxResults": 50,  # Max number of videos per API call
+            "key": api_key
+        }
+        response = requests.get(base_url, params=params)
+        if response.status_code == 200:
+            data = response.json()
+            videos = [
+                {
+                    "title": item["snippet"]["title"],
+                    "url": f"https://www.youtube.com/watch?v={item['snippet']['resourceId']['videoId']}"
+                }
+                for item in data["items"]
+            ]
+            return videos
+        else:
+            st.error("Failed to fetch playlist details. Check your API key and playlist ID.")
+            return []
 
     # YouTube API key and playlist ID (replace with your own)
     api_key = "AIzaSyAxHBK8MxzePcos86BOaBwUtTurr_ZbpNg"  # Replace with your API key
