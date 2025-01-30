@@ -270,7 +270,7 @@ if playlist_id:
             frameborder="0" 
             referrerpolicy="strict-origin" 
             allow="accelerometer; autoplay; clipboard-write; gyroscope; picture-in-picture; web-share" 
-            allowfullscreen>
+            >
         </iframe>
     """, height=350)
 
@@ -281,8 +281,8 @@ if playlist_id:
                 src="https://www.youtube.com/embed/fLi0EJfi_vg&list=PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr" 
                 title="YouTube video player" 
                 frameborder="0" 
-                allow="picture-in-picture; fullscreen"  
-                allowfullscreen>
+                allow="picture-in-picture"  
+                >
         </iframe>
     """, height=315)
 
@@ -353,7 +353,7 @@ if playlist_id:
                         src="{playlist_url}" 
                         frameborder="0" 
                         allow="autoplay; clipboard-write; picture-in-picture" 
-                        allowfullscreen>
+                        >
                 </iframe>
             """, height=315)
     else:
@@ -379,7 +379,7 @@ if playlist_id:
                     frameborder="0" 
                     allow="autoplay; clipboard-write; picture-in-picture" 
                     referrerpolicy="strict-origin-when-cross-origin"
-                    allowfullscreen>
+                    >
             </iframe>
         """, height=315)
     else:
