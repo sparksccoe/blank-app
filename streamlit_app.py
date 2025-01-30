@@ -363,13 +363,15 @@ if playlist_id:
     else:
         st.write("No videos found in the playlist.")
 
-    # Add some spacing
-    st.markdown("<br><br>", unsafe_allow_html=True)
+   
 
     # Define the YouTube embed URL
+    video_id = "VIDEO_ID"
+    VIDEO_ID = "dQw4w9WgXcQ"
     embed_code = f"""
     <iframe width="560" height="315"
         src="https://www.youtube.com/embed/{video_id}"
+        sandbox="allow-same-origin allow-scripts allow-popups"
         frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen>
@@ -378,6 +380,10 @@ if playlist_id:
 
     # Render the HTML iframe in Streamlit
     st.markdown(embed_code, unsafe_allow_html=True)
+
+
+    # Add some spacing
+    st.markdown("<br><br>", unsafe_allow_html=True)
 
    # Features to choose from in the dropdown
     features = ["Popularity", "Duration", "Acoustic", "Dance", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo"]
