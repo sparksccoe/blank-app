@@ -366,19 +366,22 @@ if playlist_id:
     # Render the HTML iframe in Streamlit
     st.markdown(embed_code, unsafe_allow_html=True)
 
-    # Convert YouTube URL to an embeddable format
-    video_url = "https://www.youtube.com/embed/fLi0EJfi_vg"
+    # Define the YouTube iframe embed code
+    youtube_iframe = """
+    <iframe 
+        width="560" 
+        height="315" 
+        src="https://www.youtube.com/embed/fLi0EJfi_vg?si=FakJaWyIxJF_SqZW&amp;controls=0" 
+        title="YouTube video player" 
+        frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        referrerpolicy="strict-origin-when-cross-origin" 
+        allowfullscreen>
+    </iframe>
+    """
 
-    # Embed the YouTube video using an iframe
-    st.components.v1.html(f"""
-        <iframe width="800" height="450" 
-            src="{video_url}" 
-            frameborder="0" 
-            crossorigin="anonymous"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            >
-        </iframe>
-    """, height=500)
+# Use Streamlit's st.components.v1.html() to render the iframe
+st.components.v1.html(youtube_iframe, height=350)
 
 
     # Add some spacing
