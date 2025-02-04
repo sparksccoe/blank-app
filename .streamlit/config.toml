@@ -16,3 +16,19 @@ textColor = '#2D2B3E'
 # Accepted values (serif | sans serif | monospace) 
 # Default: "sans serif"
 font = "sans serif"
+
+[server]
+
+# Enables support for Cross-Origin Resource Sharing (CORS) protection,
+# for added security.
+# If XSRF protection is enabled and CORS protection is disabled at the
+# same time, Streamlit will enable them both instead.
+# Default: true
+enableCORS = false
+
+# Enables support for Cross-Site Request Forgery (XSRF) protection, for
+# added security.
+# If XSRF protection is enabled and CORS protection is disabled at the
+# same time, Streamlit will enable them both instead.
+# Default: true
+enableXsrfProtection = false
