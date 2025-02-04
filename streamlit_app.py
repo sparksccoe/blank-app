@@ -380,8 +380,8 @@ if playlist_id:
     </iframe>
     """
 
-# Use Streamlit's st.components.v1.html() to render the iframe
-st.components.v1.html(youtube_iframe, height=350)
+    # Use Streamlit's st.components.v1.html() to render the iframe
+    st.components.v1.html(youtube_iframe, height=350)
 
 
     # Add some spacing
