@@ -366,11 +366,17 @@ if playlist_id:
     # Render the HTML iframe in Streamlit
     st.markdown(embed_code, unsafe_allow_html=True)
 
+    # Convert YouTube URL to an embeddable format
+    video_url = "https://www.youtube.com/embed/fLi0EJfi_vg"
+
+    # Embed the YouTube video using an iframe
     st.components.v1.html(f"""
-        <video width="800" height="450" controls crossorigin="anonymous">
-        <source src="https://www.youtube.com/embed/fLi0EJfi_vg?si=9vZFq7fV6wVnRFBm" type="video/mp4">
-        Your browser does not support the video tag.
-        </video>
+        <iframe width="800" height="450" 
+            src="{video_url}" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+        </iframe>
     """, height=500)
 
 
