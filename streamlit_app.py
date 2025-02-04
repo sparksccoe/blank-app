@@ -360,14 +360,18 @@ if playlist_id:
     VIDEO_ID = "dQw4w9WgXcQ"
     embed_code = f"""
     <iframe width="560" height="315" 
-        src="https://www.youtube.com/embed/fLi0EJfi_vg?si=9vZFq7fV6wVnRFBm?enablejsapi=1&origin=http://youtube.com"" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        src="https://www.youtube.com/embed/fLi0EJfi_vg?si=9vZFq7fV6wVnRFBm?enablejsapi=1&origin=https://www.gstatic.com" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
     """
 
     # Render the HTML iframe in Streamlit
     st.markdown(embed_code, unsafe_allow_html=True)
 
-    components.iframe("""
-    https://www.youtube.com/embed/zaoiriEbncc""" , scrolling = True , height = 350)
+    st.components.v1.html(f"""
+        <video width="800" height="450" controls crossorigin="anonymous">
+        <source src="https://www.youtube.com/embed/fLi0EJfi_vg?si=9vZFq7fV6wVnRFBm" type="video/mp4">
+        Your browser does not support the video tag.
+        </video>
+    """, height=500)
 
 
     # Add some spacing
