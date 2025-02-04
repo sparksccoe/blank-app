@@ -374,6 +374,7 @@ if playlist_id:
         <iframe width="800" height="450" 
             src="{video_url}" 
             frameborder="0" 
+            crossorigin="anonymous"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
             allowfullscreen>
         </iframe>
