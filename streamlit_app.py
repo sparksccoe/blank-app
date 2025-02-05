@@ -367,22 +367,45 @@ if playlist_id:
     # Render the HTML iframe in Streamlit
     st.markdown(embed_code, unsafe_allow_html=True)
 
-    # Define the YouTube iframe embed code
-    youtube_iframe = """
-    <iframe 
-        width="560" 
-        height="315" 
-        src="https://www.youtube.com/embed/fLi0EJfi_vg?si=FakJaWyIxJF_SqZW&amp;controls=0" 
-        title="YouTube video player" 
-        frameborder="0" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-        referrerpolicy="strict-origin-when-cross-origin" 
-        allowfullscreen>
-    </iframe>
+   # First, create a div element where the YouTube player will be injected
+    youtube_player_html = """
+        <div id="youtube-player"></div>
     """
+    st.markdown(youtube_player_html, unsafe_allow_html=True)
 
-    # Use Streamlit's st.components.v1.html() to render the iframe
-    st.components.v1.html(youtube_iframe, height=350)
+    # JavaScript to dynamically load the YouTube iframe API and embed the player
+    youtube_script_html = """
+        <script>
+        const parentDOM = window.parent.document;
+
+        // Create a script tag to load the YouTube Player API
+        var head = parentDOM.getElementsByTagName('head')[0];
+        var script = parentDOM.createElement('script');
+        script.type = 'text/javascript';
+        script.src = 'https://www.youtube.com/iframe_api';
+        head.appendChild(script);
+
+        script.onload = function() {
+            // Function to create the YouTube player
+            window.onYouTubeIframeAPIReady = function() {
+                const playerDiv = parentDOM.getElementById('youtube-player');
+                
+                var player = new parentDOM.defaultView.YT.Player(playerDiv, {
+                    width: '560',
+                    height: '315',
+                    videoId: 'fLi0EJfi_vg',  // Replace with your YouTube video ID
+                    playerVars: {
+                        'autoplay': 1,
+                        'controls': 1,
+                        'modestbranding': 1,
+                        'rel': 0  // Prevent showing related videos at the end
+                    }
+                });
+            };
+        };
+        </script>
+    """
+    st.components.v1.html(youtube_script_html, height=0)
 
 
     # Add some spacing
