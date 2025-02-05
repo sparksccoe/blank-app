@@ -2,21 +2,6 @@ import streamlit as st
 import requests
 import streamlit.components.v1 as components
 
-import http.cookies
-
-st.title("Set Secure SameSite=None Cookies in Streamlit")
-
-# Create a secure cookie with SameSite=None
-cookie = http.cookies.SimpleCookie()
-cookie["my_secure_cookie"] = "my_secure_value"
-cookie["my_secure_cookie"]["path"] = "/"
-cookie["my_secure_cookie"]["secure"] = True
-cookie["my_secure_cookie"]["httponly"] = True
-cookie["my_secure_cookie"]["samesite"] = "None"
-
-# Send cookie in HTTP header
-st.write("Setting a SameSite=None; Secure cookie")
-st.write(f"Set-Cookie: {cookie.output(header='', sep='')}")
 
 hide_streamlit_style = """
                 <style>
