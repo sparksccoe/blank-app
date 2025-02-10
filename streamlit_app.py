@@ -256,10 +256,9 @@ if playlist_id:
     playlist_embed_url = f"https://open.spotify.com/embed/playlist/{playlist_id}"
     st.markdown(f'<iframe src="{playlist_embed_url}" width="100%" height="400" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>', unsafe_allow_html=True)
 
-
-    # Define your domain (replace with your actual domain or localhost for testing)
-    origin_domain = "https://dataadventures.streamlit.app"
-
+    # Add title and description
+    st.title("Embedded YouTube Playlist Player")
+    st.write("Click on the hamburger icon in the top right of the YouTube player to navigate the playlist.")
 
     # Embed YouTube playlist with strict-origin referrer policy
     components.html(f"""
@@ -273,34 +272,6 @@ if playlist_id:
             >
         </iframe>
     """, height=350)
-
-
-    # Define the YouTube embed URL and headers
-    video_id = "fLi0EJfi_vg"  # Replace with an actual YouTube video ID
-    url = f"https://www.youtube.com/embed/{video_id}"
-    headers = {
-        "Referer": "https://www.youtube.com"
-    }
-
-
-    # Define constants
-    video_id = "fLi0EJfi_vg"  # Replace with your YouTube video ID
-    playlist_url = f"https://www.youtube.com/embed/{video_id}"
-
-
-   
-
-    # Define the video or playlist ID
-    video_id = "PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr"  # Replace with your YouTube video ID
-    playlist_url = "https://www.youtube.com/embed/fLi0EJfi_vg?si=kLtgW-kqKjSz8fcM"
-
-    # Make a GET request to the YouTube embed URL
-    headers = {
-        "Referer": "https://www.youtube.com"
-    }
-
-    response = requests.get(playlist_url, headers=headers)
-
 
 
     # Function to fetch playlist details using the YouTube API
