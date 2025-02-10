@@ -356,9 +356,8 @@ if playlist_id:
             Your browser does not support the video tag.
         </video>
         """
+        st.markdown(video_html, unsafe_allow_html=True)
 
-        # Embed the selected video using st.video
-        st.video(selected_video_url)
     else:
         st.write("No videos found in the playlist.")
 
