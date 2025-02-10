@@ -70,14 +70,14 @@ with col3:
     st.write("")
 
 st.markdown(
-    "<h1 style='text-align: center;'>Welcome Warmenhoven Advisory</h1>",
+    "<h1 style='text-align: center;'>Playtest Welcome</h1>",
     unsafe_allow_html=True
 )
 
-st.write('Let’s go on a Data Adventure with our Warmenhoven Jams!')
+st.write('Let’s go on a Data Adventure with our Bards!')
 
 # Initialize playlist_id as None or hardcoded here
-playlist_id = "4mTuRYyxHhFxoemBGQuSxF"
+playlist_id = "3BGJRi9zQrIjLDtBbRYy5n"
 
 # retrieve data from the Spotify API
 if playlist_id:
@@ -107,7 +107,7 @@ if playlist_id:
     # Convert decade to a string ending with 's' (e.g., 1970 -> "1970s")
     track_decade = df_decades['track_decade'] = df_decades['Decade'].astype(str) + "s"
 
-    df = pd.read_csv("Warmenhoven Jams-4.csv")
+    df = pd.read_csv("Symphonia Bards.csv")
     track_danceability = df["Dance"].tolist()
     track_energy = df["Energy"].tolist()
     track_loudness = df["Loud (Db)"].tolist()
@@ -264,7 +264,7 @@ if playlist_id:
     # Embed YouTube playlist with strict-origin referrer policy
     components.html(f"""
         <iframe 
-            src="https://www.youtube.com/embed/videoseries?list=PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr&enablejsapi=1&origin={origin_domain}" 
+            src="https://www.youtube.com/embed/videoseries?list=PLtg7R4Q_LfGU-WLVp5jeOoD7tdUiS6FHg" 
             scrolling="yes" 
             height="350" 
             width="100%" 
@@ -329,7 +329,7 @@ if playlist_id:
 
     # YouTube API key and playlist ID (replace with your own)
     api_key = "AIzaSyAxHBK8MxzePcos86BOaBwUtTurr_ZbpNg"  # Replace with your API key
-    playlist_url = "https://www.youtube.com/playlist?list=PLtg7R4Q_LfGVoW2J6eK8YuhUvLWX4vimr"
+    playlist_url = "https://www.youtube.com/playlist?list=PLtg7R4Q_LfGU-WLVp5jeOoD7tdUiS6FHg"
     playlist_id = playlist_url.split("list=")[-1]
 
     # Fetch playlist details
