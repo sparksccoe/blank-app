@@ -181,7 +181,7 @@ if playlist_id:
     df = pd.DataFrame(data)
     num_total_tracks = len(df)
     df.index += 1
-    st.write("The table below is scrollable both horizontally and vertically. Each column can be clicked to sort in ascending or descending order. Hovering over a column header will explain what that feature represents.")
+    st.write("The table below is scrollable both horizontally and vertically. Please scroll to the right of the table to see every audio feature. Each column can be clicked to sort in ascending or descending order. Hovering over a column header will explain what that feature represents.")
     st.data_editor(
         df,
         column_config={
