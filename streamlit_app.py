@@ -373,40 +373,6 @@ if playlist_id:
     """
     st.markdown(youtube_player_html, unsafe_allow_html=True)
 
-    # JavaScript to dynamically load the YouTube iframe API and embed the player
-    youtube_script_html = """
-        <script>
-            const parentDOM = window.parent.document;
-
-            // Create a script tag to load the YouTube Player API
-            var head = parentDOM.getElementsByTagName('head')[0];
-            var script = parentDOM.createElement('script');
-            script.type = 'text/javascript';
-            script.src = 'https://www.youtube.com/iframe_api';
-            head.appendChild(script);
-
-            script.onload = function() {
-                // Function to create the YouTube player
-                window.onYouTubeIframeAPIReady = function() {
-                    const playerDiv = parentDOM.getElementById('youtube-player');
-                    
-                    var player = new parentDOM.defaultView.YT.Player(playerDiv, {
-                        width: '560',
-                        height: '315',
-                        videoId: 'fLi0EJfi_vg',  // Replace with your YouTube video ID
-                        playerVars: {
-                            'autoplay': 1,
-                            'controls': 1,
-                            'modestbranding': 1,
-                            'rel': 0  // Prevent showing related videos at the end
-                        }
-                    });
-                };
-            };
-        </script>
-    """
-    st.components.v1.html(youtube_script_html, height=0)
-
 
     # Add some spacing
     st.markdown("<br><br>", unsafe_allow_html=True)
