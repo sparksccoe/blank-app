@@ -354,25 +354,6 @@ if playlist_id:
     else:
         st.write("No videos found in the playlist.")
 
-   
-
-    # Define the YouTube embed URL
-    video_id = "VIDEO_ID"
-    VIDEO_ID = "dQw4w9WgXcQ"
-    embed_code = f"""
-    <iframe width="560" height="315" 
-        src="https://www.youtube.com/embed/fLi0EJfi_vg?si=9vZFq7fV6wVnRFBm?enablejsapi=1&origin=https://www.gstatic.com" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-    """
-
-    # Render the HTML iframe in Streamlit
-    st.markdown(embed_code, unsafe_allow_html=True)
-
-   # First, create a div element where the YouTube player will be injected
-    youtube_player_html = """
-        <div id="youtube-player"></div>
-    """
-    st.markdown(youtube_player_html, unsafe_allow_html=True)
-
 
     # Add some spacing
     st.markdown("<br><br>", unsafe_allow_html=True)
