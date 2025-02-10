@@ -349,6 +349,14 @@ if playlist_id:
         # Get the selected video URL
         selected_video_url = selected_video["url"]
 
+        # Embed the selected video with custom width and height
+        video_html = f"""
+        <video width="100%" height="350" controls>
+            <source src="{selected_video_url}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        """
+
         # Embed the selected video using st.video
         st.video(selected_video_url)
     else:
