@@ -257,7 +257,7 @@ if playlist_id:
     st.markdown(f'<iframe src="{playlist_embed_url}" width="100%" height="400" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>', unsafe_allow_html=True)
 
     # Add title and description
-    st.title("Embedded YouTube Playlist Player")
+    st.title("YouTube Playlist Player")
     st.write("Click on the hamburger icon in the top right of the YouTube player to navigate the playlist.")
 
     # Embed YouTube playlist with strict-origin referrer policy
@@ -312,7 +312,7 @@ if playlist_id:
 
         # Create a dropdown menu for video selection
         selected_video = st.selectbox(
-            "Choose a video to watch:",
+            "Or choose a video from your playlist to watch:",
             options=videos,
             format_func=lambda video: video["title"]  # Use the video title as the dropdown label
         )
