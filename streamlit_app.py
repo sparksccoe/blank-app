@@ -349,17 +349,21 @@ if playlist_id:
         # Get the selected video URL
         selected_video_url = selected_video["url"]
 
-        # Embed the selected video with custom width and height
-        video_html = f"""
-        <video width="100%" height="350" controls>
-            <source src="{selected_video_url}" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
+        # Extract the YouTube video ID
+        youtube_video_id = selected_video_url.split("v=")[-1].split("&")[0]
+
+        # Embed the selected YouTube video with height 350px
+        youtube_embed_html = f"""
+        <iframe width="100%" height="350" src="https://www.youtube.com/embed/{youtube_video_id}" 
+        frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowfullscreen></iframe>
         """
-        st.markdown(video_html, unsafe_allow_html=True)
+        
+        st.markdown(youtube_embed_html, unsafe_allow_html=True)
 
     else:
         st.write("No videos found in the playlist.")
+
 
 
     # Add some spacing
