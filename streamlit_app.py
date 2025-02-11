@@ -77,7 +77,7 @@ with col3:
 # )
 
 # st.write('Let’s go on a Data Adventure with our Bards!')
-st.markdown("<h3 style='text-align: center;'>Let’s go on a Data Adventure with our Bards!</h3>", unsafe_allow_html=True)
+st.markdown("<h4 style='text-align: center;'>Let’s go on a Data Adventure with our Bards!</h4>", unsafe_allow_html=True)
 
 st.header("🎚️ Metronome Master")
 # 🎼 Show relatable response only after the user enters BPM
