@@ -194,8 +194,8 @@ playlist_id = "3BGJRi9zQrIjLDtBbRYy5n"
 
 # YouTube API key and playlist ID (replace with your own)
 api_key = "AIzaSyAxHBK8MxzePcos86BOaBwUtTurr_ZbpNg"  # Replace with your API key
-playlist_url = "https://www.youtube.com/playlist?list=PLtg7R4Q_LfGU-WLVp5jeOoD7tdUiS6FHg"
-playlist_id = playlist_url.split("list=")[-1]
+youtube_playlist_url = "https://www.youtube.com/playlist?list=PLtg7R4Q_LfGU-WLVp5jeOoD7tdUiS6FHg"
+youtube_playlist_id = playlist_url.split("list=")[-1]
 
 # 🟢 Ensure both BPM & Loudness are entered before proceeding
 if bpm is not None and loudness is not None:
