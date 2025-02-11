@@ -160,8 +160,8 @@ if bpm is not None:
 
 # 🔊 Section: Loudness Analysis
 st.header("🔊 Loudness")
-loudness = st.number_input("Enter the relative loudness of your song (in dB, typically between -60 and 0):", 
-                           min_value=-60.0, max_value=0.0, value=None, step=1, format="-%d")
+st.number_input("🔊 Enter the relative loudness of your song (in dB, typically between -60 and 0):", 
+                           min_value=-60, max_value=0, value=None, step=1, format="-%d")
 
 # 🎼 Show relatable response only after the user enters loudness
 if loudness is not None:
