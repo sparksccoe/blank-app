@@ -80,6 +80,10 @@ st.write('Let’s go on a Data Adventure with our Bards!')
 
 st.header("🎶 Tempo")
 # 🎼 Show relatable response only after the user enters BPM
+
+# 🎵 Ask for BPM input (default None)
+bpm = st.number_input("🎚️ Enter the BPM (Beats Per Minute) of your song:", 
+                      min_value=40, max_value=250, value=None, step=1, format="%d")
 if bpm is not None:
     if bpm < 60:
         st.write("🛌 This is a **super chill, slow-tempo song**—perfect for relaxation or deep focus.")
