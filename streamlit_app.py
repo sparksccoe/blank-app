@@ -272,6 +272,11 @@ if bpm is not None and loudness is not None:
                 ]
                 
                 return videos
+
+                videos = fetch_playlist_videos(api_key, playlist_id)
+
+                # Store video IDs separately
+                track_video_id = [video["video_id"] for video in videos]
             else:
                 st.error("❌ Failed to fetch playlist details. Check your API key and playlist ID.")
                 return []
@@ -400,14 +405,8 @@ if playlist_id:
             st.error("❌ Failed to fetch playlist details. Check your API key and playlist ID.")
             return []
 
-    # Example usage (Replace with actual API key & playlist ID)
-    api_key = "YOUR_YOUTUBE_API_KEY"
-    playlist_id = "YOUR_YOUTUBE_PLAYLIST_ID"
-
-    videos = fetch_playlist_videos(api_key, playlist_id)
-
-    # Store video IDs separately
-    track_video_id = [video["video_id"] for video in videos]
+  
+  
 
     # Convert track keys to pitch class notation
     # Map numeric key values to pitch class notation
