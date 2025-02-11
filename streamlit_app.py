@@ -93,23 +93,73 @@ elif bpm < 150:
 else:
     st.write("🔥 This is ultra-fast—likely a drum & bass, punk, or extreme techno beat!")
 
-# Function to generate a click track
-def generate_click_track(bpm, duration=5, sample_rate=44100):
+# Function to generate a percussive sound (kick, snare, hi-hat)
+def generate_drum_sound(sample_rate=44100, drum_type="kick"):
+    duration = 0.15  # Length of drum sound
+    t = np.linspace(0, duration, int(sample_rate * duration), False)
+
+    if drum_type == "kick":
+        # Deep sine wave for kick drum
+        envelope = np.exp(-t / 0.05)  # Short decay
+        sound = 0.8 * envelope * np.sin(2 * np.pi * 60 * t)  # 60 Hz kick
+
+    elif drum_type == "snare":
+        # White noise for snare drum + low pass filter
+        envelope = np.exp(-t / 0.04)  # Snappier decay
+        noise = np.random.normal(0, 0.5, t.shape)
+        sound = 0.5 * envelope * noise  # White noise snare
+
+    elif drum_type == "hihat":
+        # High-frequency noise for hi-hat
+        envelope = np.exp(-t / 0.02)  # Very short decay
+        noise = np.random.normal(0, 0.3, t.shape)
+        sound = 0.3 * envelope * noise  # Crisp hi-hat
+
+    return np.clip(sound, -1, 1)
+
+# Function to generate a drum beat loop
+def generate_drum_beat(bpm, duration=5, sample_rate=44100):
     interval = 60 / bpm  # Seconds per beat
     num_beats = int(duration / interval)  # Total beats in duration
-    click_sound = np.zeros(int(sample_rate * duration))  # Silence track
-    
+    audio = np.zeros(int(sample_rate * duration))  # Empty audio track
+
+    # Generate individual drum sounds
+    kick = generate_drum_sound(drum_type="kick")
+    snare = generate_drum_sound(drum_type="snare")
+    hihat = generate_drum_sound(drum_type="hihat")
+
+    beat_positions = [0, 2, 4, 6]  # Kick on beats 1 & 3, Snare on 2 & 4
     for i in range(num_beats):
         start = int(i * interval * sample_rate)
-        click_sound[start:start+500] = 1.0  # Create a sharp click
-    
-    return click_sound
+        end = start + len(kick)
 
-# Button to play tempo beats
-if st.button("▶️ Play Tempo"):
-    click_track = generate_click_track(bpm)
-    sf.write("tempo_click.wav", click_track, 44100)
-    st.audio("tempo_click.wav")
+        # Add kick on beats 1 & 3
+        if i % 4 in [0, 2]:
+            audio[start:end] += kick
+
+        # Add snare on beats 2 & 4
+        if i % 4 == 1 or i % 4 == 3:
+            audio[start:end] += snare
+
+        # Add hi-hat on every beat
+        hh_start = int(i * interval * sample_rate)
+        hh_end = hh_start + len(hihat)
+        audio[hh_start:hh_end] += hihat
+
+    return np.clip(audio, -1, 1)  # Prevent distortion
+
+# Streamlit App
+st.title("🥁 Drum Beat Generator")
+
+# BPM input
+bpm = st.number_input("🎵 Enter BPM (Beats Per Minute):", min_value=40, max_value=250, value=120, step=1)
+
+# Button to play drum beat
+if st.button("▶️ Play Drum Loop"):
+    drum_beat = generate_drum_beat(bpm)
+    sf.write("drum_beat.wav", drum_beat, 44100)
+    st.audio("drum_beat.wav")
+
 
 # Initialize playlist_id as None or hardcoded here
 playlist_id = "3BGJRi9zQrIjLDtBbRYy5n"
