@@ -160,8 +160,19 @@ if bpm is not None:
 
 # 🔊 Section: Loudness Analysis
 st.header("🔊 Loudness")
-loudness=st.number_input("🔊 Enter the relative loudness of your song (in dB, typically between -60 and 0):", 
-                           min_value=-60, max_value=0, value=None, step=1, format="-%d")
+# Initialize session state for loudness if not already set
+if "loudness" not in st.session_state:
+    st.session_state.loudness = None
+
+# Create a number input for loudness that persists
+loudness = st.number_input(
+    "🔊 Enter the relative loudness of your song (in dB, typically between -60 and 0):", 
+    min_value=-60, max_value=0, value=st.session_state.loudness, step=1, format="-%d"
+)
+
+# Update session state when the user changes the input
+if loudness is not None:
+    st.session_state.loudness = loudness
 
 # 🎼 Show relatable response only after the user enters loudness
 if loudness is not None:
