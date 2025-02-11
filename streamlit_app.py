@@ -350,7 +350,7 @@ if bpm is not None and loudness is not None:
                 col1, col2 = st.columns([1, 4])
                 
                 with col1:
-                    st.image(row["Image"], width=50)
+                    st.image(row["Image"], width=100)
 
                 with col2:
                     st.write(f"**{row['Name']}** by {row['Artist']}")
