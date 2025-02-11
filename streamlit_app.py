@@ -162,16 +162,16 @@ if bpm is not None:
 st.header("🔊 Loudness")
 # 🔊 Initialize session state for loudness if not already set
 if "loudness" not in st.session_state:
-    st.session_state.loudness = None  # Default to None (empty field)
+    st.session_state.loudness = None  # Start as None (empty input)
 
-# Create a number input for loudness that persists
+# Ensure number input does not reset, but starts empty
 loudness = st.number_input(
-    "🔊 Enter the relative loudness of your song (in dB, typically between -60 and 0):", 
+    "🔊 Enter the relative loudness of your song (in dB, typically between -60 and 0):",
     min_value=-60, max_value=0, value=st.session_state.loudness, step=1, format="-%d"
 )
 
-# Update session state when the user changes the input
-if loudness is not None:
+# Update session state when the user enters a value
+if loudness is not None and loudness != st.session_state.loudness:
     st.session_state.loudness = loudness
 
 # 🎼 Show relatable response only after the user enters loudness
@@ -186,8 +186,7 @@ if loudness is not None:
         st.write("🎸 This is **fairly loud**, like *Uptown Funk* by Bruno Mars 🔥 or *Industry Baby* by Lil Nas X—big, dynamic, and exciting!")
     else:
         st.write("🚀 **Max loudness!** This is like *Blinding Lights* by The Weeknd 🌟 or *Sicko Mode* by Travis Scott—high-energy, booming, and club-ready!")
-else:
-    st.write("⚠️ Please enter a loudness level to see a comparison.")
+
 
 
 # Initialize playlist_id as None or hardcoded here
