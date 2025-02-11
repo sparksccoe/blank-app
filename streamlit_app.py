@@ -93,23 +93,23 @@ elif bpm < 150:
 else:
     st.write("🔥 This is ultra-fast—likely a drum & bass, punk, or extreme techno beat!")
 
-# # Function to generate a click track
-# def generate_click_track(bpm, duration=5, sample_rate=44100):
-#     interval = 60 / bpm  # Seconds per beat
-#     num_beats = int(duration / interval)  # Total beats in duration
-#     click_sound = np.zeros(int(sample_rate * duration))  # Silence track
+# Function to generate a click track
+def generate_click_track(bpm, duration=5, sample_rate=44100):
+    interval = 60 / bpm  # Seconds per beat
+    num_beats = int(duration / interval)  # Total beats in duration
+    click_sound = np.zeros(int(sample_rate * duration))  # Silence track
     
-#     for i in range(num_beats):
-#         start = int(i * interval * sample_rate)
-#         click_sound[start:start+500] = 1.0  # Create a sharp click
+    for i in range(num_beats):
+        start = int(i * interval * sample_rate)
+        click_sound[start:start+500] = 1.0  # Create a sharp click
     
-#     return click_sound
+    return click_sound
 
-# # Button to play tempo beats
-# if st.button("▶️ Play Tempo"):
-#     click_track = generate_click_track(bpm)
-#     sf.write("tempo_click.wav", click_track, 44100)
-#     st.audio("tempo_click.wav")
+# Button to play tempo beats
+if st.button("▶️ Play Tempo"):
+    click_track = generate_click_track(bpm)
+    sf.write("tempo_click.wav", click_track, 44100)
+    st.audio("tempo_click.wav")
 
 # Initialize playlist_id as None or hardcoded here
 playlist_id = "3BGJRi9zQrIjLDtBbRYy5n"
