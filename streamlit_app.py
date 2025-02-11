@@ -340,6 +340,8 @@ if playlist_id:
     # track_keys_converted = [key_mapping[key] for key in track_key]
 
 
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.markdown("<br><br>", unsafe_allow_html=True)
     # display the playlist data in a table
     st.header("Additional Playlist Information")
     st.write(f"## {playlist['name']}")
