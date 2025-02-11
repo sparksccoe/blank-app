@@ -247,6 +247,35 @@ if bpm is not None and loudness is not None:
             "Spotify URL": track_url
         })
 
+        # Function to fetch playlist details using the YouTube API
+        def fetch_playlist_videos(api_key, playlist_id):
+            base_url = "https://www.googleapis.com/youtube/v3/playlistItems"
+            params = {
+                "part": "snippet",
+                "playlistId": playlist_id,
+                "maxResults": 50,  # Max number of videos per API call
+                "key": api_key
+            }
+            response = requests.get(base_url, params=params)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Extract video title, URL, and video ID
+                videos = [
+                    {
+                        "title": item["snippet"]["title"],
+                        "url": f"https://www.youtube.com/watch?v={item['snippet']['resourceId']['videoId']}",
+                        "video_id": item["snippet"]["resourceId"]["videoId"]  # Extract YouTube video ID
+                    }
+                    for item in data.get("items", [])
+                ]
+                
+                return videos
+            else:
+                st.error("❌ Failed to fetch playlist details. Check your API key and playlist ID.")
+                return []
+
         # 🎯 Find the closest matching song in the playlist
         if not df_tracks.empty:
             # Calculate differences in tempo and loudness
