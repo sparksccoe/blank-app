@@ -156,8 +156,7 @@ if bpm is not None:
         drum_beat = generate_drum_beat(bpm)
         sf.write("drum_beat.wav", drum_beat, 44100)
         st.audio("drum_beat.wav")
-else:
-    st.write("⚠️ Please enter a BPM before playing the drum loop.")
+
 
 # 🔊 Section: Loudness Analysis
 st.header("🔊 Loudness")
