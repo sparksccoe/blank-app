@@ -297,22 +297,30 @@ if bpm is not None and loudness is not None:
             # Show album cover
             st.image(best_match["Image"], caption=best_match["Name"], width=250)
 
-             # Create track_video_id list from extracted video IDs
-            track_video_id = [video["video_id"] for video in videos]
+            
+        # 🔍 Fetch video details and extract track_video_id
+        videos, track_video_id = fetch_playlist_videos(api_key, youtube_playlist_id)
 
-            # Fetch video details and extract track_video_id
-            videos, track_video_id = fetch_playlist_videos(api_key, youtube_playlist_id)
+        # Convert to DataFrame and ensure proper mapping
+        video_df = pd.DataFrame(videos)  # Convert videos list to DataFrame
+        video_df.rename(columns={"video_id": "track_video_id"}, inplace=True)  # Rename column for consistency
 
-            # 🎬 Embed YouTube Video of the Best Match
-            if "track_video_id" in best_match and pd.notna(best_match["track_video_id"]):  # Ensure video_id exists
-                youtube_embed_url = f"https://www.youtube.com/embed/{best_match['track_video_id']}"
-                st.markdown(f"""
-                    <iframe width="560" height="315" src="{youtube_embed_url}" 
-                    frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen></iframe>
-                """, unsafe_allow_html=True)
-            else:
-                st.write("⚠️ No YouTube video available for this track.")
+        # Merge YouTube video data into df_tracks (match by song name)
+        df_tracks = df_tracks.merge(video_df, how="left", left_on="Name", right_on="title")
+
+        # Refresh best_match to include video_id
+        best_match = df_tracks.loc[df_tracks["Match Score"].idxmin()]
+
+        # 🎬 Embed YouTube Video of the Best Match
+        if "track_video_id" in best_match and pd.notna(best_match["track_video_id"]):  # Ensure video_id exists
+            youtube_embed_url = f"https://www.youtube.com/embed/{best_match['track_video_id']}"
+            st.markdown(f"""
+                <iframe width="560" height="315" src="{youtube_embed_url}" 
+                frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen></iframe>
+            """, unsafe_allow_html=True)
+        else:
+            st.write("⚠️ No YouTube video available for this track.")
 
         else:
             st.write("No songs available in the playlist to compare.")
