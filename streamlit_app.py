@@ -300,8 +300,8 @@ if bpm is not None and loudness is not None:
             st.image(best_match["Image"], caption=best_match["Name"], width=250)
 
             # 🎬 Embed YouTube Video of the Best Match
-            if "video_id" in best_match and pd.notna(best_match["video_id"]):  # Ensure video_id exists
-                youtube_embed_url = f"https://www.youtube.com/embed/{best_match['video_id']}"
+            if "track_video_id" in best_match and pd.notna(best_match["track_video_id"]):  # Ensure video_id exists
+                youtube_embed_url = f"https://www.youtube.com/embed/{best_match['track_video_id']}"
                 st.markdown(f"""
                     <iframe width="560" height="315" src="{youtube_embed_url}" 
                     frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
