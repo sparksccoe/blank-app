@@ -154,6 +154,23 @@ if st.button("🥁 Play Your Tempo as a Drum Loop"):
     sf.write("drum_beat.wav", drum_beat, 44100)
     st.audio("drum_beat.wav")
 
+# 🔊 Section: Loudness Analysis
+st.header("🔊 Loudness Analysis")
+loudness = st.number_input("🔊 Enter the relative loudness of your song (in dB, typically between -60 and 0):", 
+                           min_value=-60.0, max_value=0.0, value=-10.0, step=1.0)
+
+# 🎼 Relatable response based on Loudness level with popular song examples
+if loudness < -40:
+    st.write("📉 This is **super quiet**, like the peaceful piano in *Clair de Lune* 🎹 or the soft intro of *Lofi Girl* study beats.")
+elif loudness < -25:
+    st.write("🌿 This is a **soft, gentle track**, like *Golden Hour* by JVKE 🎶 or the calm melodies in *Somewhere Over the Rainbow* by Israel Kamakawiwo'ole.")
+elif loudness < -15:
+    st.write("🎶 A **moderate loudness level**, like *Watermelon Sugar* by Harry Styles 🍉 or *Sunroof* by Nicky Youre—smooth but with some energy!")
+elif loudness < -5:
+    st.write("🎸 This is **fairly loud**, like *Uptown Funk* by Bruno Mars 🔥 or *Industry Baby* by Lil Nas X—big, dynamic, and exciting!")
+else:
+    st.write("🚀 **Max loudness!** This is like *Blinding Lights* by The Weeknd 🌟 or *Sicko Mode* by Travis Scott—high-energy, booming, and club-ready!")
+
 
 # Initialize playlist_id as None or hardcoded here
 playlist_id = "3BGJRi9zQrIjLDtBbRYy5n"
