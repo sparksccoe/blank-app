@@ -341,6 +341,7 @@ if playlist_id:
 
 
     # display the playlist data in a table
+    st.header("Additional Playlist Information")
     st.write(f"## {playlist['name']}")
     st.image(playlist_cover, width=300)
     if playlist.get('description'):
