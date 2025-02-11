@@ -322,6 +322,34 @@ if bpm is not None and loudness is not None:
             else:
                 st.write("⚠️ No YouTube video available for this track.")
 
+            # 🎵 Button to Add Song to Playlist
+            if st.button("➕ Add Song to Playlist"):
+                new_song = pd.DataFrame([{
+                    "Name": best_match["Name"],
+                    "Artist": best_match["Artist"],
+                    "Image": best_match["Image"],
+                    "track_video_id": best_match["track_video_id"]
+                }])
+
+                # Append song to user playlist
+                st.session_state.user_playlist = pd.concat([st.session_state.user_playlist, new_song], ignore_index=True)
+                st.success(f"✅ Added **{best_match['Name']}** to your playlist!")
+
+        # 🎼 Display User-Defined Playlist
+        if not st.session_state.user_playlist.empty:
+            st.subheader("🎶 Your Playlist")
+            
+            for _, row in st.session_state.user_playlist.iterrows():
+                col1, col2 = st.columns([1, 4])
+                
+                with col1:
+                    st.image(row["Image"], width=100)
+
+                with col2:
+                    st.write(f"**{row['Name']}** by {row['Artist']}")
+
+            st.write("📋 You can keep adding songs and build your playlist!")
+
         else:
             st.write("No songs available in the playlist to compare.")
 
