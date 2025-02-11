@@ -80,7 +80,7 @@ st.write('Let’s go on a Data Adventure with our Bards!')
 
 st.header("🎶 Tempo")
 # 🎵 Ask for BPM input
-bpm = st.number_input("What is the BPM of your song?", min_value=40, max_value=250, value=120, step=1)
+bpm = st.number_input("What is the BPM of your song?", min_value=40, max_value=250, value=None, step=1)
 
 # 🎼 Relatable response based on BPM range
 if bpm < 60:
@@ -157,7 +157,7 @@ if st.button("🥁 Play Your Tempo as a Drum Loop"):
 # 🔊 Section: Loudness Analysis
 st.header("🔊 Loudness")
 loudness = st.number_input("Enter the relative loudness of your song (in dB, typically between -60 and 0):", 
-                           min_value=-60.0, max_value=0.0, value=-10.0, step=1.0)
+                           min_value=-60.0, max_value=0.0, value=None, step=1.0)
 
 # 🎼 Relatable response based on Loudness level with popular song examples
 if loudness < -40:
