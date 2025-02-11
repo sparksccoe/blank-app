@@ -280,13 +280,13 @@ if bpm is not None and loudness is not None:
                     {
                         "title": item["snippet"]["title"],
                         "url": f"https://www.youtube.com/watch?v={item['snippet']['resourceId']['videoId']}",
-                        "video_id": item["snippet"]["resourceId"]["videoId"]  # Extract YouTube video ID
+                        "video_id": item["snippet"]["resourceId"].get("videoId", None)  # Extract YouTube video ID
                     }
                     for item in data.get("items", [])
                 ]
 
                  # Create track_video_id list from extracted video IDs
-                track_video_id = [video["video_id"] for video in videos]
+                track_video_id = [video["video_id"] for video in videos if video["video_id"] is not None]
 
                 return videos, track_video_id  # Return both video details and video IDs
             else:
