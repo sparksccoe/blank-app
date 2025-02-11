@@ -36,8 +36,8 @@ scikit-learn==1.6.0
 scipy==1.14.1
 six==1.17.0
 smmap==5.0.1
-soundfile==0.13.1
-sounddevice==0.5.1
+soundfile
+sounddevice
 spotipy==2.24.0
 streamlit==1.41.0
 tenacity==9.0.0
