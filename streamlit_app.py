@@ -78,7 +78,7 @@ st.markdown(
 
 st.write('Let’s go on a Data Adventure with our Bards!')
 
-st.header("🎶 Tempo")
+st.header("🎚️ Metronome Master")
 # 🎼 Show relatable response only after the user enters BPM
 
 # 🎵 Ask for BPM input (default None)
@@ -159,7 +159,7 @@ if bpm is not None:
 
 
 # 🔊 Section: Loudness Analysis
-st.header("🔊 Loudness")
+st.header("🔊 Volume Virtuoso")
 # 🔊 Initialize session state for loudness if not already set
 if "loudness" not in st.session_state:
     st.session_state.loudness = None  # Start as None (empty input)
