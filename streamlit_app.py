@@ -1,6 +1,9 @@
 import streamlit as st
 import requests
 import streamlit.components.v1 as components
+import numpy as np
+import soundfile as sf
+import sounddevice as sd
 
 
 hide_streamlit_style = """
@@ -75,6 +78,39 @@ st.markdown(
 )
 
 st.write('Let’s go on a Data Adventure with our Bards!')
+
+# Ask for BPM input
+bpm = st.number_input("🎵 What is the BPM of your song?", min_value=40, max_value=250, value=120, step=1)
+
+# Relatable response based on BPM range
+if bpm < 60:
+    st.write("🛌 This is a super chill, slow-tempo song—perfect for relaxation or deep focus.")
+elif bpm < 90:
+    st.write("🌊 A laid-back groove, great for R&B, lo-fi beats, or smooth jazz.")
+elif bpm < 120:
+    st.write("💃 A mid-tempo track—probably a good dance groove or pop beat!")
+elif bpm < 150:
+    st.write("🏃 A fast-paced song, great for working out or getting pumped up!")
+else:
+    st.write("🔥 This is ultra-fast—likely a drum & bass, punk, or extreme techno beat!")
+
+# Function to generate a click track
+def generate_click_track(bpm, duration=5, sample_rate=44100):
+    interval = 60 / bpm  # Seconds per beat
+    num_beats = int(duration / interval)  # Total beats in duration
+    click_sound = np.zeros(int(sample_rate * duration))  # Silence track
+    
+    for i in range(num_beats):
+        start = int(i * interval * sample_rate)
+        click_sound[start:start+500] = 1.0  # Create a sharp click
+    
+    return click_sound
+
+# Button to play tempo beats
+if st.button("▶️ Play Tempo"):
+    click_track = generate_click_track(bpm)
+    sf.write("tempo_click.wav", click_track, 44100)
+    st.audio("tempo_click.wav")
 
 # Initialize playlist_id as None or hardcoded here
 playlist_id = "3BGJRi9zQrIjLDtBbRYy5n"
