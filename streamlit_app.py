@@ -149,7 +149,7 @@ def generate_drum_beat(bpm, duration=5, sample_rate=44100):
     return np.clip(audio, -1, 1)  # Prevent distortion
 
 # 🎧 Button to play drum beat
-if st.button("🥁 Play Drum Loop"):
+if st.button("🥁 Play Your Tempo as a Drum Loop"):
     drum_beat = generate_drum_beat(bpm)
     sf.write("drum_beat.wav", drum_beat, 44100)
     st.audio("drum_beat.wav")
