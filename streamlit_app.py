@@ -297,6 +297,9 @@ if bpm is not None and loudness is not None:
             # Show album cover
             st.image(best_match["Image"], caption=best_match["Name"], width=250)
 
+            # Fetch video details and extract track_video_id
+            videos, track_video_id = fetch_playlist_videos(api_key, playlist_id)
+
             # 🎬 Embed YouTube Video of the Best Match
             if "track_video_id" in best_match and pd.notna(best_match["track_video_id"]):  # Ensure video_id exists
                 youtube_embed_url = f"https://www.youtube.com/embed/{best_match['track_video_id']}"
