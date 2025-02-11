@@ -186,6 +186,9 @@ if loudness is not None:
         st.write("🎸 This is **fairly loud**, like *Uptown Funk* by Bruno Mars 🔥 or *Industry Baby* by Lil Nas X—big, dynamic, and exciting!")
     else:
         st.write("🚀 **Max loudness!** This is like *Blinding Lights* by The Weeknd 🌟 or *Sicko Mode* by Travis Scott—high-energy, booming, and club-ready!")
+else:
+    st.write("⚠️ Please enter a loudness level to see a comparison.")
+
 
 # Initialize playlist_id as None or hardcoded here
 playlist_id = "3BGJRi9zQrIjLDtBbRYy5n"
