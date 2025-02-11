@@ -192,6 +192,11 @@ if loudness is not None:
 # Initialize playlist_id as None or hardcoded here
 playlist_id = "3BGJRi9zQrIjLDtBbRYy5n"
 
+# YouTube API key and playlist ID (replace with your own)
+api_key = "AIzaSyAxHBK8MxzePcos86BOaBwUtTurr_ZbpNg"  # Replace with your API key
+playlist_url = "https://www.youtube.com/playlist?list=PLtg7R4Q_LfGU-WLVp5jeOoD7tdUiS6FHg"
+playlist_id = playlist_url.split("list=")[-1]
+
 # 🟢 Ensure both BPM & Loudness are entered before proceeding
 if bpm is not None and loudness is not None:
     # 🟢 Retrieve data from Spotify API
@@ -329,7 +334,43 @@ if playlist_id:
     # Apply the conversion to the track durations
     track_duration_formatted = [ms_to_minutes_seconds(duration) for duration in track_duration]
     
+    # Function to fetch playlist details using the YouTube API
+    def fetch_playlist_videos(api_key, playlist_id):
+        base_url = "https://www.googleapis.com/youtube/v3/playlistItems"
+        params = {
+            "part": "snippet",
+            "playlistId": playlist_id,
+            "maxResults": 50,  # Max number of videos per API call
+            "key": api_key
+        }
+        response = requests.get(base_url, params=params)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Extract video title, URL, and video ID
+            videos = [
+                {
+                    "title": item["snippet"]["title"],
+                    "url": f"https://www.youtube.com/watch?v={item['snippet']['resourceId']['videoId']}",
+                    "video_id": item["snippet"]["resourceId"]["videoId"]  # Extract YouTube video ID
+                }
+                for item in data.get("items", [])
+            ]
+            
+            return videos
+        else:
+            st.error("❌ Failed to fetch playlist details. Check your API key and playlist ID.")
+            return []
 
+    # Example usage (Replace with actual API key & playlist ID)
+    api_key = "YOUR_YOUTUBE_API_KEY"
+    playlist_id = "YOUR_YOUTUBE_PLAYLIST_ID"
+
+    videos = fetch_playlist_videos(api_key, playlist_id)
+
+    # Store video IDs separately
+    track_video_id = [video["video_id"] for video in videos]
 
     # Convert track keys to pitch class notation
     # Map numeric key values to pitch class notation
@@ -491,10 +532,7 @@ if playlist_id:
             st.error("Failed to fetch playlist details. Check your API key and playlist ID.")
             return []
 
-    # YouTube API key and playlist ID (replace with your own)
-    api_key = "AIzaSyAxHBK8MxzePcos86BOaBwUtTurr_ZbpNg"  # Replace with your API key
-    playlist_url = "https://www.youtube.com/playlist?list=PLtg7R4Q_LfGU-WLVp5jeOoD7tdUiS6FHg"
-    playlist_id = playlist_url.split("list=")[-1]
+   
 
     # Fetch playlist details
     videos = fetch_playlist_videos(api_key, playlist_id)
