@@ -199,7 +199,7 @@ youtube_playlist_id = youtube_playlist_url.split("list=")[-1]
 
 # 🔹 Ensure user playlist is initialized in session state
 if "user_playlist" not in st.session_state:
-    st.session_state.user_playlist = pd.DataFrame(columns=["Name", "Artist", "Image", "track_video_id"])
+    st.session_state.user_playlist = pd.DataFrame(columns=["Name", "Artist", "Image", "track_video_id", "Tempo", "Loud (Db)"])
 
 
 # 🟢 Ensure both BPM & Loudness are entered before proceeding
@@ -333,7 +333,9 @@ if bpm is not None and loudness is not None:
                     "Name": best_match["Name"],
                     "Artist": best_match["Artist"],
                     "Image": best_match["Image"],
-                    "track_video_id": best_match["track_video_id"]
+                    "track_video_id": best_match["track_video_id"],
+                    "Tempo": best_match["Tempo"],   
+                    "Loud (Db)": best_match["Loud (Db)"]  
                 }])
 
                 # Append song to user playlist
@@ -348,15 +350,17 @@ if bpm is not None and loudness is not None:
                 col1, col2 = st.columns([1, 4])
                 
                 with col1:
-                    st.image(row["Image"], width=100)
+                    st.image(row["Image"], width=50)
 
                 with col2:
                     st.write(f"**{row['Name']}** by {row['Artist']}")
+                    st.write(f"**Tempo:** {row['Tempo']} BPM")
+                    st.write(f"**Loudness:** {row['Loud (Db)']} dB")
 
             st.write("📋 You can keep adding songs and build your playlist!")
 
         else:
-            st.write("No songs available in the playlist to compare.")
+            st.write("Your playlist is empty. Add songs to create one!")
 
 else:
     st.write("⚠️ Please enter both **Tempo (BPM)** and **Loudness (dB)** to find your matching song.")
