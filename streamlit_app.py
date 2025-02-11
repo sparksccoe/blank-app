@@ -248,11 +248,11 @@ if bpm is not None and loudness is not None:
         })
 
         # Function to fetch playlist details using the YouTube API
-        def fetch_playlist_videos(api_key, playlist_id):
+        def fetch_playlist_videos(api_key, youtube_playlist_id):
             base_url = "https://www.googleapis.com/youtube/v3/playlistItems"
             params = {
                 "part": "snippet",
-                "playlistId": playlist_id,
+                "playlistId": youtube_playlist_id,
                 "maxResults": 50,  # Max number of videos per API call
                 "key": api_key
             }
@@ -298,7 +298,7 @@ if bpm is not None and loudness is not None:
             st.image(best_match["Image"], caption=best_match["Name"], width=250)
 
             # Fetch video details and extract track_video_id
-            videos, track_video_id = fetch_playlist_videos(api_key, playlist_id)
+            videos, track_video_id = fetch_playlist_videos(api_key, youtube_playlist_id)
 
             # 🎬 Embed YouTube Video of the Best Match
             if "track_video_id" in best_match and pd.notna(best_match["track_video_id"]):  # Ensure video_id exists
