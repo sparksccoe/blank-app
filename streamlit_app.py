@@ -71,10 +71,10 @@ with col2:
 with col3:
     st.write("")
 
-st.markdown(
-    "<h1 style='text-align: center;'>Playtest Welcome</h1>",
-    unsafe_allow_html=True
-)
+# st.markdown(
+#     "<h1 style='text-align: center;'>Playtest Welcome</h1>",
+#     unsafe_allow_html=True
+# )
 
 st.write('Let’s go on a Data Adventure with our Bards!')
 
@@ -166,7 +166,7 @@ if "loudness" not in st.session_state:
 
 # Ensure number input does not reset, but starts empty
 loudness = st.number_input(
-    "🔊 Enter the relative loudness of your song (in dB, typically between -60 and 0):",
+    "Enter the relative loudness of your song (in dB, typically between -60 and 0):",
     min_value=-60, max_value=0, value=st.session_state.loudness, step=1, format="-%d"
 )
 
