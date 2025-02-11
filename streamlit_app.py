@@ -78,10 +78,11 @@ st.markdown(
 
 st.write('Let’s go on a Data Adventure with our Bards!')
 
-# Ask for BPM input
+
+# 🎵 Ask for BPM input
 bpm = st.number_input("🎵 What is the BPM of your song?", min_value=40, max_value=250, value=120, step=1)
 
-# Relatable response based on BPM range
+# 🎼 Relatable response based on BPM range
 if bpm < 60:
     st.write("🛌 This is a super chill, slow-tempo song—perfect for relaxation or deep focus.")
 elif bpm < 90:
@@ -128,7 +129,6 @@ def generate_drum_beat(bpm, duration=5, sample_rate=44100):
     snare = generate_drum_sound(drum_type="snare")
     hihat = generate_drum_sound(drum_type="hihat")
 
-    beat_positions = [0, 2, 4, 6]  # Kick on beats 1 & 3, Snare on 2 & 4
     for i in range(num_beats):
         start = int(i * interval * sample_rate)
         end = start + len(kick)
@@ -148,14 +148,8 @@ def generate_drum_beat(bpm, duration=5, sample_rate=44100):
 
     return np.clip(audio, -1, 1)  # Prevent distortion
 
-# Streamlit App
-st.title("🥁 Drum Beat Generator")
-
-# BPM input
-bpm = st.number_input("🎵 Enter BPM (Beats Per Minute):", min_value=40, max_value=250, value=120, step=1)
-
-# Button to play drum beat
-if st.button("▶️ Play Drum Loop"):
+# 🎧 Button to play drum beat
+if st.button("🥁 Play Drum Loop"):
     drum_beat = generate_drum_beat(bpm)
     sf.write("drum_beat.wav", drum_beat, 44100)
     st.audio("drum_beat.wav")
