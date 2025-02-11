@@ -160,9 +160,9 @@ if bpm is not None:
 
 # 🔊 Section: Loudness Analysis
 st.header("🔊 Loudness")
-# Initialize session state for loudness if not already set
+# 🔊 Initialize session state for loudness if not already set
 if "loudness" not in st.session_state:
-    st.session_state.loudness = None
+    st.session_state.loudness = None  # Default to None (empty field)
 
 # Create a number input for loudness that persists
 loudness = st.number_input(
