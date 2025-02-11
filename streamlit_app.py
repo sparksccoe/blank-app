@@ -175,6 +175,83 @@ else:
 # Initialize playlist_id as None or hardcoded here
 playlist_id = "3BGJRi9zQrIjLDtBbRYy5n"
 
+# 🟢 Ensure both BPM & Loudness are entered before proceeding
+if bpm is not None and loudness is not None:
+    # 🟢 Retrieve data from Spotify API
+    if playlist_id:
+        playlist = sp.playlist(playlist_id)
+        playlist_cover = playlist["images"][0]["url"]
+        tracks = playlist["tracks"]["items"]
+
+        track_id = [track["track"]["id"] for track in tracks]
+        track_names = [track["track"]["name"] for track in tracks]
+        track_artists = [", ".join([artist["name"] for artist in track["track"]["artists"]]) for track in tracks]
+        track_popularity = [track["track"]["popularity"] for track in tracks]
+        track_duration = [track["track"]["duration_ms"] for track in tracks]
+        track_album = [track["track"]["album"]["name"] for track in tracks]
+        track_preview = [track["track"]["preview_url"] for track in tracks]
+        track_image = [track["track"]["album"]["images"][0]["url"] for track in tracks]
+        track_release_date = [track["track"]["album"]["release_date"] for track in tracks]
+        track_url = [track["track"]["external_urls"]["spotify"] for track in tracks]
+
+        # Create a DataFrame for track decades
+        df_decades = pd.DataFrame({'Release Date': track_release_date})
+        df_decades['Year'] = pd.to_datetime(df_decades['Release Date']).dt.year
+        df_decades['Decade'] = (df_decades['Year'] // 10) * 10
+        track_decade = df_decades['Decade'].astype(str) + "s"
+
+        # 🟢 Load additional song features from CSV
+        df = pd.read_csv("Symphonia Bards.csv")
+
+        track_danceability = df["Dance"].tolist()
+        track_energy = df["Energy"].tolist()
+        track_loudness = df["Loud (Db)"].tolist()
+        track_acousticness = df["Acoustic"].tolist()
+        track_instrumentalness = df["Instrumental"].tolist()
+        track_liveness = df["Live"].tolist()
+        track_valence = df["Happy"].tolist()
+        track_tempo = df["BPM"].apply(round).tolist()
+        track_signature = df["Time Signature"].tolist()
+        track_speechiness = df["Speech"].tolist()
+        track_keys_converted = df["Key"].tolist()
+
+        # 🟢 Create a DataFrame with relevant data
+        df_tracks = pd.DataFrame({
+            "Name": track_names,
+            "Artist": track_artists,
+            "Tempo": track_tempo,
+            "Loud (Db)": track_loudness,
+            "Image": track_image,
+            "Spotify URL": track_url
+        })
+
+        # 🎯 Find the closest matching song in the playlist
+        if not df_tracks.empty:
+            # Calculate differences in tempo and loudness
+            df_tracks["Tempo Difference"] = abs(df_tracks["Tempo"] - bpm)
+            df_tracks["Loudness Difference"] = abs(df_tracks["Loud (Db)"] - loudness)
+
+            # Compute a "match score" (lower is better)
+            df_tracks["Match Score"] = df_tracks["Tempo Difference"] + df_tracks["Loudness Difference"]
+
+            # Get the best-matching song
+            best_match = df_tracks.loc[df_tracks["Match Score"].idxmin()]
+
+            # 🎵 Display the result
+            st.subheader(f"🎵 Your song is **{best_match['Name']}** by **{best_match['Artist']}**")
+            
+            # Show album cover
+            st.image(best_match["Image"], caption=best_match["Name"], width=250)
+
+            # Spotify Link
+            st.markdown(f"[🎧 Listen on Spotify]({best_match['Spotify URL']})")
+
+        else:
+            st.write("No songs available in the playlist to compare.")
+
+else:
+    st.write("⚠️ Please enter both **Tempo (BPM)** and **Loudness (dB)** to find your matching song.")
+
 # retrieve data from the Spotify API
 if playlist_id:
     playlist = sp.playlist(playlist_id)
