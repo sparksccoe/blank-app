@@ -80,7 +80,7 @@ st.write('Let’s go on a Data Adventure with our Bards!')
 
 st.header("Tempo")
 # 🎵 Ask for BPM input
-bpm = st.number_input("🎵 What is the BPM of your song?", min_value=40, max_value=250, value=120, step=1)
+bpm = st.number_input("What is the BPM of your song?", min_value=40, max_value=250, value=120, step=1)
 
 # 🎼 Relatable response based on BPM range
 if bpm < 60:
