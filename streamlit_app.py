@@ -79,9 +79,6 @@ st.markdown(
 st.write('Let’s go on a Data Adventure with our Bards!')
 
 st.header("🎶 Tempo")
-# 🎵 Ask for BPM input
-bpm = st.number_input("What is the BPM of your song?", min_value=40, max_value=250, value=None, step=1)
-
 # 🎼 Show relatable response only after the user enters BPM
 if bpm is not None:
     if bpm < 60:
@@ -95,10 +92,7 @@ if bpm is not None:
     else:
         st.write("🔥 This is **ultra-fast**—likely a drum & bass, punk, or extreme techno beat!")
 
-else:
-    st.write("⚠️ Please enter a BPM to get a tempo analysis.")
-
-# Function to generate a percussive sound (kick, snare, hi-hat)
+# 🥁 Function to generate a percussive sound (kick, snare, hi-hat)
 def generate_drum_sound(sample_rate=44100, drum_type="kick"):
     duration = 0.15  # Length of drum sound
     t = np.linspace(0, duration, int(sample_rate * duration), False)
@@ -122,7 +116,7 @@ def generate_drum_sound(sample_rate=44100, drum_type="kick"):
 
     return np.clip(sound, -1, 1)
 
-# Function to generate a drum beat loop
+# 🥁 Function to generate a drum beat loop
 def generate_drum_beat(bpm, duration=5, sample_rate=44100):
     interval = 60 / bpm  # Seconds per beat
     num_beats = int(duration / interval)  # Total beats in duration
@@ -152,11 +146,14 @@ def generate_drum_beat(bpm, duration=5, sample_rate=44100):
 
     return np.clip(audio, -1, 1)  # Prevent distortion
 
-# 🎧 Button to play drum beat
-if st.button("🥁 Play Your Tempo as a Drum Loop"):
-    drum_beat = generate_drum_beat(bpm)
-    sf.write("drum_beat.wav", drum_beat, 44100)
-    st.audio("drum_beat.wav")
+# 🎧 Button to play drum beat (only after BPM is entered)
+if bpm is not None:
+    if st.button("🥁 Play Your Tempo as a Drum Loop"):
+        drum_beat = generate_drum_beat(bpm)
+        sf.write("drum_beat.wav", drum_beat, 44100)
+        st.audio("drum_beat.wav")
+else:
+    st.write("⚠️ Please enter a BPM before playing the drum loop.")
 
 # 🔊 Section: Loudness Analysis
 st.header("🔊 Loudness")
