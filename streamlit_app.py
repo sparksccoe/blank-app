@@ -82,17 +82,21 @@ st.header("🎶 Tempo")
 # 🎵 Ask for BPM input
 bpm = st.number_input("What is the BPM of your song?", min_value=40, max_value=250, value=None, step=1)
 
-# 🎼 Relatable response based on BPM range
-if bpm < 60:
-    st.write("🛌 This is a super chill, slow-tempo song—perfect for relaxation or deep focus.")
-elif bpm < 90:
-    st.write("🌊 A laid-back groove, great for R&B, lo-fi beats, or smooth jazz.")
-elif bpm < 120:
-    st.write("💃 A mid-tempo track—probably a good dance groove or pop beat!")
-elif bpm < 150:
-    st.write("🏃 A fast-paced song, great for working out or getting pumped up!")
+# 🎼 Show relatable response only after the user enters BPM
+if bpm is not None:
+    if bpm < 60:
+        st.write("🛌 This is a **super chill, slow-tempo song**—perfect for relaxation or deep focus.")
+    elif bpm < 90:
+        st.write("🌊 A **laid-back groove**, great for R&B, lo-fi beats, or smooth jazz.")
+    elif bpm < 120:
+        st.write("💃 A **mid-tempo track**—probably a good dance groove or pop beat!")
+    elif bpm < 150:
+        st.write("🏃 A **fast-paced song**, great for working out or getting pumped up!")
+    else:
+        st.write("🔥 This is **ultra-fast**—likely a drum & bass, punk, or extreme techno beat!")
+
 else:
-    st.write("🔥 This is ultra-fast—likely a drum & bass, punk, or extreme techno beat!")
+    st.write("⚠️ Please enter a BPM to get a tempo analysis.")
 
 # Function to generate a percussive sound (kick, snare, hi-hat)
 def generate_drum_sound(sample_rate=44100, drum_type="kick"):
