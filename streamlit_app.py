@@ -77,7 +77,12 @@ with col3:
 # )
 
 # st.write('Let’s go on a Data Adventure with our Bards!')
-st.markdown("<h4 style='text-align: center;'>Let’s go on a Data Adventure with our Bards!</h4>", unsafe_allow_html=True)
+st.markdown(
+    "<div style='text-align: center; font-size: 16px; font-weight: normal;'>"
+    "Let’s go on a Data Adventure with our Bards!"
+    "</div>", 
+    unsafe_allow_html=True
+)
 
 st.header("🎚️ Metronome Master")
 # 🎼 Show relatable response only after the user enters BPM
@@ -96,6 +101,9 @@ if bpm is not None:
         st.write("🏃 A **fast-paced song**, great for working out or getting pumped up!")
     else:
         st.write("🔥 This is **ultra-fast**—likely a drum & bass, punk, or extreme techno beat!")
+
+if bpm is not None:
+    st.session_state.loudness = None # Reset loudness state
 
 # 🥁 Function to generate a percussive sound (kick, snare, hi-hat)
 def generate_drum_sound(sample_rate=44100, drum_type="kick"):
