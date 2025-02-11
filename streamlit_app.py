@@ -297,6 +297,9 @@ if bpm is not None and loudness is not None:
             # Show album cover
             st.image(best_match["Image"], caption=best_match["Name"], width=250)
 
+             # Create track_video_id list from extracted video IDs
+            track_video_id = [video["video_id"] for video in videos]
+
             # Fetch video details and extract track_video_id
             videos, track_video_id = fetch_playlist_videos(api_key, youtube_playlist_id)
 
