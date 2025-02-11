@@ -266,12 +266,15 @@ if bpm is not None and loudness is not None:
                     {
                         "title": item["snippet"]["title"],
                         "url": f"https://www.youtube.com/watch?v={item['snippet']['resourceId']['videoId']}",
-                        "track_video_id": item["snippet"]["resourceId"]["videoId"]  # Extract YouTube video ID
+                        "video_id": item["snippet"]["resourceId"]["videoId"]  # Extract YouTube video ID
                     }
                     for item in data.get("items", [])
                 ]
-                
-                return videos
+
+                 # Create track_video_id list from extracted video IDs
+                track_video_id = [video["video_id"] for video in videos]
+
+                return videos, track_video_id  # Return both video details and video IDs
             else:
                 st.error("❌ Failed to fetch playlist details. Check your API key and playlist ID.")
                 return []
