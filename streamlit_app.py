@@ -56,8 +56,8 @@ from sklearn.preprocessing import MinMaxScaler
 from datetime import datetime
 from plotly.colors import qualitative
 import numpy as np
-import soundfile as sf
-import sounddevice as sd
+import soundfile as soundfile
+import sounddevice as sounddevice
 
 image = Image.open('data_adventures_logo.png')
 col1, col2, col3 = st.columns([1,6,1])
