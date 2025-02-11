@@ -197,6 +197,11 @@ api_key = "AIzaSyAxHBK8MxzePcos86BOaBwUtTurr_ZbpNg"  # Replace with your API key
 youtube_playlist_url = "https://www.youtube.com/playlist?list=PLtg7R4Q_LfGU-WLVp5jeOoD7tdUiS6FHg"
 youtube_playlist_id = youtube_playlist_url.split("list=")[-1]
 
+# 🔹 Ensure user playlist is initialized in session state
+if "user_playlist" not in st.session_state:
+    st.session_state.user_playlist = pd.DataFrame(columns=["Name", "Artist", "Image", "track_video_id"])
+
+
 # 🟢 Ensure both BPM & Loudness are entered before proceeding
 if bpm is not None and loudness is not None:
     # 🟢 Retrieve data from Spotify API
