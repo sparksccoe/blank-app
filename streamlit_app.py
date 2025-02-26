@@ -402,7 +402,7 @@ if playlist_id:
     # Convert decade to a string ending with 's' (e.g., 1970 -> "1970s")
     track_decade = df_decades['track_decade'] = df_decades['Decade'].astype(str) + "s"
 
-    df = pd.read_csv("Symphonia Bards.csv")
+    df = pd.read_csv("Symphonia Bards (1).csv")
     track_danceability = df["Dance"].tolist()
     track_energy = df["Energy"].tolist()
     track_loudness = df["Loud (Db)"].tolist()
