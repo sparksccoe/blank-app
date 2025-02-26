@@ -435,7 +435,7 @@ if playlist_id:
     track_duration_formatted = [ms_to_minutes_seconds(duration) for duration in track_duration]
     
     # Function to fetch playlist details using the YouTube API
-    def fetch_playlist_videos(api_key, playlist_id):
+    def fetch_playlist_videos(api_key, youtube_playlist_id):
         base_url = "https://www.googleapis.com/youtube/v3/playlistItems"
         params = {
             "part": "snippet",
@@ -603,7 +603,7 @@ if playlist_id:
 
 
     # Function to fetch playlist details using the YouTube API
-    def fetch_playlist_videos(api_key, playlist_id):
+    def fetch_playlist_videos(api_key, youtube_playlist_id):
         base_url = "https://www.googleapis.com/youtube/v3/playlistItems"
         params = {
             "part": "snippet",
@@ -623,13 +623,13 @@ if playlist_id:
             ]
             return videos
         else:
-            st.error("Failed to fetch playlist details. Check your API key and playlist ID.")
+            st.error("Failed to fetch playlist details.")
             return []
 
    
 
     # Fetch playlist details
-    videos = fetch_playlist_videos(api_key, playlist_id)
+    videos = fetch_playlist_videos(api_key, youtube_playlist_id)
 
     if videos:
         # Default video (first video in the playlist)
