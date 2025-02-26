@@ -92,15 +92,15 @@ bpm = st.number_input("Enter the BPM (Beats Per Minute) of your song:",
                       min_value=40, max_value=250, value=None, step=1, format="%d")
 if bpm is not None:
     if bpm < 60:
-        st.write("🛌 This is a **super chill, slow-tempo song**—perfect for relaxation or deep focus.")
+        st.write("This is a **super chill, slow-tempo song**—perfect for relaxation or deep focus.")
     elif bpm < 90:
-        st.write("🌊 A **laid-back groove**, great for R&B, lo-fi beats, or smooth jazz.")
+        st.write("A **laid-back groove**, great for R&B, lo-fi beats, or smooth jazz.")
     elif bpm < 120:
-        st.write("💃 A **mid-tempo track**—probably a good dance groove or pop beat!")
+        st.write("A **mid-tempo track**—probably a good dance groove or pop beat!")
     elif bpm < 150:
-        st.write("🏃 A **fast-paced song**, great for working out or getting pumped up!")
+        st.write("A **fast-paced song**, great for working out or getting pumped up!")
     else:
-        st.write("🔥 This is **ultra-fast**—likely a drum & bass, punk, or extreme techno beat!")
+        st.write("This is **ultra-fast**—likely a drum & bass, punk, or extreme techno beat!")
 
 if bpm is not None:
     st.session_state.loudness = None # Reset loudness state
@@ -186,15 +186,15 @@ if loudness is not None and loudness != st.session_state.loudness:
 # 🎼 Show relatable response only after the user enters loudness
 if loudness is not None:
     if loudness < -40:
-        st.write("📉 This is **super quiet**, like the peaceful piano in *Clair de Lune* 🎹 or the soft intro of *Lofi Girl* study beats.")
+        st.write("This is **super quiet**, like the peaceful piano in *Clair de Lune* or the soft intro of *Lofi Girl* study beats.")
     elif loudness < -25:
-        st.write("🌿 This is a **soft, gentle track**, like *Golden Hour* by JVKE 🎶 or the calm melodies in *Somewhere Over the Rainbow* by Israel Kamakawiwo'ole.")
+        st.write("This is a **soft, gentle track**, like *Golden Hour* by JVKE or the calm melodies in *Somewhere Over the Rainbow* by Israel Kamakawiwo'ole.")
     elif loudness < -15:
-        st.write("🎶 A **moderate loudness level**, like *Watermelon Sugar* by Harry Styles 🍉 or *Sunroof* by Nicky Youre—smooth but with some energy!")
+        st.write("A **moderate loudness level**, like *Watermelon Sugar* by Harry Styles or *Sunroof* by Nicky Youre—smooth but with some energy!")
     elif loudness < -5:
-        st.write("🎸 This is **fairly loud**, like *Uptown Funk* by Bruno Mars 🔥 or *Industry Baby* by Lil Nas X—big, dynamic, and exciting!")
+        st.write("This is **fairly loud**, like *Uptown Funk* by Bruno Mars or *Industry Baby* by Lil Nas X—big, dynamic, and exciting!")
     else:
-        st.write("🚀 **Max loudness!** This is like *Blinding Lights* by The Weeknd 🌟 or *Sicko Mode* by Travis Scott—high-energy, booming, and club-ready!")
+        st.write("**Max loudness!** This is like *Blinding Lights* by The Weeknd or *Sicko Mode* by Travis Scott—high-energy, booming, and club-ready!")
 
 
 
@@ -237,7 +237,7 @@ if bpm is not None and loudness is not None:
         track_decade = df_decades['Decade'].astype(str) + "s"
 
         # 🟢 Load additional song features from CSV
-        df = pd.read_csv("Symphonia Bards.csv")
+        df = pd.read_csv("Symphonia Bards (1).csv")
 
         track_danceability = df["Dance"].tolist()
         track_energy = df["Energy"].tolist()
