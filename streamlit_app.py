@@ -439,7 +439,7 @@ if playlist_id:
         base_url = "https://www.googleapis.com/youtube/v3/playlistItems"
         params = {
             "part": "snippet",
-            "playlistId": playlist_id,
+            "playlistId": youtube_playlist_id,
             "maxResults": 50,  # Max number of videos per API call
             "key": api_key
         }
@@ -607,7 +607,7 @@ if playlist_id:
         base_url = "https://www.googleapis.com/youtube/v3/playlistItems"
         params = {
             "part": "snippet",
-            "playlistId": playlist_id,
+            "playlistId": youtube_playlist_id,
             "maxResults": 50,  # Max number of videos per API call
             "key": api_key
         }
