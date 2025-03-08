@@ -380,7 +380,6 @@ if bpm is not None and loudness is not None:
             else:
                 st.warning("⚠️ This song is already in your playlist!")
 
-
         # 🎵 Display the User's Playlist Below
         st.subheader("🎶 Your Playlist")
         if st.session_state.user_playlist:
@@ -392,5 +391,203 @@ if bpm is not None and loudness is not None:
                     st.write(f"**{song['Name']}** by {song['Artist']}")
                     st.markdown(f"**Tempo:** {song['Tempo (BPM)']} BPM &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; **Loudness:** {song['Loudness (dB)']} dB")
         else:
-                st.write("Your playlist is empty. Add songs to create one!")  
+                st.write("Your playlist is empty. Add songs to create one!")
+
+# Ensure session state for playlist tracking
+if "user_playlist" not in st.session_state:
+    st.session_state.user_playlist = []
+
+# Display full playlist analysis button only if at least one song is added
+if len(st.session_state.user_playlist) > 0:
+    # st.markdown("✅ **You’ve added at least one song to your playlist!** Now, you can explore the full playlist analysis.")
+    # Encourage users to keep matching and adding songs
+    st.markdown(
+        "**Keep matching and adding more songs to your playlist!** "
+        "Once you're satisfied with your selections, explore the **full playlist analysis** below."
+    )
+
+    # Initialize session state variable to track visibility
+    if "show_playlist_analysis" not in st.session_state:
+        st.session_state.show_playlist_analysis = False
+
+    # Button to toggle display of playlist analysis
+    if st.button(
+        "📊 View Full Playlist Analysis" if not st.session_state.show_playlist_analysis else "🔽 Hide Playlist Analysis"
+    ):
+        st.session_state.show_playlist_analysis = not st.session_state.show_playlist_analysis
+
+def display_playlist_analysis():
+    """Displays the full playlist insights and analysis."""
     
+    st.markdown("### **🔍 Playlist Insights & Analysis**")
+    st.markdown("_Here's a deep dive into your playlist's characteristics, trends, and audio features._")
+
+    # Extract data from session state playlist
+    playlist_songs = st.session_state.user_playlist
+
+    # Construct DataFrame
+    data = {
+        "Image": [song["Image"] for song in playlist_songs],
+        "Name": [song["Name"] for song in playlist_songs],
+        "Artist": [song["Artist"] for song in playlist_songs],
+        "Genre": [song.get("Genre", "Unknown") for song in playlist_songs],
+        "Release Date": [song["Release Date"] for song in playlist_songs],
+        "Release Decade": [song["Decade"] for song in playlist_songs],
+        "Popularity": [song["Popularity"] for song in playlist_songs],
+        "Duration": [song["Duration"] for song in playlist_songs],
+        "Acoustic": [song["Acousticness"] for song in playlist_songs],
+        "Dance": [song["Danceability"] for song in playlist_songs],
+        "Energy": [song["Energy"] for song in playlist_songs],
+        "Happy": [song["Happiness"] for song in playlist_songs],
+        "Instrumental": [song["Instrumentalness"] for song in playlist_songs],
+        "Key": [song["Key"] for song in playlist_songs],
+        "Live": [song["Liveness"] for song in playlist_songs],
+        "Loud (Db)": [song["Loudness (dB)"] for song in playlist_songs],
+        "Speech": [song["Speechiness"] for song in playlist_songs],
+        "Tempo": [song["Tempo (BPM)"] for song in playlist_songs],
+    }
+
+    df = pd.DataFrame(data)
+    df.index += 1  # Start index at 1
+    num_total_tracks = len(df)
+
+    # Inform users about table interactivity
+    st.write(
+        "📋 The table below is **scrollable** both horizontally and vertically. "
+        "Click on column headers to **sort** and **hover** for explanations."
+    )
+
+    # Display the playlist analysis table with sorting and image preview
+    st.data_editor(
+        df,
+        column_config={
+            "Image": st.column_config.ImageColumn(
+                "Album Art", help="Click on the album cover to enlarge"
+            ),
+            "Name": st.column_config.TextColumn(
+                "Track Name", help="The name of the track"
+            ),
+            "Artist": st.column_config.TextColumn(
+                "Artist", help="The primary artist or band who performed the track"
+            ),
+            "Genre": st.column_config.TextColumn(
+                "Genre", help="Genres are based on the primary artist, as Spotify doesn't provide genre information at the album or track level."
+            ),
+            "Release Date": st.column_config.TextColumn(
+                "Release Date", help="The date when the track or album was released"
+            ),
+            "Release Decade": st.column_config.TextColumn(
+                "Release Decade", help="The decade when the track or album was released"
+            ),
+            "Popularity": st.column_config.NumberColumn(
+                "Popularity", help="The popularity score of the track (0 to 100)"
+            ),
+            "Duration": st.column_config.TextColumn(
+                "Duration", help="The duration of the track"
+            ),
+            "Acoustic": st.column_config.NumberColumn(
+                "Acousticness", help="A measure of the acoustic quality of the track (0 to 1)"
+            ),
+            "Dance": st.column_config.NumberColumn(
+                "Danceability", help="How suitable the track is for dancing (0 to 1)"
+            ),
+            "Energy": st.column_config.NumberColumn(
+                "Energy", help="The intensity and activity level of the track (0 to 1)"
+            ),
+            "Happy": st.column_config.NumberColumn(
+                "Valence", help="A measure of the musical positivity of the track (0 to 1)"
+            ),
+            "Instrumental": st.column_config.NumberColumn(
+                "Instrumental", help="The likelihood that the track is instrumental (0 to 1)"
+            ),
+            "Key": st.column_config.TextColumn(
+                "Key", help="The musical key the track is composed in (0 to 11)"
+            ),
+            "Live": st.column_config.NumberColumn(
+                "Liveness", help="The probability that the track was performed live (0 to 1)"
+            ),
+            "Loud (Db)": st.column_config.NumberColumn(
+                "Loudness", help="The average loudness of a track in decibels (dB), useful for comparing the relative loudness of tracks"
+            ),
+            "Speech": st.column_config.NumberColumn(
+                "Speechiness", help="The presence of spoken words in the track (0 to 1)"
+            ),
+            "Tempo": st.column_config.NumberColumn(
+                "Tempo", help="The tempo of the track in beats per minute (BPM)"
+            )
+        },
+        disabled=True,
+    )
+
+    # 🎥 YouTube Dropdown for Playing Playlist Songs
+    song_options = [song["Name"] for song in st.session_state.user_playlist]
+
+    if song_options:
+        selected_song = st.selectbox(
+            "🎥 Choose a song from your playlist to play on YouTube:",
+            options=song_options
+        )
+
+        # Attempt to find a corresponding YouTube video
+        matched_video = None
+        for video in videos:
+            if selected_song.lower() in video["title"].lower():
+                matched_video = video
+                break  # Stop searching after first match
+
+        if matched_video:
+            selected_video_url = matched_video["url"]
+            youtube_video_id = selected_video_url.split("v=")[-1].split("&")[0]
+
+            # Embed the selected YouTube video
+            youtube_embed_html = f"""
+            <iframe width="100%" height="350" src="https://www.youtube.com/embed/{youtube_video_id}" 
+            frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen></iframe>
+            """
+            st.markdown(youtube_embed_html, unsafe_allow_html=True)
+        else:
+            st.write(f"⚠️ No YouTube video found for **{selected_song}**. Playing YouTube playlist instead.")
+
+       # Add some spacing
+    st.markdown("<br><br>", unsafe_allow_html=True)
+
+    # 🎼 Features to choose from in the dropdown
+    features = ["Popularity", "Duration", "Acoustic", "Dance", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo"]
+    features_with_descriptions = [
+        "Popularity: The popularity score of the track (0 to 100)",
+        "Duration: The duration of the track",
+        "Acoustic: A measure of the acoustic quality of the track (0 to 1)",
+        "Dance: How suitable the track is for dancing (0 to 1)",
+        "Energy: The intensity and activity level of the track (0 to 1)",
+        "Happy: A measure of the musical positivity of the track (0 to 1)",
+        "Instrumental: The likelihood that the track is instrumental (0 to 1)",
+        "Key: The musical key the track is composed in (0 to 11)",
+        "Live: The probability that the track was performed live (0 to 1)",
+        "Loud (Db): The overall loudness of the track in decibels",
+        "Speech: The presence of spoken words in the track (0 to 1)",
+        "Tempo: The tempo of the track in beats per minute (BPM)"
+    ]
+
+    selected_feature_with_description = st.selectbox("🔢 Select an audio feature to rank tracks by:", features_with_descriptions)
+    
+    # Extract the feature name from the selected option (before the colon)
+    selected_feature = selected_feature_with_description.split(":")[0]
+
+    # 🎚️ Number of tracks to display in ranking
+    num_tracks = st.slider(f"🎼 How many tracks do you want to display?", min_value=1, max_value=num_total_tracks, value=3)
+
+    # 🎵 Display Top & Lowest Tracks by Feature
+    sorted_df = df.sort_values(by=selected_feature, ascending=False)
+    st.write(f"### 🎖️ Top {num_tracks} Tracks by {selected_feature}")
+    st.dataframe(sorted_df.head(num_tracks)[["Name", "Artist", selected_feature]], hide_index=True)
+
+    sorted_df_ascending = df.sort_values(by=selected_feature, ascending=True)
+    st.write(f"### 🛑 Lowest {num_tracks} Tracks by {selected_feature}")
+    st.dataframe(sorted_df_ascending.head(num_tracks)[["Name", "Artist", selected_feature]], hide_index=True)
+
+
+# 📌 Call the function **after** the button logic
+if st.session_state.get("show_playlist_analysis", False):
+    display_playlist_analysis()  # Function is defined below, but called here.
+
