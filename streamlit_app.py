@@ -66,34 +66,21 @@ youtube_playlist_url = "https://www.youtube.com/playlist?list=PLtg7R4Q_LfGU-WLVp
 youtube_playlist_id = youtube_playlist_url.split("list=")[-1]
 
 # Define the CSV filename as a variable
-song_features_csv = "Symphonia Bards-3.csv"
+song_features_csv = "Symphonia Bards-3-images(3).csv"
 
 if playlist_id:
-    playlist = sp.playlist(playlist_id)
-    playlist_cover = playlist["images"][0]["url"]
-    tracks = playlist["tracks"]["items"]
-
-    track_id = [track["track"]["id"] for track in tracks]
-    track_names = [track["track"]["name"] for track in tracks]
-    track_artists = [", ".join([artist["name"] for artist in track["track"]["artists"]]) for track in tracks]
-    track_popularity = [track["track"]["popularity"] for track in tracks]
-    track_duration = [track["track"]["duration_ms"] for track in tracks]
-    track_album = [track["track"]["album"]["name"] for track in tracks]
-    track_preview = [track["track"]["preview_url"] for track in tracks]
-    track_image = [track["track"]["album"]["images"][0]["url"] for track in tracks]
-    track_release_date = [track["track"]["album"]["release_date"] for track in tracks]
-    track_url = [track["track"]["external_urls"]["spotify"] for track in tracks]
-
-    # Create a DataFrame for track decades
-    df_decades = pd.DataFrame({'Release Date': track_release_date})
-    df_decades['Year'] = pd.to_datetime(df_decades['Release Date']).dt.year
-    df_decades['Decade'] = (df_decades['Year'] // 10) * 10
-    track_decade = df_decades['Decade'].astype(str) + "s"
-
     # 🟢 Load additional song features from CSV
     df_audio_features = pd.read_csv(song_features_csv)
 
     # Extract individual audio feature columns
+    track_id = df_audio_features["Spotify Track Id"].tolist()
+    track_names = df_audio_features["Song"].tolist()
+    track_artists = df_audio_features["Artist"].tolist()
+    track_popularity = df_audio_features["Popularity"].tolist()
+    track_duration = df_audio_features["Time"].tolist()
+    track_album = df_audio_features["Album"].tolist()
+    track_image = df_audio_features["Image"].tolist()
+    track_release_date = df_audio_features["Album Date"].tolist()
     track_danceability = df_audio_features["Dance"].tolist()
     track_duration = df_audio_features["Time"].tolist()
     track_energy = df_audio_features["Energy"].tolist()
@@ -107,14 +94,35 @@ if playlist_id:
     track_speechiness = df_audio_features["Speech"].tolist()
     track_keys_converted = df_audio_features["Key"].tolist()
 
-    # Extract genres by fetching artist details
-    track_genres = []
-    for track in tracks:
-        artist_id = track["track"]["artists"][0]["id"]  # Get the first artist for simplicity
-        artist = sp.artist(artist_id)  # Fetch artist information
-        genres = artist.get("genres", [])  # Extract genres from artist
-        first_genre = genres[0] if genres else "No genre available"  # Get the first genre, or a default if no genres exist
-        track_genres.append(first_genre)
+     # Create a DataFrame for track decades
+    df_decades = pd.DataFrame({'Release Date': track_release_date})
+    df_decades['Year'] = pd.to_datetime(df_decades['Release Date']).dt.year
+    df_decades['Decade'] = (df_decades['Year'] // 10) * 10
+    track_decade = df_decades['Decade'].astype(str) + "s"
+
+    # # Extract genres by fetching artist details
+    # track_genres = []
+    # for track in tracks:
+    #     artist_id = track["track"]["artists"][0]["id"]  # Get the first artist for simplicity
+    #     artist = sp.artist(artist_id)  # Fetch artist information
+    #     genres = artist.get("genres", [])  # Extract genres from artist
+    #     first_genre = genres[0] if genres else "No genre available"  # Get the first genre, or a default if no genres exist
+    #     track_genres.append(first_genre)
+
+    # # Extract genres using artist IDs from CSV
+    # track_genres = []
+    # for artist_name in track_artists:
+    #     # Search for the artist on Spotify
+    #     results = sp.search(q=artist_name, type="artist", limit=1)
+        
+    #     if results["artists"]["items"]:
+    #         artist = results["artists"]["items"][0]  # Get the first matching artist
+    #         genres = artist.get("genres", [])  # Extract genres from artist data
+    #         first_genre = genres[0] if genres else "No genre available"
+    #     else:
+    #         first_genre = "No genre available"  # Handle case where artist is not found
+        
+    #     track_genres.append(first_genre)
 
     # Function to fetch playlist details using the YouTube API
     def fetch_playlist_videos(api_key, youtube_playlist_id):
@@ -160,8 +168,6 @@ if playlist_id:
         "Popularity": track_popularity,
         "Release Date": track_release_date,
         "Decade": track_decade,
-        "Spotify URL": track_url,
-        "Spotify Preview": track_preview,
         "Image": track_image,
         "Danceability": track_danceability,
         "Energy": track_energy,
@@ -175,7 +181,7 @@ if playlist_id:
         "Speechiness": track_speechiness,
         "Key": track_keys_converted,
         "Duration": track_duration,
-        "Genre": track_genres,
+        # "Genre": track_genres,
         "YouTube Video ID": track_video_id[:len(track_id)],  # Ensure lengths match
     })
 
@@ -393,6 +399,16 @@ if bpm is not None and loudness is not None:
         else:
                 st.write("Your playlist is empty. Add songs to create one!")
 
+        # 🎥 Embed YouTube videos for each song in the user's playlist
+        st.subheader("📺 Watch Your Playlist on YouTube")
+
+        for song in st.session_state.user_playlist:
+            if pd.notna(song["YouTube Video ID"]):  # Ensure a valid video ID exists
+                youtube_embed_url = f"https://www.youtube.com/embed/{song['YouTube Video ID']}"
+                st.video(youtube_embed_url)
+            else:
+                st.write(f"⚠️ No YouTube video available for **{song['Name']}** by {song['Artist']}.")
+
 # Ensure session state for playlist tracking
 if "user_playlist" not in st.session_state:
     st.session_state.user_playlist = []
@@ -586,10 +602,101 @@ def display_playlist_analysis():
     st.write(f"### 🛑 Lowest {num_tracks} Tracks by {selected_feature}")
     st.dataframe(sorted_df_ascending.head(num_tracks)[["Name", "Artist", selected_feature]], hide_index=True)
 
+    # # 🎭 **Genre Distribution Analysis**
+    # if "Genre" in df.columns:
+    #     st.write("### 🎭 Main Genres of Songs in Your Playlist")
+
+    #     # Convert genres to DataFrame
+    #     df_genres = pd.DataFrame(df["Genre"], columns=["Genre"])
+
+    #     # Count occurrences of each genre
+    #     genre_counts = df_genres["Genre"].value_counts()
+
+    #     # Calculate percentage of each genre
+    #     genre_percentages = (genre_counts / genre_counts.sum()) * 100
+
+    #     # Sort genres by percentage in descending order
+    #     genre_percentages_sorted = genre_percentages.sort_values(ascending=False)
+
+    #     # Calculate the cumulative sum and filter to include genres up to 80% of total
+    #     cumulative_percentages = genre_percentages_sorted.cumsum()
+    #     top_genres_80 = genre_percentages_sorted[cumulative_percentages <= 80]
+
+    #     # **Fix: Convert Series to DataFrame explicitly**
+    #     df_top_genres = pd.DataFrame({
+    #         "Genre": top_genres_80.index,
+    #         "Percentage": top_genres_80.values
+    #     })
+
+    #     # 🎨 Create a colorful horizontal bar chart using Plotly
+    #     fig_genres = px.bar(
+    #         df_top_genres,  # Use correctly formatted DataFrame
+    #         x="Percentage",
+    #         y="Genre",
+    #         orientation="h",  # Horizontal bar chart
+    #         labels={"Percentage": "Percentage of Songs (%)", "Genre": "Genres"},
+    #         color="Genre",  # Use genre names for color categories
+    #         color_discrete_sequence=px.colors.qualitative.Set3  # Use a qualitative color palette
+    #     )
+
+    #     # Customize hovertemplate to show only the percentage
+    #     fig_genres.update_traces(hovertemplate='%{x:.1f}%<extra></extra>')
+
+    #     # Customize the bar chart appearance
+    #     fig_genres.update_layout(
+    #         xaxis_title="Percentage of Songs (%)",
+    #         yaxis_title="Genres",
+    #         xaxis=dict(range=[0, 100]),  # Ensure range is 0-100%
+    #         margin=dict(t=0),  # Remove top margin
+    #         showlegend=False
+    #     )
+
+    #     # Display the bar chart in Streamlit
+    #     st.plotly_chart(fig_genres)
+
+    # Create a DataFrame using "Release Decade" from earlier data
+    df_decades = pd.DataFrame({
+        'Track': [song["Name"] for song in playlist_songs],  # Ensure track names are included
+        'Decade': [song["Release Decade"] for song in playlist_songs]  # Use "Release Decade"
+    })
+
+    # Calculate the percentage of songs in each decade
+    decade_counts = df_decades['Decade'].value_counts(normalize=True) * 100
+
+    # Sort decades in chronological order
+    decade_counts = decade_counts.sort_index()
+
+    # Create a DataFrame for visualization
+    df_bins_decades = pd.DataFrame({
+        'Decade': decade_counts.index,
+        'Percentage': decade_counts.values
+    })
+
+    # Create a vertical bar chart using Plotly
+    fig_decades = go.Figure(go.Bar(
+        x=df_bins_decades['Decade'],  # The decade categories
+        y=df_bins_decades['Percentage'],  # The percentages
+        text=[f"{perc:.1f}%" for perc in df_bins_decades['Percentage']],  # Display percentages as text inside the bars
+        textposition='auto',  # Position text inside bars
+        marker=dict(
+            color=px.colors.qualitative.Plotly  # Automatically assign colors
+        )
+    ))
+
+    # Update layout for better visualization
+    fig_decades.update_layout(
+        title_text='Percentage of Songs by Decade',
+        xaxis_title='Decade',
+        yaxis_title='Percentage of Songs (%)',
+        yaxis=dict(tickvals=[0, 20, 40, 60, 80, 100]),  # Custom y-axis ticks
+        showlegend=False  # Hide legend
+    )
+
+    # Display the bar chart in Streamlit
+    st.plotly_chart(fig_decades)
+
 
 # 📌 Call the function **after** the button logic
 if st.session_state.get("show_playlist_analysis", False):
-    display_playlist_analysis()  # Function is defined below, but called here.
-
-
+    display_playlist_analysis() 
 
