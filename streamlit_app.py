@@ -360,8 +360,6 @@ if bpm is not None and loudness is not None:
                 "Popularity": best_match["Popularity"],
                 "Release Date": best_match["Release Date"],
                 "Decade": best_match["Decade"],
-                "Spotify URL": best_match["Spotify URL"],
-                "Spotify Preview": best_match["Spotify Preview"],
                 "Image": best_match["Image"],
                 "Danceability": best_match["Danceability"],
                 "Energy": best_match["Energy"],
