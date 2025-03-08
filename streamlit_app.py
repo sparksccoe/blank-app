@@ -373,7 +373,7 @@ if bpm is not None and loudness is not None:
                 "Speechiness": best_match["Speechiness"],
                 "Key": best_match["Key"],
                 "Duration": best_match["Duration"],
-                "Genre": best_match["Genre"],
+                # "Genre": best_match["Genre"],
                 "YouTube Video ID": best_match["YouTube Video ID"]
             }
 
