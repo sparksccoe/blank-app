@@ -397,15 +397,24 @@ if bpm is not None and loudness is not None:
         else:
                 st.write("Your playlist is empty. Add songs to create one!")
 
-        # 🎥 Embed YouTube videos for each song in the user's playlist
-        st.subheader("📺 Watch Your Playlist on YouTube")
+    # 🎥 Embed YouTube playlist for all songs in the user's playlist
+    st.subheader("📺 Watch Your Playlist on YouTube")
 
-        for song in st.session_state.user_playlist:
-            if pd.notna(song["YouTube Video ID"]):  # Ensure a valid video ID exists
-                youtube_embed_url = f"https://www.youtube.com/embed/{song['YouTube Video ID']}"
-                st.video(youtube_embed_url)
-            else:
-                st.write(f"⚠️ No YouTube video available for **{song['Name']}** by {song['Artist']}.")
+    # Collect valid YouTube Video IDs
+    youtube_video_ids = [song["YouTube Video ID"] for song in st.session_state.user_playlist if pd.notna(song["YouTube Video ID"])]
+
+    if youtube_video_ids:
+        # Create a YouTube playlist URL with video IDs in succession
+        video_ids_str = ",".join(youtube_video_ids)  # Comma-separated list of video IDs
+
+        # YouTube playlist embed format (uses the first video ID and queues the rest)
+        youtube_embed_url = f"https://www.youtube.com/embed/{youtube_video_ids[0]}?playlist={','.join(youtube_video_ids[1:])}" if len(youtube_video_ids) > 1 else f"https://www.youtube.com/embed/{youtube_video_ids[0]}"
+
+        # Embed the YouTube playlist
+        st.video(youtube_embed_url)
+
+    else:
+        st.write("⚠️ No YouTube videos available for your playlist.")
 
 # Ensure session state for playlist tracking
 if "user_playlist" not in st.session_state:
