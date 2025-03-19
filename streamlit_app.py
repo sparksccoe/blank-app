@@ -404,14 +404,15 @@ if bpm is not None and loudness is not None:
     youtube_video_ids = [song["YouTube Video ID"] for song in st.session_state.user_playlist if pd.notna(song["YouTube Video ID"])]
 
     if youtube_video_ids:
-        # Create a YouTube playlist URL with video IDs in succession
-        video_ids_str = ",".join(youtube_video_ids)  # Comma-separated list of video IDs
-
-        # YouTube playlist embed format (uses the first video ID and queues the rest)
-        youtube_embed_url = f"https://www.youtube.com/embed/{youtube_video_ids[0]}?playlist={','.join(youtube_video_ids[1:])}" if len(youtube_video_ids) > 1 else f"https://www.youtube.com/embed/{youtube_video_ids[0]}"
+        if len(youtube_video_ids) == 1:
+            # Single video case
+            youtube_embed_url = f"https://www.youtube.com/embed/{youtube_video_ids[0]}"
+        else:
+            # Multiple videos: Use watch_videos for better queuing
+            youtube_embed_url = f"https://www.youtube.com/watch_videos?video_ids=" + ",".join(youtube_video_ids)
 
         # Embed the YouTube playlist
-        st.video(youtube_embed_url)
+        st.markdown(f'<iframe width="100%" height="400" src="{youtube_embed_url}" frameborder="0" allowfullscreen></iframe>', unsafe_allow_html=True)
 
     else:
         st.write("⚠️ No YouTube videos available for your playlist.")
