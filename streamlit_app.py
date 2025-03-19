@@ -473,8 +473,18 @@ if st.session_state.user_playlist:
 
             # 🎉 Confirm to the user that their playlist has been saved
             st.success(f"✅ Playlist '{playlist_name}' saved successfully!")
-            st.info(f"🔹 **Your Playlist ID: `{random_id}`**\nUse this ID to retrieve your playlist later. It will be available for **two weeks**.")
-
+            st.markdown(
+                f"""
+                <div style="border: 2px solid #4CAF50; padding: 10px; border-radius: 5px; text-align: center;">
+                    <p style="font-size: 24px; font-weight: bold; color: #4CAF50;">🎵 Your Playlist ID:</p>
+                    <p style="font-size: 36px; font-weight: bold; color: #ff5733;">{random_id}</p>
+                    <p style="font-size: 16px;">Use this ID to retrieve your playlist later.<br>
+                    It will be available for <b>two weeks</b>.</p>
+                </div>
+                """, 
+                unsafe_allow_html=True
+            )
+            
 # 🗑️ Cleanup Function (Run Periodically)
 def cleanup_old_playlists():
     now = datetime.now()
