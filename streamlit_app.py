@@ -420,7 +420,7 @@ if bpm is not None and loudness is not None:
             # Ensure the first video is part of the queue
             first_video = st.session_state.youtube_video_ids[0]
             playlist_videos = ",".join(st.session_state.youtube_video_ids)  # Include the first video in the playlist
-            youtube_embed_url = f"https://www.youtube.com/embed/{first_video}?playlist={playlist_videos}&autoplay=1"
+            youtube_embed_url = f"https://www.youtube.com/embed/{first_video}?playlist={playlist_videos}"
 
         # Use an iframe to prevent Streamlit from reloading the component
         st.markdown(
