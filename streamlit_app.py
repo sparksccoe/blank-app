@@ -400,26 +400,27 @@ if bpm is not None and loudness is not None:
     # 🎥 Embed YouTube playlist for all songs in the user's playlist
     st.subheader("📺 Watch Your Playlist on YouTube")
 
-    # Ensure session state stores video IDs
+    # Ensure session state stores video IDs persistently
     if "youtube_video_ids" not in st.session_state:
         st.session_state.youtube_video_ids = []
 
     # Collect valid YouTube Video IDs from user playlist
     new_video_ids = [song["YouTube Video ID"] for song in st.session_state.user_playlist if pd.notna(song["YouTube Video ID"])]
 
-    # Update session state only if new videos are added
-    if new_video_ids != st.session_state.youtube_video_ids:
+    # Only update session state if new videos are added (to prevent resets)
+    if set(new_video_ids) != set(st.session_state.youtube_video_ids):
         st.session_state.youtube_video_ids = new_video_ids  # Update stored video list
 
+    # Display YouTube player only if there are valid videos
     if st.session_state.youtube_video_ids:
         if len(st.session_state.youtube_video_ids) == 1:
             # Single video case
             youtube_embed_url = f"https://www.youtube.com/embed/{st.session_state.youtube_video_ids[0]}"
         else:
-            # Multiple videos: Use watch_videos for proper queuing
-            youtube_embed_url = f"https://www.youtube.com/watch_videos?video_ids=" + ",".join(st.session_state.youtube_video_ids)
+            # Multiple videos: Use playlist embedding to queue songs properly
+            youtube_embed_url = f"https://www.youtube.com/embed/{st.session_state.youtube_video_ids[0]}?playlist={','.join(st.session_state.youtube_video_ids[1:])}&autoplay=1"
 
-        # Embed YouTube playlist using iframe (prevents disappearance)
+        # Use an iframe to prevent Streamlit from reloading the component
         st.markdown(
             f'<iframe width="100%" height="400" src="{youtube_embed_url}" frameborder="0" allowfullscreen></iframe>',
             unsafe_allow_html=True
@@ -427,6 +428,7 @@ if bpm is not None and loudness is not None:
 
     else:
         st.write("⚠️ No YouTube videos available for your playlist.")
+
 
 
 # Ensure session state for playlist tracking
