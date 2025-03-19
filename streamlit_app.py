@@ -445,9 +445,10 @@ if st.session_state.user_playlist:
     st.markdown("---")
     st.subheader("💾 Save Your Playlist")
 
-    if st.button("💾 Save Playlist"):
-        playlist_name = st.text_input("Enter a name for your playlist:", key="playlist_name_input")
+    # Prompt user to enter a playlist name
+    playlist_name = st.text_input("Enter a name for your playlist:")
 
+    if st.button("💾 Save Playlist"):
         if playlist_name:
             # Generate a random 6-character identifier
             random_id = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
@@ -466,11 +467,13 @@ if st.session_state.user_playlist:
             expiration_date = datetime.now() + timedelta(weeks=2)
 
             # Save metadata to track expiration
-            with open(os.path.join(playlist_dir, f"{filename}.meta"), "w") as meta_file:
+            meta_filepath = os.path.join(playlist_dir, f"{filename}.meta")
+            with open(meta_filepath, "w") as meta_file:
                 meta_file.write(expiration_date.strftime("%Y-%m-%d %H:%M:%S"))
 
+            # 🎉 Confirm to the user that their playlist has been saved
             st.success(f"✅ Playlist '{playlist_name}' saved successfully!")
-            st.info(f"Your playlist ID is **{random_id}**. Use this ID to access your playlist later. It will be available for **two weeks**.")
+            st.info(f"🔹 **Your Playlist ID: `{random_id}`**\nUse this ID to retrieve your playlist later. It will be available for **two weeks**.")
 
 # 🗑️ Cleanup Function (Run Periodically)
 def cleanup_old_playlists():
