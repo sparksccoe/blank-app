@@ -400,18 +400,26 @@ if bpm is not None and loudness is not None:
     # 🎥 Embed YouTube playlist for all songs in the user's playlist
     st.subheader("📺 Watch Your Playlist on YouTube")
 
-    # Collect valid YouTube Video IDs
-    youtube_video_ids = [song["YouTube Video ID"] for song in st.session_state.user_playlist if pd.notna(song["YouTube Video ID"])]
+    # Ensure session state stores video IDs
+    if "youtube_video_ids" not in st.session_state:
+        st.session_state.youtube_video_ids = []
 
-    if youtube_video_ids:
-        if len(youtube_video_ids) == 1:
+    # Collect valid YouTube Video IDs from user playlist
+    new_video_ids = [song["YouTube Video ID"] for song in st.session_state.user_playlist if pd.notna(song["YouTube Video ID"])]
+
+    # Update session state only if new videos are added
+    if new_video_ids != st.session_state.youtube_video_ids:
+        st.session_state.youtube_video_ids = new_video_ids  # Update stored video list
+
+    if st.session_state.youtube_video_ids:
+        if len(st.session_state.youtube_video_ids) == 1:
             # Single video case
-            youtube_embed_url = f"https://www.youtube.com/embed/{youtube_video_ids[0]}"
+            youtube_embed_url = f"https://www.youtube.com/embed/{st.session_state.youtube_video_ids[0]}"
         else:
             # Multiple videos: Use watch_videos for proper queuing
-            youtube_embed_url = f"https://www.youtube.com/watch_videos?video_ids=" + ",".join(youtube_video_ids)
+            youtube_embed_url = f"https://www.youtube.com/watch_videos?video_ids=" + ",".join(st.session_state.youtube_video_ids)
 
-        # Embed the YouTube playlist in an iframe
+        # Embed YouTube playlist using iframe (prevents disappearance)
         st.markdown(
             f'<iframe width="100%" height="400" src="{youtube_embed_url}" frameborder="0" allowfullscreen></iframe>',
             unsafe_allow_html=True
@@ -419,6 +427,7 @@ if bpm is not None and loudness is not None:
 
     else:
         st.write("⚠️ No YouTube videos available for your playlist.")
+
 
 # Ensure session state for playlist tracking
 if "user_playlist" not in st.session_state:
