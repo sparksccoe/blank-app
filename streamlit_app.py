@@ -420,7 +420,7 @@ if bpm is not None and loudness is not None:
     if st.session_state.youtube_video_ids:
         if len(st.session_state.youtube_video_ids) == 1:
             # Single video case (play the only video)
-            youtube_embed_url = f"https://www.youtube.com/embed/{st.session_state.youtube_video_ids[0]}?autoplay=1"
+            youtube_embed_url = f"https://www.youtube.com/embed/{st.session_state.youtube_video_ids[0]}"
         else:
             # Ensure the first video is part of the queue
             first_video = st.session_state.youtube_video_ids[0]
