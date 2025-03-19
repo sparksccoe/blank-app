@@ -661,14 +661,11 @@ def display_playlist_analysis():
     #     # Display the bar chart in Streamlit
     #     st.plotly_chart(fig_genres)
 
-    # Create a DataFrame using "Release Decade" from earlier data
-    df_decades = pd.DataFrame({
-        'Track': [song["Name"] for song in playlist_songs],  # Ensure track names are included
-        'Decade': [song["Release Decade"] for song in playlist_songs]  # Use "Release Decade"
-    })
+    # Extract "Name" and "Release Decade" for decade analysis
+    df_decades = df_playlist[['Name', 'Release Decade']].copy()
 
     # Calculate the percentage of songs in each decade
-    decade_counts = df_decades['Decade'].value_counts(normalize=True) * 100
+    decade_counts = df_decades['Release Decade'].value_counts(normalize=True) * 100
 
     # Sort decades in chronological order
     decade_counts = decade_counts.sort_index()
