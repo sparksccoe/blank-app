@@ -414,11 +414,13 @@ if bpm is not None and loudness is not None:
     # Display YouTube player only if there are valid videos
     if st.session_state.youtube_video_ids:
         if len(st.session_state.youtube_video_ids) == 1:
-            # Single video case
-            youtube_embed_url = f"https://www.youtube.com/embed/{st.session_state.youtube_video_ids[0]}"
+            # Single video case (play the only video)
+            youtube_embed_url = f"https://www.youtube.com/embed/{st.session_state.youtube_video_ids[0]}?autoplay=1"
         else:
-            # Multiple videos: Use playlist embedding to queue songs properly
-            youtube_embed_url = f"https://www.youtube.com/embed/{st.session_state.youtube_video_ids[0]}?playlist={','.join(st.session_state.youtube_video_ids[1:])}&autoplay=1"
+            # Ensure the first video is part of the queue
+            first_video = st.session_state.youtube_video_ids[0]
+            playlist_videos = ",".join(st.session_state.youtube_video_ids)  # Include the first video in the playlist
+            youtube_embed_url = f"https://www.youtube.com/embed/{first_video}?playlist={playlist_videos}&autoplay=1"
 
         # Use an iframe to prevent Streamlit from reloading the component
         st.markdown(
@@ -428,8 +430,6 @@ if bpm is not None and loudness is not None:
 
     else:
         st.write("⚠️ No YouTube videos available for your playlist.")
-
-
 
 # Ensure session state for playlist tracking
 if "user_playlist" not in st.session_state:
