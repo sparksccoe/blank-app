@@ -252,7 +252,7 @@ def generate_drum_sound(sample_rate=44100, drum_type="kick"):
     return np.clip(sound, -1, 1)
 
 # 🥁 Function to generate a drum beat loop
-def generate_drum_beat(bpm, duration=5, sample_rate=44100):
+def generate_drum_beat(bpm, duration=20, sample_rate=44100):
     interval = 60 / bpm  # Seconds per beat
     num_beats = int(duration / interval)  # Total beats in duration
     audio = np.zeros(int(sample_rate * duration))  # Empty audio track
@@ -702,8 +702,8 @@ def display_playlist_analysis():
     # Display the bar chart in Streamlit
     st.plotly_chart(fig_decades)
 
-
 # 📌 Call the function **after** the button logic
 if st.session_state.get("show_playlist_analysis", False):
     display_playlist_analysis() 
+
 
