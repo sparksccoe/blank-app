@@ -408,11 +408,14 @@ if bpm is not None and loudness is not None:
             # Single video case
             youtube_embed_url = f"https://www.youtube.com/embed/{youtube_video_ids[0]}"
         else:
-            # Multiple videos: Use watch_videos for better queuing
+            # Multiple videos: Use watch_videos for proper queuing
             youtube_embed_url = f"https://www.youtube.com/watch_videos?video_ids=" + ",".join(youtube_video_ids)
 
-        # Embed the YouTube playlist
-        st.markdown(f'<iframe width="100%" height="400" src="{youtube_embed_url}" frameborder="0" allowfullscreen></iframe>', unsafe_allow_html=True)
+        # Embed the YouTube playlist in an iframe
+        st.markdown(
+            f'<iframe width="100%" height="400" src="{youtube_embed_url}" frameborder="0" allowfullscreen></iframe>',
+            unsafe_allow_html=True
+        )
 
     else:
         st.write("⚠️ No YouTube videos available for your playlist.")
