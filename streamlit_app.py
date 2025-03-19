@@ -661,6 +661,9 @@ def display_playlist_analysis():
     #     # Display the bar chart in Streamlit
     #     st.plotly_chart(fig_genres)
 
+    # Create DataFrame from the constructed 'data' dictionary
+    df_playlist = pd.DataFrame(data)
+
     # Extract "Name" and "Release Decade" for decade analysis
     df_decades = df_playlist[['Name', 'Release Decade']].copy()
 
