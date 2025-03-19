@@ -1,6 +1,11 @@
 import streamlit as st
 import requests
 import streamlit.components.v1 as components
+import os
+import random
+import string
+import shutil
+from datetime import datetime, timedelta
 
 hide_streamlit_style = """
                 <style>
@@ -430,6 +435,61 @@ if bpm is not None and loudness is not None:
 
     else:
         st.write("⚠️ No YouTube videos available for your playlist.")
+
+# Ensure 'saved user playlists' directory exists
+playlist_dir = "saved_user_playlists"
+os.makedirs(playlist_dir, exist_ok=True)
+
+# 📝 Button to Save User Playlist
+if st.session_state.user_playlist:
+    st.markdown("---")
+    st.subheader("💾 Save Your Playlist")
+
+    if st.button("💾 Save Playlist"):
+        playlist_name = st.text_input("Enter a name for your playlist:", key="playlist_name_input")
+
+        if playlist_name:
+            # Generate a random 6-character identifier
+            random_id = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
+
+            # Format the filename
+            filename = f"{playlist_name.replace(' ', '_')}_{random_id}.csv"
+            filepath = os.path.join(playlist_dir, filename)
+
+            # Convert playlist to a DataFrame
+            df_playlist = pd.DataFrame(st.session_state.user_playlist)
+
+            # Save the playlist as a CSV file
+            df_playlist.to_csv(filepath, index=False)
+
+            # Set expiration date (2 weeks from now)
+            expiration_date = datetime.now() + timedelta(weeks=2)
+
+            # Save metadata to track expiration
+            with open(os.path.join(playlist_dir, f"{filename}.meta"), "w") as meta_file:
+                meta_file.write(expiration_date.strftime("%Y-%m-%d %H:%M:%S"))
+
+            st.success(f"✅ Playlist '{playlist_name}' saved successfully!")
+            st.info(f"Your playlist ID is **{random_id}**. Use this ID to access your playlist later. It will be available for **two weeks**.")
+
+# 🗑️ Cleanup Function (Run Periodically)
+def cleanup_old_playlists():
+    now = datetime.now()
+    for file in os.listdir(playlist_dir):
+        if file.endswith(".meta"):
+            meta_filepath = os.path.join(playlist_dir, file)
+            with open(meta_filepath, "r") as meta_file:
+                expiration_str = meta_file.read().strip()
+                expiration_date = datetime.strptime(expiration_str, "%Y-%m-%d %H:%M:%S")
+
+                # If expired, delete the playlist and metadata
+                if now > expiration_date:
+                    playlist_csv = meta_filepath.replace(".meta", "")
+                    os.remove(meta_filepath)
+                    if os.path.exists(playlist_csv):
+                        os.remove(playlist_csv)
+
+cleanup_old_playlists()  # Call cleanup function to remove expired playlists
 
 # Ensure session state for playlist tracking
 if "user_playlist" not in st.session_state:
