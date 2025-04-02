@@ -819,34 +819,45 @@ def display_playlist_analysis():
     # Sort genres by percentage in descending order
     genre_percentages_sorted = genre_percentages.sort_values(ascending=False)
 
-    # Calculate cumulative sum and filter genres contributing to top 80%
-    cumulative_percentages = genre_percentages_sorted.cumsum()
-    top_genres_80 = genre_percentages_sorted[cumulative_percentages <= 80]
+    # Handle case where there's only 1 song
+    if len(genre_percentages_sorted) == 1:
+        st.write("### 🎶 Genre of the Song in Your Playlist")
+        single_genre = genre_percentages_sorted.index[0]
+        single_percentage = genre_percentages_sorted.iloc[0]
 
-    # Display chart header
+        st.write(f"Your song is categorized as **{single_genre}**, which makes up **{single_percentage:.2f}%** of your playlist.")
+    else:
+        # Calculate cumulative sum and filter genres contributing to top 80%
+        cumulative_percentages = genre_percentages_sorted.cumsum()
+        top_genres_80 = genre_percentages_sorted[cumulative_percentages <= 80]
+
+        # Create DataFrame for chart
+        df_top_genres = pd.DataFrame({
+            "Genre": top_genres_80.index,
+            "Percentage": top_genres_80.values
+        })
+
     st.write("### 🎶 Main Genres of Songs in Your Playlist")
 
-    # Create a horizontal bar chart using Plotly to display top genres contributing to 80%
+    # Create the horizontal bar chart
     fig = px.bar(
-        top_genres_80,
-        x=top_genres_80.values,
-        y=top_genres_80.index,
-        orientation='h',  # Horizontal bar chart
-        labels={'x': 'Percentage of Songs (%)', 'y': 'Genres'},
-        # title='Main Genres of Songs',
+        df_top_genres,
+        x="Percentage",
+        y="Genre",
+        orientation='h',
+        labels={'Percentage': 'Percentage of Songs (%)', 'Genre': 'Genres'}
     )
-    # Customize hovertemplate to show only the percentage
+
     fig.update_traces(hovertemplate='%{x:.2f}%<extra></extra>')
-    # Customize the bar chart's appearance
     fig.update_layout(
         xaxis_title="Percentage of Songs (%)",
         yaxis_title="Genres",
-        xaxis=dict(range=[0, 100]),  # Set x-axis range from 0 to 100
-        margin=dict(t=0)  # Remove the space at the top of the chart
-        # title_x=0  # Center the title
+        xaxis=dict(range=[0, 100]),
+        margin=dict(t=0)
     )
-    # Display the bar chart in Streamlit
+
     st.plotly_chart(fig)
+
 
 # 📌 Call the function **after** the button logic
 if st.session_state.get("show_playlist_analysis", False):
