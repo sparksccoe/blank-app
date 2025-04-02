@@ -190,6 +190,30 @@ if playlist_id:
         "YouTube Video ID": track_video_id[:len(track_id)],  # Ensure lengths match
     })
 
+# Initialize user playlist in session state if it doesn’t exist
+if "user_playlist" not in st.session_state:
+    st.session_state.user_playlist = []
+
+image = Image.open('data_adventures_logo.png')
+col1, col2, col3 = st.columns([1,6,1])
+
+with col1:
+    st.write("")
+
+with col2:
+    st.image(image, width=int(image.width * 0.4))
+
+with col3:
+    st.write("")
+
+# st.write('Let’s go on a Data Adventure with our Bards!')
+st.markdown(
+    "<div style='text-align: center; font-size: 16px; font-weight: normal;'>"
+    "Let’s go on a Data Adventure with our Bards!"
+    "</div>", 
+    unsafe_allow_html=True
+)
+
 # 📂 Retrieve Saved Playlist Section
 st.markdown("---")
 st.subheader("📂 Retrieve a Saved Playlist")
@@ -215,30 +239,6 @@ if retrieve_option == "Yes":
             st.success(f"✅ Playlist with ID `{entered_id}` loaded successfully!")
         else:
             st.error("❌ No playlist found with that ID. Please double-check and try again.")
-
-# Initialize user playlist in session state if it doesn’t exist
-if "user_playlist" not in st.session_state:
-    st.session_state.user_playlist = []
-
-image = Image.open('data_adventures_logo.png')
-col1, col2, col3 = st.columns([1,6,1])
-
-with col1:
-    st.write("")
-
-with col2:
-    st.image(image, width=int(image.width * 0.4))
-
-with col3:
-    st.write("")
-
-# st.write('Let’s go on a Data Adventure with our Bards!')
-st.markdown(
-    "<div style='text-align: center; font-size: 16px; font-weight: normal;'>"
-    "Let’s go on a Data Adventure with our Bards!"
-    "</div>", 
-    unsafe_allow_html=True
-)
 
 st.header("🎚️ Metronome Master")
 # 🎼 Show relatable response only after the user enters BPM
