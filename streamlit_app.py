@@ -218,7 +218,7 @@ st.markdown(
 st.subheader("📂 Retrieve a Saved Playlist")
 
 # Ask if user wants to retrieve a saved playlist
-retrieve_option = st.radio("Do you have a Playlist ID to retrieve a saved playlist?", ("No", "Yes"))
+retrieve_option = st.radio("Do you want to open a playlist you saved earlier?", ("No", "Yes"))
 
 if retrieve_option == "Yes":
     entered_id = st.text_input("Enter your 6-character Playlist ID:")
