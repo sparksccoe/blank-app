@@ -810,23 +810,22 @@ def display_playlist_analysis():
 
     # 🎼 Genre Distribution Analysis from the Playlist DataFrame
 
-    # Playlist track_genres data 
-    # Convert track_genres to a DataFrame for easier analysis
-    df_genres = pd.DataFrame(track_genres, columns=["Genre"])
-
     # Count occurrences of each genre
-    genre_counts = df_genres["Genre"].value_counts()
+    genre_counts = df["Genre"].value_counts()
 
     # Calculate the percentage for each genre
     genre_percentages = (genre_counts / genre_counts.sum()) * 100
-    # Sort genres by their percentage in descending order
+
+    # Sort genres by percentage in descending order
     genre_percentages_sorted = genre_percentages.sort_values(ascending=False)
 
-    # Calculate the cumulative sum and filter to only include genres up to 80%
+    # Calculate cumulative sum and filter genres contributing to top 80%
     cumulative_percentages = genre_percentages_sorted.cumsum()
     top_genres_80 = genre_percentages_sorted[cumulative_percentages <= 80]
 
-    st.write(f"### Main Genres of Songs")
+    # Display chart header
+    st.write("### 🎶 Main Genres of Songs in Your Playlist")
+
     # Create a horizontal bar chart using Plotly to display top genres contributing to 80%
     fig = px.bar(
         top_genres_80,
