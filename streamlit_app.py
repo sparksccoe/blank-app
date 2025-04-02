@@ -215,7 +215,6 @@ st.markdown(
 )
 
 # 📂 Retrieve Saved Playlist Section
-st.markdown("---")
 st.subheader("📂 Retrieve a Saved Playlist")
 
 # Ask if user wants to retrieve a saved playlist
@@ -240,6 +239,7 @@ if retrieve_option == "Yes":
         else:
             st.error("❌ No playlist found with that ID. Please double-check and try again.")
 
+st.markdown("---")
 st.header("🎚️ Metronome Master")
 # 🎼 Show relatable response only after the user enters BPM
 
