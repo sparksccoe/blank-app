@@ -190,6 +190,32 @@ if playlist_id:
         "YouTube Video ID": track_video_id[:len(track_id)],  # Ensure lengths match
     })
 
+# 📂 Retrieve Saved Playlist Section
+st.markdown("---")
+st.subheader("📂 Retrieve a Saved Playlist")
+
+# Ask if user wants to retrieve a saved playlist
+retrieve_option = st.radio("Do you have a Playlist ID to retrieve a saved playlist?", ("No", "Yes"))
+
+if retrieve_option == "Yes":
+    entered_id = st.text_input("Enter your 6-character Playlist ID:")
+
+    if entered_id:
+        # Look for a matching playlist file in the directory
+        matching_files = [f for f in os.listdir(playlist_dir) if f.endswith(f"{entered_id}.csv")]
+
+        if matching_files:
+            playlist_file = matching_files[0]
+            filepath = os.path.join(playlist_dir, playlist_file)
+
+            # Load the playlist into session state
+            retrieved_df = pd.read_csv(filepath)
+            st.session_state.user_playlist = retrieved_df.to_dict(orient="records")
+
+            st.success(f"✅ Playlist with ID `{entered_id}` loaded successfully!")
+        else:
+            st.error("❌ No playlist found with that ID. Please double-check and try again.")
+
 # Initialize user playlist in session state if it doesn’t exist
 if "user_playlist" not in st.session_state:
     st.session_state.user_playlist = []
@@ -403,7 +429,7 @@ if bpm is not None and loudness is not None:
                 st.write("Your playlist is empty. Add songs to create one!")
 
     # 🎥 Embed YouTube playlist for all songs in the user's playlist
-    st.subheader("📺 Watch Your Playlist on YouTube")
+    st.subheader("📺 Listen to your playlist on YouTube")
 
     # Ensure session state stores video IDs persistently
     if "youtube_video_ids" not in st.session_state:
