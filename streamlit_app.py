@@ -814,34 +814,27 @@ def display_playlist_analysis():
     # Sort genres by percentage in descending order
     genre_percentages_sorted = genre_percentages.sort_values(ascending=False)
 
-    # Handle edge case: No genres found
     if genre_percentages_sorted.empty:
         st.warning("⚠️ No genre data available to display.")
-    # Handle edge case: Only one genre
     elif len(genre_percentages_sorted) == 1:
         st.write("### 🎶 Genre of the Song in Your Playlist")
         genre = genre_percentages_sorted.index[0]
         percent = genre_percentages_sorted.iloc[0]
         st.write(f"Your song is categorized as **{genre}**, which makes up **{percent:.2f}%** of your playlist.")
     else:
-        # Calculate cumulative sum and filter genres contributing to top 80%
         cumulative_percentages = genre_percentages_sorted.cumsum()
         top_genres_80 = genre_percentages_sorted[cumulative_percentages <= 80]
 
-    # Fallback: If top_genres_80 is empty (e.g. all genres above 80% individually)
-    if top_genres_80.empty:
+    if len(top_genres_80) == 0:
         top_genres_80 = genre_percentages_sorted.head(5)
 
-    # Create a DataFrame for Plotly
     df_top_genres = pd.DataFrame({
         "Genre": top_genres_80.index.tolist(),
         "Percentage": top_genres_80.values.tolist()
     })
 
-    # Display the chart title
     st.write("### 🎶 Main Genres of Songs in Your Playlist")
 
-    # Create the bar chart
     fig = px.bar(
         df_top_genres,
         x="Percentage",
@@ -857,6 +850,9 @@ def display_playlist_analysis():
         xaxis=dict(range=[0, 100]),
         margin=dict(t=0)
     )
+
+    st.plotly_chart(fig)
+
 
     st.plotly_chart(fig)
 
