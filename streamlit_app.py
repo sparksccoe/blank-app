@@ -214,6 +214,8 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+st.markdown("<br>", unsafe_allow_html=True)
+
 # 📂 Retrieve Saved Playlist Section
 st.subheader("📂 Retrieve a Saved Playlist")
 
@@ -235,7 +237,7 @@ if retrieve_option == "Yes":
             retrieved_df = pd.read_csv(filepath)
             st.session_state.user_playlist = retrieved_df.to_dict(orient="records")
 
-            st.success(f"✅ Playlist with ID `{entered_id}` loaded successfully!")
+            st.success(f"✅ Playlist with ID `{entered_id}` loaded successfully! Let's keep building our playlist.")
         else:
             st.error("❌ No playlist found with that ID. Please double-check and try again.")
 
@@ -805,6 +807,46 @@ def display_playlist_analysis():
 
     # Display the bar chart in Streamlit
     st.plotly_chart(fig_decades)
+
+    # 🎼 Genre Distribution Analysis from the Playlist DataFrame
+
+    # Count occurrences of each genre
+    genre_counts = df["Genre"].value_counts()
+
+    # Calculate the percentage for each genre
+    genre_percentages = (genre_counts / genre_counts.sum()) * 100
+
+    # Sort genres by percentage in descending order
+    genre_percentages_sorted = genre_percentages.sort_values(ascending=False)
+
+    # Calculate cumulative sum and filter genres contributing to top 80%
+    cumulative_percentages = genre_percentages_sorted.cumsum()
+    top_genres_80 = genre_percentages_sorted[cumulative_percentages <= 80]
+
+    # Display chart header
+    st.write("### 🎶 Main Genres of Songs in Your Playlist")
+
+    # Create a horizontal bar chart using Plotly
+    fig = px.bar(
+        top_genres_80,
+        x=top_genres_80.values,
+        y=top_genres_80.index,
+        orientation='h',
+        labels={'x': 'Percentage of Songs (%)', 'y': 'Genres'}
+    )
+
+    # Customize hover and layout
+    fig.update_traces(hovertemplate='%{x:.2f}%<extra></extra>')
+    fig.update_layout(
+        xaxis_title="Percentage of Songs (%)",
+        yaxis_title="Genres",
+        xaxis=dict(range=[0, 100]),
+        margin=dict(t=10),
+        showlegend=False
+    )
+
+    # Show the chart in Streamlit
+    st.plotly_chart(fig)
 
 # 📌 Call the function **after** the button logic
 if st.session_state.get("show_playlist_analysis", False):
