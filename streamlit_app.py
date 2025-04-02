@@ -805,11 +805,6 @@ def display_playlist_analysis():
         showlegend=False  # Hide legend
     )
 
-    # Display the bar chart in Streamlit
-    st.plotly_chart(fig_decades)
-
-    # 🎼 Genre Distribution Analysis from the Playlist DataFrame
-
     # Count occurrences of each genre
     genre_counts = df["Genre"].value_counts()
 
@@ -831,11 +826,11 @@ def display_playlist_analysis():
         cumulative_percentages = genre_percentages_sorted.cumsum()
         top_genres_80 = genre_percentages_sorted[cumulative_percentages <= 80]
 
-        # Create DataFrame for chart
-        df_top_genres = pd.DataFrame({
-            "Genre": top_genres_80.index,
-            "Percentage": top_genres_80.values
-        })
+    # Create DataFrame for chart
+    df_top_genres = pd.DataFrame({
+        "Genre": top_genres_80.index,
+        "Percentage": top_genres_80.values
+    })
 
     st.write("### 🎶 Main Genres of Songs in Your Playlist")
 
@@ -857,6 +852,7 @@ def display_playlist_analysis():
     )
 
     st.plotly_chart(fig)
+
 
 
 # 📌 Call the function **after** the button logic
