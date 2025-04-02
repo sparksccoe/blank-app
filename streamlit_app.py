@@ -826,13 +826,17 @@ def display_playlist_analysis():
     # Display chart header
     st.write("### 🎶 Main Genres of Songs in Your Playlist")
 
-    # Create a horizontal bar chart using Plotly
+    df_top_genres = pd.DataFrame({
+        "Genre": top_genres_80.index,
+        "Percentage": top_genres_80.values
+    })
+
     fig = px.bar(
-        top_genres_80,
-        x=top_genres_80.values,
-        y=top_genres_80.index,
+        df_top_genres,
+        x="Percentage",
+        y="Genre",
         orientation='h',
-        labels={'x': 'Percentage of Songs (%)', 'y': 'Genres'}
+        labels={'Percentage': 'Percentage of Songs (%)', 'Genre': 'Genres'}
     )
 
     # Customize hover and layout
