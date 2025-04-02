@@ -810,46 +810,43 @@ def display_playlist_analysis():
 
     # 🎼 Genre Distribution Analysis from the Playlist DataFrame
 
+    # Playlist track_genres data 
+    # Convert track_genres to a DataFrame for easier analysis
+    df_genres = pd.DataFrame(track_genres, columns=["Genre"])
+
     # Count occurrences of each genre
-    genre_counts = df["Genre"].value_counts()
+    genre_counts = df_genres["Genre"].value_counts()
 
     # Calculate the percentage for each genre
     genre_percentages = (genre_counts / genre_counts.sum()) * 100
-
-    # Sort genres by percentage in descending order
+    # Sort genres by their percentage in descending order
     genre_percentages_sorted = genre_percentages.sort_values(ascending=False)
 
-    # Calculate cumulative sum and filter genres contributing to top 80%
+    # Calculate the cumulative sum and filter to only include genres up to 80%
     cumulative_percentages = genre_percentages_sorted.cumsum()
     top_genres_80 = genre_percentages_sorted[cumulative_percentages <= 80]
 
-    # Display chart header
-    st.write("### 🎶 Main Genres of Songs in Your Playlist")
-
-    df_top_genres = pd.DataFrame({
-        "Genre": top_genres_80.index,
-        "Percentage": top_genres_80.values
-    })
-
+    st.write(f"### Main Genres of Songs")
+    # Create a horizontal bar chart using Plotly to display top genres contributing to 80%
     fig = px.bar(
-        df_top_genres,
-        x="Percentage",
-        y="Genre",
-        orientation='h',
-        labels={'Percentage': 'Percentage of Songs (%)', 'Genre': 'Genres'}
+        top_genres_80,
+        x=top_genres_80.values,
+        y=top_genres_80.index,
+        orientation='h',  # Horizontal bar chart
+        labels={'x': 'Percentage of Songs (%)', 'y': 'Genres'},
+        # title='Main Genres of Songs',
     )
-
-    # Customize hover and layout
+    # Customize hovertemplate to show only the percentage
     fig.update_traces(hovertemplate='%{x:.2f}%<extra></extra>')
+    # Customize the bar chart's appearance
     fig.update_layout(
         xaxis_title="Percentage of Songs (%)",
         yaxis_title="Genres",
-        xaxis=dict(range=[0, 100]),
-        margin=dict(t=10),
-        showlegend=False
+        xaxis=dict(range=[0, 100]),  # Set x-axis range from 0 to 100
+        margin=dict(t=0)  # Remove the space at the top of the chart
+        # title_x=0  # Center the title
     )
-
-    # Show the chart in Streamlit
+    # Display the bar chart in Streamlit
     st.plotly_chart(fig)
 
 # 📌 Call the function **after** the button logic
