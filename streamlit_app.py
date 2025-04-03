@@ -238,6 +238,11 @@ if retrieve_option == "Yes":
             # Load the playlist into session state
             retrieved_df = pd.read_csv(filepath)
             st.session_state.user_playlist = retrieved_df.to_dict(orient="records")
+            # Extract the name portion
+            playlist_base_name = matching_file.rsplit("_", 1)[0].replace("_", " ")
+
+            # Store it in session state
+            st.session_state.saved_playlist_name = playlist_base_name
 
             st.success(f"✅ Playlist with ID `{entered_id}` loaded successfully! Let's keep building our playlist.")
         else:
@@ -420,7 +425,10 @@ if bpm is not None and loudness is not None:
                 st.warning("⚠️ This song is already in your playlist!")
 
         # 🎵 Display the User's Playlist Below
-        st.subheader("🎶 Your Playlist")
+        if "saved_playlist_name" in st.session_state:
+            st.subheader(f"🎶 Your Playlist: {st.session_state.saved_playlist_name}")
+        else:
+            st.subheader("🎶 Your Playlist")
         if st.session_state.user_playlist:
             for song in st.session_state.user_playlist:
                 col1, col2 = st.columns([1, 3])
