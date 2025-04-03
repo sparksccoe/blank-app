@@ -239,7 +239,7 @@ if retrieve_option == "Yes":
             retrieved_df = pd.read_csv(filepath)
             st.session_state.user_playlist = retrieved_df.to_dict(orient="records")
             # Extract the name portion
-            playlist_base_name = matching_files.rsplit("_", 1)[0].replace("_", " ")
+            playlist_base_name = matching_files[0].rsplit("_", 1)[0].replace("_", " ")
 
             # Store it in session state
             st.session_state.saved_playlist_name = playlist_base_name
