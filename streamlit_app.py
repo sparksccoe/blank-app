@@ -224,6 +224,8 @@ retrieve_option = st.radio("Do you want to open a playlist you saved earlier?", 
 
 if retrieve_option == "Yes":
     entered_id = st.text_input("Enter your 6-character Playlist ID:")
+    # Define the directory where playlists are saved
+    playlist_dir = "saved_user_playlists"
 
     if entered_id:
         # Look for a matching playlist file in the directory
