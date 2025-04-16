@@ -6,6 +6,8 @@ import random
 import string
 import shutil
 from datetime import datetime, timedelta
+from streamlit_drawable_canvas import st_canvas
+from PIL import Image
 
 hide_streamlit_style = """
                 <style>
@@ -350,6 +352,32 @@ if loudness is not None:
         st.write("This is **fairly loud**, like *Uptown Funk* by Bruno Mars or *Industry Baby* by Lil Nas X—big, dynamic, and exciting!")
     else:
         st.write("**Max loudness!** This is like *Blinding Lights* by The Weeknd or *Sicko Mode* by Travis Scott—high-energy, booming, and club-ready!")
+
+    st.subheader("🎨 Visualize Tempo and Loudness")
+    
+    # Load background image
+    bg_image_path = "average_tempo_line.png"
+    bg_image = Image.open(bg_image_path)
+
+    # Drawable canvas with transparent red rectangle overlay option
+    canvas_result = st_canvas(
+        fill_color="rgba(255, 0, 0, 0.1)",  # transparent red
+        stroke_width=3,
+        stroke_color="red",
+        background_image=bg_image,
+        update_streamlit=True,
+        height=bg_image.height,
+        width=bg_image.width,
+        drawing_mode="rect",
+        key="loudness_canvas"
+    )
+
+    if canvas_result.json_data is not None:
+        st.caption("📐 Rectangle drawn data (x/y/w/h):")
+        for obj in canvas_result.json_data["objects"]:
+            if obj["type"] == "rect":
+                st.write(f"Top-left: ({obj['left']}, {obj['top']}), Width: {obj['width']}, Height: {obj['height']}")
+
 
 # 🟢 Ensure both BPM & Loudness are entered before proceeding
 if bpm is not None and loudness is not None:
