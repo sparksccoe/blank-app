@@ -272,7 +272,7 @@ if retrieve_option == "Yes":
                 show_youtube = st.checkbox("🎧 Show YouTube Playlist", value=False)
 
                 if show_youtube:
-                    st.subheader("📺 Listen to your playlist on YouTube")
+                    st.subheader("🎧 Listen to your playlist on YouTube")
 
                     # Ensure session state stores video IDs persistently
                     if "youtube_video_ids" not in st.session_state:
