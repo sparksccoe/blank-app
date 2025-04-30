@@ -225,13 +225,17 @@ st.subheader("📂 Retrieve a Saved Playlist")
 retrieve_option = st.radio("Do you want to open a playlist you saved earlier?", ("No", "Yes"))
 
 if retrieve_option == "Yes":
-    entered_id = st.text_input("Enter your 6-character Playlist ID:")
+    entered_code = st.text_input("Enter your 2-word Playlist Code:").strip().lower()
+
     # Define the directory where playlists are saved
     playlist_dir = "saved_user_playlists"
 
-    if entered_id:
-        # Look for a matching playlist file in the directory
-        matching_files = [f for f in os.listdir(playlist_dir) if f.endswith(f"{entered_id}.csv")]
+    if entered_code:
+        # Case-insensitive match
+        matching_files = [
+            f for f in os.listdir(playlist_dir)
+            if f.lower().endswith(f"{entered_code}.csv")
+        ]
 
         if matching_files:
             playlist_file = matching_files[0]
@@ -240,15 +244,16 @@ if retrieve_option == "Yes":
             # Load the playlist into session state
             retrieved_df = pd.read_csv(filepath)
             st.session_state.user_playlist = retrieved_df.to_dict(orient="records")
-            # Extract the name portion
-            playlist_base_name = matching_files[0].rsplit("_", 1)[0].replace("_", " ")
 
-            # Store it in session state
+            # Extract playlist name from filename
+            playlist_base_name = playlist_file.rsplit("_", 1)[0].replace("_", " ")
+
+            # Store in session state
             st.session_state.saved_playlist_name = playlist_base_name
 
-            st.success(f"✅ Playlist with ID `{entered_id}` loaded successfully! Let's keep building our playlist.")
+            st.success(f"✅ Playlist with code `{entered_code}` loaded successfully! Let's keep building your playlist.")
 
-            # 🎶 Display Retrieved Playlist
+            # 🎶 Display Playlist
             if "saved_playlist_name" in st.session_state:
                 st.subheader(f"🎶 Your Playlist: {st.session_state.saved_playlist_name}")
             else:
@@ -262,9 +267,8 @@ if retrieve_option == "Yes":
                     with col2:
                         st.write(f"**{song['Name']}** by {song['Artist']}")
                         st.markdown(f"**Tempo:** {song['Tempo (BPM)']} BPM &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; **Loudness:** {song['Loudness (dB)']} dB")
-
         else:
-            st.error("❌ No playlist found with that ID. Please double-check and try again.")
+            st.error("❌ No playlist found with that code. Please double-check and try again.")
 
 
 st.markdown("---")
@@ -494,9 +498,16 @@ if bpm is not None and loudness is not None:
     else:
         st.write("⚠️ No YouTube videos available for your playlist.")
 
-# Ensure 'saved user playlists' directory exists
+# Ensure 'saved_user_playlists' directory exists
 playlist_dir = "saved_user_playlists"
 os.makedirs(playlist_dir, exist_ok=True)
+
+# Word list for playlist code generation
+word_choices = [
+    "Graph", "Tempo", "Volume", "Loud", "Soft", "Fast", "Slow", "Numeric", "Data",
+    "Creature", "Bard", "Village", "Journal", "Game", "Adventure", "Visualize",
+    "Activate", "Concert", "Music", "Band", "Quartet", "Trio"
+]
 
 # 📝 Button to Save User Playlist
 if st.session_state.user_playlist:
@@ -508,11 +519,12 @@ if st.session_state.user_playlist:
 
     if st.button("💾 Save Playlist"):
         if playlist_name:
-            # Generate a random 6-character identifier
-            random_id = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
+            # Generate a lowercase two-word playlist code
+            word1, word2 = random.sample(word_choices, 2)
+            playlist_code = f"{word1}{word2}".lower()
 
             # Format the filename
-            filename = f"{playlist_name.replace(' ', '_')}_{random_id}.csv"
+            filename = f"{playlist_name.replace(' ', '_')}_{playlist_code}.csv"
             filepath = os.path.join(playlist_dir, filename)
 
             # Convert playlist to a DataFrame
@@ -531,7 +543,23 @@ if st.session_state.user_playlist:
 
             # 🎉 Confirm to the user that their playlist has been saved
             st.success(f"✅ Playlist '{playlist_name}' saved successfully!")
-            st.info(f"🔹 **Your Playlist ID:**\n\n### `{random_id}`\n\nUse this ID to retrieve your playlist later. It will be available for **two weeks**.")
+            st.info(f"🔹 **Your Playlist Code:**\n\n### `{playlist_code}`\n\nUse this code to retrieve your playlist later. It will be available for **two weeks**.")
+
+# Display Playlist Code in a Copy-Friendly Format
+st.markdown("##### 📋 Copy Your Playlist Code")
+
+# Use st.code for clean display
+st.code(playlist_code, language="")
+
+# Add copy-to-clipboard functionality using HTML and JavaScript
+copy_code = f"""
+    <input type="text" value="{playlist_code}" id="playlistCode" readonly style="opacity:0; position:absolute; left:-9999px;">
+    <button onclick="navigator.clipboard.writeText('{playlist_code}'); this.innerText='Copied! ✅';" 
+            style="margin-top: 5px; padding: 6px 12px; font-size: 16px; cursor: pointer;">
+        📋 Copy Code
+    </button>
+"""
+st.markdown(copy_code, unsafe_allow_html=True)
 
 # 🗑️ Cleanup Function (Run Periodically)
 def cleanup_old_playlists():
@@ -550,7 +578,7 @@ def cleanup_old_playlists():
                     if os.path.exists(playlist_csv):
                         os.remove(playlist_csv)
 
-cleanup_old_playlists()  # Call cleanup function to remove expired playlists
+cleanup_old_playlists()
 
 # Ensure session state for playlist tracking
 if "user_playlist" not in st.session_state:
