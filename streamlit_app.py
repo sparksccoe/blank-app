@@ -509,9 +509,15 @@ word_choices = [
     "Activate", "Concert", "Music", "Band", "Quartet", "Trio"
 ]
 
-# 📝 Button to Save User Playlist
-if st.button("💾 Save Playlist"):
-    if playlist_name:
+# 📝 Save Playlist Section
+if st.session_state.user_playlist:
+    st.markdown("---")
+    st.subheader("💾 Save Your Playlist")
+
+    # Prompt user to enter a playlist name first
+    playlist_name = st.text_input("Enter a name for your playlist:")
+
+    if st.button("💾 Save Playlist") and playlist_name:
         # Generate a unique, lowercase one-word playlist code
         base_word = random.choice(word_choices).lower()
 
@@ -534,14 +540,10 @@ if st.button("💾 Save Playlist"):
 
         # Convert playlist to a DataFrame
         df_playlist = pd.DataFrame(st.session_state.user_playlist)
-
-        # Save the playlist as a CSV file
         df_playlist.to_csv(filepath, index=False)
 
         # Set expiration date (2 weeks from now)
         expiration_date = datetime.now() + timedelta(weeks=2)
-
-        # Save metadata to track expiration
         meta_filepath = os.path.join(playlist_dir, f"{filename}.meta")
         with open(meta_filepath, "w") as meta_file:
             meta_file.write(expiration_date.strftime("%Y-%m-%d %H:%M:%S"))
