@@ -247,8 +247,25 @@ if retrieve_option == "Yes":
             st.session_state.saved_playlist_name = playlist_base_name
 
             st.success(f"✅ Playlist with ID `{entered_id}` loaded successfully! Let's keep building our playlist.")
+
+            # 🎶 Display Retrieved Playlist
+            if "saved_playlist_name" in st.session_state:
+                st.subheader(f"🎶 Your Playlist: {st.session_state.saved_playlist_name}")
+            else:
+                st.subheader("🎶 Your Playlist")
+
+            if st.session_state.user_playlist:
+                for song in st.session_state.user_playlist:
+                    col1, col2 = st.columns([1, 3])
+                    with col1:
+                        st.image(song["Image"], width=80)
+                    with col2:
+                        st.write(f"**{song['Name']}** by {song['Artist']}")
+                        st.markdown(f"**Tempo:** {song['Tempo (BPM)']} BPM &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; **Loudness:** {song['Loudness (dB)']} dB")
+
         else:
             st.error("❌ No playlist found with that ID. Please double-check and try again.")
+
 
 st.markdown("---")
 st.header("🎚️ Metronome Master")
