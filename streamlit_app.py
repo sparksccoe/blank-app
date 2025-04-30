@@ -225,7 +225,7 @@ st.subheader("📂 Retrieve a Saved Playlist")
 retrieve_option = st.radio("Do you want to open a playlist you saved earlier?", ("No", "Yes"))
 
 if retrieve_option == "Yes":
-    entered_code = st.text_input("Enter your 2-word Playlist Code:").strip().lower()
+    entered_code = st.text_input("Enter your 1-word Playlist Code:").strip().lower()
 
     # Define the directory where playlists are saved
     playlist_dir = "saved_user_playlists"
@@ -519,11 +519,23 @@ if st.session_state.user_playlist:
 
     if st.button("💾 Save Playlist"):
         if playlist_name:
-            # Generate a lowercase two-word playlist code
-            word1, word2 = random.sample(word_choices, 2)
-            playlist_code = f"{word1}{word2}".lower()
+            # Generate a unique, lowercase one-word playlist code
+            base_word = random.choice(word_choices).lower()
 
-            # Format the filename
+            # Get all existing codes (case-insensitive)
+            existing_codes = {
+                f.rsplit("_", 1)[-1].replace(".csv", "").lower()
+                for f in os.listdir(playlist_dir) if f.endswith(".csv")
+            }
+
+            # Initialize playlist code and ensure uniqueness
+            playlist_code = base_word
+            suffix = 1
+            while playlist_code in existing_codes:
+                playlist_code = f"{base_word}{suffix}"
+                suffix += 1
+
+            # Format the filename using the playlist name and unique code
             filename = f"{playlist_name.replace(' ', '_')}_{playlist_code}.csv"
             filepath = os.path.join(playlist_dir, filename)
 
@@ -535,28 +547,6 @@ if st.session_state.user_playlist:
 
             # Set expiration date (2 weeks from now)
             expiration_date = datetime.now() + timedelta(weeks=2)
-
-            # Save metadata to track expiration
-            meta_filepath = os.path.join(playlist_dir, f"{filename}.meta")
-            with open(meta_filepath, "w") as meta_file:
-                meta_file.write(expiration_date.strftime("%Y-%m-%d %H:%M:%S"))
-
-            # 🎉 Confirm to the user that their playlist has been saved
-            st.success(f"✅ Playlist '{playlist_name}' saved successfully!")
-            st.info(f"🔹 **Your Playlist Code:**\n\n### `{playlist_code}`\n\nUse this code to retrieve your playlist later. It will be available for **two weeks**.")
-
-            # 📋 Copy-to-clipboard UI
-            st.markdown("##### 📋 Copy Your Playlist Code")
-            st.code(playlist_code, language="")
-
-            copy_code = f"""
-                <input type="text" value="{playlist_code}" id="playlistCode" readonly style="opacity:0; position:absolute; left:-9999px;">
-                <button onclick="navigator.clipboard.writeText('{playlist_code}'); this.innerText='Copied! ✅';" 
-                        style="margin-top: 5px; padding: 6px 12px; font-size: 16px; cursor: pointer;">
-                    📋 Copy Code
-                </button>
-            """
-            st.markdown(copy_code, unsafe_allow_html=True)
 
 # 🗑️ Cleanup Function (Run Periodically)
 def cleanup_old_playlists():
