@@ -255,7 +255,7 @@ if retrieve_option == "Yes":
 
             # 🎶 Display Playlist
             if "saved_playlist_name" in st.session_state:
-                st.subheader(f"🎶 Your Playlist: {st.session_state.saved_playlist_name}")
+                st.markdown(f"### 🎶 Your Playlist: **{st.session_state.saved_playlist_name}**")
             else:
                 st.subheader("🎶 Your Playlist")
 
