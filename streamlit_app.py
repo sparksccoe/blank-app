@@ -545,21 +545,18 @@ if st.session_state.user_playlist:
             st.success(f"✅ Playlist '{playlist_name}' saved successfully!")
             st.info(f"🔹 **Your Playlist Code:**\n\n### `{playlist_code}`\n\nUse this code to retrieve your playlist later. It will be available for **two weeks**.")
 
-# Display Playlist Code in a Copy-Friendly Format
-st.markdown("##### 📋 Copy Your Playlist Code")
+            # 📋 Copy-to-clipboard UI
+            st.markdown("##### 📋 Copy Your Playlist Code")
+            st.code(playlist_code, language="")
 
-# Use st.code for clean display
-st.code(playlist_code, language="")
-
-# Add copy-to-clipboard functionality using HTML and JavaScript
-copy_code = f"""
-    <input type="text" value="{playlist_code}" id="playlistCode" readonly style="opacity:0; position:absolute; left:-9999px;">
-    <button onclick="navigator.clipboard.writeText('{playlist_code}'); this.innerText='Copied! ✅';" 
-            style="margin-top: 5px; padding: 6px 12px; font-size: 16px; cursor: pointer;">
-        📋 Copy Code
-    </button>
-"""
-st.markdown(copy_code, unsafe_allow_html=True)
+            copy_code = f"""
+                <input type="text" value="{playlist_code}" id="playlistCode" readonly style="opacity:0; position:absolute; left:-9999px;">
+                <button onclick="navigator.clipboard.writeText('{playlist_code}'); this.innerText='Copied! ✅';" 
+                        style="margin-top: 5px; padding: 6px 12px; font-size: 16px; cursor: pointer;">
+                    📋 Copy Code
+                </button>
+            """
+            st.markdown(copy_code, unsafe_allow_html=True)
 
 # 🗑️ Cleanup Function (Run Periodically)
 def cleanup_old_playlists():
