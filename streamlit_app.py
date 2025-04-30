@@ -510,43 +510,46 @@ word_choices = [
 ]
 
 # 📝 Button to Save User Playlist
-if st.session_state.user_playlist:
-    st.markdown("---")
-    st.subheader("💾 Save Your Playlist")
+if st.button("💾 Save Playlist"):
+    if playlist_name:
+        # Generate a unique, lowercase one-word playlist code
+        base_word = random.choice(word_choices).lower()
 
-    # Prompt user to enter a playlist name
-    playlist_name = st.text_input("Enter a name for your playlist:")
+        # Get all existing codes (case-insensitive)
+        existing_codes = {
+            f.rsplit("_", 1)[-1].replace(".csv", "").lower()
+            for f in os.listdir(playlist_dir) if f.endswith(".csv")
+        }
 
-    if st.button("💾 Save Playlist"):
-        if playlist_name:
-            # Generate a unique, lowercase one-word playlist code
-            base_word = random.choice(word_choices).lower()
+        # Initialize playlist code and ensure uniqueness
+        playlist_code = base_word
+        suffix = 1
+        while playlist_code in existing_codes:
+            playlist_code = f"{base_word}{suffix}"
+            suffix += 1
 
-            # Get all existing codes (case-insensitive)
-            existing_codes = {
-                f.rsplit("_", 1)[-1].replace(".csv", "").lower()
-                for f in os.listdir(playlist_dir) if f.endswith(".csv")
-            }
+        # Format the filename using the playlist name and unique code
+        filename = f"{playlist_name.replace(' ', '_')}_{playlist_code}.csv"
+        filepath = os.path.join(playlist_dir, filename)
 
-            # Initialize playlist code and ensure uniqueness
-            playlist_code = base_word
-            suffix = 1
-            while playlist_code in existing_codes:
-                playlist_code = f"{base_word}{suffix}"
-                suffix += 1
+        # Convert playlist to a DataFrame
+        df_playlist = pd.DataFrame(st.session_state.user_playlist)
 
-            # Format the filename using the playlist name and unique code
-            filename = f"{playlist_name.replace(' ', '_')}_{playlist_code}.csv"
-            filepath = os.path.join(playlist_dir, filename)
+        # Save the playlist as a CSV file
+        df_playlist.to_csv(filepath, index=False)
 
-            # Convert playlist to a DataFrame
-            df_playlist = pd.DataFrame(st.session_state.user_playlist)
+        # Set expiration date (2 weeks from now)
+        expiration_date = datetime.now() + timedelta(weeks=2)
 
-            # Save the playlist as a CSV file
-            df_playlist.to_csv(filepath, index=False)
+        # Save metadata to track expiration
+        meta_filepath = os.path.join(playlist_dir, f"{filename}.meta")
+        with open(meta_filepath, "w") as meta_file:
+            meta_file.write(expiration_date.strftime("%Y-%m-%d %H:%M:%S"))
 
-            # Set expiration date (2 weeks from now)
-            expiration_date = datetime.now() + timedelta(weeks=2)
+        # 🎉 Confirm to the user that their playlist has been saved
+        st.success(f"✅ Playlist '{playlist_name}' saved successfully!")
+        st.info(f"🔹 **Your Playlist Code:**\n\n### `{playlist_code}`\n\nUse this code to retrieve your playlist later. It will be available for **two weeks**.")
+
 
 # 🗑️ Cleanup Function (Run Periodically)
 def cleanup_old_playlists():
