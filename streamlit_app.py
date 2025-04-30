@@ -267,6 +267,44 @@ if retrieve_option == "Yes":
                     with col2:
                         st.write(f"**{song['Name']}** by {song['Artist']}")
                         st.markdown(f"**Tempo:** {song['Tempo (BPM)']} BPM &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; **Loudness:** {song['Loudness (dB)']} dB")
+
+                # 🎥 Toggle YouTube Embed Section
+                show_youtube = st.checkbox("🎧 Show YouTube Playlist", value=False)
+
+                if show_youtube:
+                    st.subheader("📺 Listen to your playlist on YouTube")
+
+                    # Ensure session state stores video IDs persistently
+                    if "youtube_video_ids" not in st.session_state:
+                        st.session_state.youtube_video_ids = []
+
+                    # Collect valid YouTube Video IDs from user playlist
+                    new_video_ids = [
+                        song["YouTube Video ID"]
+                        for song in st.session_state.user_playlist
+                        if pd.notna(song.get("YouTube Video ID"))
+                    ]
+
+                    # Only update session state if changed
+                    if set(new_video_ids) != set(st.session_state.youtube_video_ids):
+                        st.session_state.youtube_video_ids = new_video_ids
+
+                    # Display player if available
+                    if st.session_state.youtube_video_ids:
+                        if len(st.session_state.youtube_video_ids) == 1:
+                            youtube_embed_url = f"https://www.youtube.com/embed/{st.session_state.youtube_video_ids[0]}"
+                        else:
+                            first_video = st.session_state.youtube_video_ids[0]
+                            playlist_videos = ",".join(st.session_state.youtube_video_ids)
+                            youtube_embed_url = f"https://www.youtube.com/embed/{first_video}?playlist={playlist_videos}"
+
+                        st.markdown(
+                            f'<iframe width="100%" height="400" src="{youtube_embed_url}" frameborder="0" allowfullscreen></iframe>',
+                            unsafe_allow_html=True
+                        )
+                    else:
+                        st.write("⚠️ No YouTube videos available for your playlist.")
+
         else:
             st.error("❌ No playlist found with that code. Please double-check and try again.")
 
