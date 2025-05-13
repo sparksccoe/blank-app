@@ -396,10 +396,13 @@ if bpm is not None:
 st.header("🔊 Volume Virtuoso")
 
 # Ensure number input does not reset, but starts empty
-loudness = st.number_input(
-    "Enter the relative loudness of your song (in dB, between -60 and 0):",
-    min_value=-60, max_value=0, value=None, step=1, format="%d"
-)
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    loudness = st.number_input(
+        "Enter the relative loudness of your song (in dB, between -60 and 0):",
+        min_value=-60, max_value=0, value=None, step=1, format="%d"
+    )
+
 
 # 🎼 Show relatable response only after the user enters loudness
 if loudness is not None:
