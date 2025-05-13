@@ -219,95 +219,93 @@ st.markdown(
 st.markdown("<br>", unsafe_allow_html=True)
 
 # 📂 Retrieve Saved Playlist Section
-st.subheader("📂 Retrieve a Saved Playlist")
+with st.expander("📂 Retrieve a Saved Playlist", expanded=False):
+    # Ask if user wants to retrieve a saved playlist
+    retrieve_option = st.radio("Do you want to open a playlist you saved earlier?", ("No", "Yes"))
 
-# Ask if user wants to retrieve a saved playlist
-retrieve_option = st.radio("Do you want to open a playlist you saved earlier?", ("No", "Yes"))
+    if retrieve_option == "Yes":
+        entered_code = st.text_input("Enter your 1-word Playlist Code:").strip().lower()
 
-if retrieve_option == "Yes":
-    entered_code = st.text_input("Enter your 1-word Playlist Code:").strip().lower()
+        # Define the directory where playlists are saved
+        playlist_dir = "saved_user_playlists"
 
-    # Define the directory where playlists are saved
-    playlist_dir = "saved_user_playlists"
+        if entered_code:
+            # Case-insensitive match
+            matching_files = [
+                f for f in os.listdir(playlist_dir)
+                if f.lower().endswith(f"{entered_code}.csv")
+            ]
 
-    if entered_code:
-        # Case-insensitive match
-        matching_files = [
-            f for f in os.listdir(playlist_dir)
-            if f.lower().endswith(f"{entered_code}.csv")
-        ]
+            if matching_files:
+                playlist_file = matching_files[0]
+                filepath = os.path.join(playlist_dir, playlist_file)
 
-        if matching_files:
-            playlist_file = matching_files[0]
-            filepath = os.path.join(playlist_dir, playlist_file)
+                # Load the playlist into session state
+                retrieved_df = pd.read_csv(filepath)
+                st.session_state.user_playlist = retrieved_df.to_dict(orient="records")
 
-            # Load the playlist into session state
-            retrieved_df = pd.read_csv(filepath)
-            st.session_state.user_playlist = retrieved_df.to_dict(orient="records")
+                # Extract playlist name from filename
+                playlist_base_name = playlist_file.rsplit("_", 1)[0].replace("_", " ")
 
-            # Extract playlist name from filename
-            playlist_base_name = playlist_file.rsplit("_", 1)[0].replace("_", " ")
+                # Store in session state
+                st.session_state.saved_playlist_name = playlist_base_name
 
-            # Store in session state
-            st.session_state.saved_playlist_name = playlist_base_name
+                st.success(f"✅ Playlist with code `{entered_code}` loaded successfully! Let's keep building your playlist.")
 
-            st.success(f"✅ Playlist with code `{entered_code}` loaded successfully! Let's keep building your playlist.")
+                # 🎶 Display Playlist
+                if "saved_playlist_name" in st.session_state:
+                    st.markdown(f"#### 🎶 Your Playlist: **{st.session_state.saved_playlist_name}**")
+                else:
+                    st.subheader("🎶 Your Playlist")
 
-            # 🎶 Display Playlist
-            if "saved_playlist_name" in st.session_state:
-                st.markdown(f"#### 🎶 Your Playlist: **{st.session_state.saved_playlist_name}**")
-            else:
-                st.subheader("🎶 Your Playlist")
+                if st.session_state.user_playlist:
+                    for song in st.session_state.user_playlist:
+                        col1, col2 = st.columns([1, 3])
+                        with col1:
+                            st.image(song["Image"], width=80)
+                        with col2:
+                            st.write(f"**{song['Name']}** by {song['Artist']}")
+                            st.markdown(f"**Tempo:** {song['Tempo (BPM)']} BPM &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; **Loudness:** {song['Loudness (dB)']} dB")
 
-            if st.session_state.user_playlist:
-                for song in st.session_state.user_playlist:
-                    col1, col2 = st.columns([1, 3])
-                    with col1:
-                        st.image(song["Image"], width=80)
-                    with col2:
-                        st.write(f"**{song['Name']}** by {song['Artist']}")
-                        st.markdown(f"**Tempo:** {song['Tempo (BPM)']} BPM &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; **Loudness:** {song['Loudness (dB)']} dB")
+                    # 🎥 Toggle YouTube Embed Section
+                    show_youtube = st.checkbox("🎧 Show YouTube Playlist", value=False)
 
-                # 🎥 Toggle YouTube Embed Section
-                show_youtube = st.checkbox("🎧 Show YouTube Playlist", value=False)
+                    if show_youtube:
+                        st.subheader("🎧 Listen to your playlist on YouTube")
 
-                if show_youtube:
-                    st.subheader("🎧 Listen to your playlist on YouTube")
+                        # Ensure session state stores video IDs persistently
+                        if "youtube_video_ids" not in st.session_state:
+                            st.session_state.youtube_video_ids = []
 
-                    # Ensure session state stores video IDs persistently
-                    if "youtube_video_ids" not in st.session_state:
-                        st.session_state.youtube_video_ids = []
+                        # Collect valid YouTube Video IDs from user playlist
+                        new_video_ids = [
+                            song["YouTube Video ID"]
+                            for song in st.session_state.user_playlist
+                            if pd.notna(song.get("YouTube Video ID"))
+                        ]
 
-                    # Collect valid YouTube Video IDs from user playlist
-                    new_video_ids = [
-                        song["YouTube Video ID"]
-                        for song in st.session_state.user_playlist
-                        if pd.notna(song.get("YouTube Video ID"))
-                    ]
+                        # Only update session state if changed
+                        if set(new_video_ids) != set(st.session_state.youtube_video_ids):
+                            st.session_state.youtube_video_ids = new_video_ids
 
-                    # Only update session state if changed
-                    if set(new_video_ids) != set(st.session_state.youtube_video_ids):
-                        st.session_state.youtube_video_ids = new_video_ids
+                        # Display player if available
+                        if st.session_state.youtube_video_ids:
+                            if len(st.session_state.youtube_video_ids) == 1:
+                                youtube_embed_url = f"https://www.youtube.com/embed/{st.session_state.youtube_video_ids[0]}"
+                            else:
+                                first_video = st.session_state.youtube_video_ids[0]
+                                playlist_videos = ",".join(st.session_state.youtube_video_ids)
+                                youtube_embed_url = f"https://www.youtube.com/embed/{first_video}?playlist={playlist_videos}"
 
-                    # Display player if available
-                    if st.session_state.youtube_video_ids:
-                        if len(st.session_state.youtube_video_ids) == 1:
-                            youtube_embed_url = f"https://www.youtube.com/embed/{st.session_state.youtube_video_ids[0]}"
+                            st.markdown(
+                                f'<iframe width="100%" height="400" src="{youtube_embed_url}" frameborder="0" allowfullscreen></iframe>',
+                                unsafe_allow_html=True
+                            )
                         else:
-                            first_video = st.session_state.youtube_video_ids[0]
-                            playlist_videos = ",".join(st.session_state.youtube_video_ids)
-                            youtube_embed_url = f"https://www.youtube.com/embed/{first_video}?playlist={playlist_videos}"
+                            st.write("⚠️ No YouTube videos available for your playlist.")
 
-                        st.markdown(
-                            f'<iframe width="100%" height="400" src="{youtube_embed_url}" frameborder="0" allowfullscreen></iframe>',
-                            unsafe_allow_html=True
-                        )
-                    else:
-                        st.write("⚠️ No YouTube videos available for your playlist.")
-
-        else:
-            st.error("❌ No playlist found with that code. Please double-check and try again.")
-
+            else:
+                st.error("❌ No playlist found with that code. Please double-check and try again.")
 
 st.markdown("---")
 st.header("🎚️ Metronome Master")
