@@ -314,8 +314,10 @@ st.header("🎚️ Metronome Master")
 # 🎼 Show relatable response only after the user enters BPM
 
 # 🎵 Ask for BPM input (default None)
-bpm = st.number_input("Enter the BPM (Beats Per Minute) of your song:", 
-                      min_value=40, max_value=250, value=None, step=1, format="%d")
+col1, col2, col3 = st.columns([1, 2, 1])  # Adjust column ratios as needed
+with col2:
+    bpm = st.number_input("Enter the BPM (Beats Per Minute) of your song (40–250):", 
+                          min_value=40, max_value=250, value=None, step=1, format="%d")
 if bpm is not None:
     if bpm < 60:
         st.write("This is a **super chill, slow-tempo song**—perfect for relaxation or deep focus.")
@@ -395,7 +397,7 @@ st.header("🔊 Volume Virtuoso")
 
 # Ensure number input does not reset, but starts empty
 loudness = st.number_input(
-    "Enter the relative loudness of your song (in dB, typically between -60 and 0):",
+    "Enter the relative loudness of your song (in dB, between -60 and 0):",
     min_value=-60, max_value=0, value=None, step=1, format="%d"
 )
 
