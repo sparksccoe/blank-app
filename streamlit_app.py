@@ -208,10 +208,9 @@ with col2:
 with col3:
     st.write("")
 
-# st.write('Let’s go on a Data Adventure with our Bards!')
 st.markdown(
     "<div style='text-align: center; font-size: 24px; font-weight: normal;'>"
-    "Welcome to Symphonia! Let's design our Creature Concert."
+    "Welcome to Symphonia! Let's start our Creature Concert."
     "</div>", 
     unsafe_allow_html=True
 )
