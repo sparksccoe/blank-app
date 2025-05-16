@@ -316,7 +316,7 @@ st.markdown("Enter the BPM (Beats Per Minute) of your song (40–250):")  # Full
 # Only the input field is centered
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
-    st.markdown("<div style='margin-top: -1rem'></div>", unsafe_allow_html=True)  # Pull field closer to the prompt
+    st.markdown("<div style='margin-top: -2rem'></div>", unsafe_allow_html=True)  # Pull field closer to the prompt
     bpm = st.number_input(
         label="",  # No label, prompt is above
         min_value=40,
