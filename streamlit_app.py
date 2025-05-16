@@ -220,7 +220,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 
 
 # 📂 Retrieve Saved Playlist Section
-with st.expander("🗝️ Treasure Hunt: Click to Find Your Saved Playlist", expanded=False):
+with st.expander("**🗝️ Treasure Hunt: Tap to Find Your Saved Playlist**", expanded=False):
     # Ask if user wants to retrieve a saved playlist
     retrieve_option = st.radio("Do you want to open a playlist you saved earlier?", ("No", "Yes"))
 
