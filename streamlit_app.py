@@ -311,11 +311,14 @@ st.header("🎚️ Metronome Master")
 # 🎼 Show relatable response only after the user enters BPM
 
 # 🎵 Ask for BPM input (default None)
-st.markdown("Enter the BPM (Beats Per Minute) of your song (40–250):")
-col1, col2, col3 = st.columns([1, 2, 1])  # Centered input field
+st.markdown("Enter the BPM (Beats Per Minute) of your song (40–250):")  # Full-width prompt
+
+# Only the input field is centered
+col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
+    st.markdown("<div style='margin-top: -1rem'></div>", unsafe_allow_html=True)  # Pull field closer to the prompt
     bpm = st.number_input(
-        label="",  # Hide label, already shown above
+        label="",  # No label, prompt is above
         min_value=40,
         max_value=250,
         value=None,
