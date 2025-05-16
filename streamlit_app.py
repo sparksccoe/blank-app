@@ -211,7 +211,7 @@ with col3:
 # st.write('Let’s go on a Data Adventure with our Bards!')
 st.markdown(
     "<div style='text-align: center; font-size: 16px; font-weight: normal;'>"
-    "Let’s go on a Data Adventure with our Bards!"
+    "Welcome to Symphonia! Let's design our Creature Concert."
     "</div>", 
     unsafe_allow_html=True
 )
