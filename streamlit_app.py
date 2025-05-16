@@ -315,7 +315,7 @@ st.header("🎚️ Metronome Master")
 # Full-width prompt with inline-block container
 st.markdown(
     """
-    <div style='margin-bottom: 0.3rem; font-weight: 500; font-size: 1rem;'>
+    <div style='margin-bottom: 0.5rem; font-weight: 500; font-size: 1rem;'>
         Enter the BPM (Beats Per Minute) of your song (40–250):
     </div>
     """,
@@ -414,14 +414,30 @@ if bpm is not None:
 # 🔊 Section: Loudness Analysis
 st.header("🔊 Volume Virtuoso")
 
-# Ensure number input does not reset, but starts empty
+# 🎧 Ask for Loudness input (default None)
+
+# Full-width prompt with a small gap below
+st.markdown(
+    """
+    <div style='margin-bottom: 0.5rem; font-weight: 500; font-size: 1rem;'>
+        Enter the relative loudness of your song (in dB, between -60 and 0):
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# Centered number input
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
     loudness = st.number_input(
-        "Enter the relative loudness of your song (in dB, between -60 and 0):",
-        min_value=-60, max_value=0, value=None, step=1, format="%d"
+        label=" ",
+        min_value=-60,
+        max_value=0,
+        value=None,
+        step=1,
+        format="%d",
+        label_visibility="collapsed"  # Use if Streamlit version supports it
     )
-
 
 # 🎼 Show relatable response only after the user enters loudness
 if loudness is not None:
