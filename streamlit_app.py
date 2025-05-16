@@ -42,7 +42,7 @@ hide_streamlit_style = """
 
     /* Add background image to app */
     .stApp {
-        background-image: url('background.jpg');
+        background-image: url('zelda.jpg');
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
