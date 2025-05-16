@@ -57,7 +57,7 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-# from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler
 from datetime import datetime
 from plotly.colors import qualitative
 import numpy as np
@@ -220,7 +220,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 
 
 # 📂 Retrieve Saved Playlist Section
-with st.expander("📂 Retrieve a Saved Playlist", expanded=False):
+with st.expander("🗝️ Treasure Hunt: Click to Find Your Saved Playlist", expanded=False):
     # Ask if user wants to retrieve a saved playlist
     retrieve_option = st.radio("Do you want to open a playlist you saved earlier?", ("No", "Yes"))
 
@@ -308,7 +308,6 @@ with st.expander("📂 Retrieve a Saved Playlist", expanded=False):
             else:
                 st.error("❌ No playlist found with that code. Please double-check and try again.")
 
-st.markdown("---")
 st.header("🎚️ Metronome Master")
 # 🎼 Show relatable response only after the user enters BPM
 
