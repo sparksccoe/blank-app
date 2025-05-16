@@ -315,7 +315,7 @@ st.header("🎚️ Metronome Master")
 # Full-width prompt with inline-block container
 st.markdown(
     """
-    <div style='margin-bottom: 0rem; font-weight: 500; font-size: 1rem;'>
+    <div style='margin-bottom: 0.3rem; font-weight: 500; font-size: 1rem;'>
         Enter the BPM (Beats Per Minute) of your song (40–250):
     </div>
     """,
