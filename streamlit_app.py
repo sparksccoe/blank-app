@@ -5,42 +5,55 @@ import os
 import random
 import string
 import shutil
+import base64
 from datetime import datetime, timedelta
 
 from PIL import Image
 
-hide_streamlit_style = """
-                <style>
-                div[data-testid="stToolbar"] {
-                visibility: hidden;
-                height: 0%;
-                position: fixed;
-                }
-                div[data-testid="stDecoration"] {
-                visibility: hidden;
-                height: 0%;
-                position: fixed;
-                }
-                div[data-testid="stStatusWidget"] {
-                visibility: hidden;
-                height: 0%;
-                position: fixed;
-                }
-                #MainMenu {
-                visibility: hidden;
-                height: 0%;
-                }
-                header {
-                visibility: hidden;
-                height: 0%;
-                }
-                footer {
-                visibility: hidden;
-                height: 0%;
-                }
-                </style>
-                """
+# Load the local image and convert it to a Base64 string
+def get_base64_img(file_path):
+    with open(file_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode()
+
+# Get the base64 version of 'zelda.jpg'
+encoded_img = get_base64_img("zelda.jpg")
+
+# Inject the CSS with the base64 image and overlay
+hide_streamlit_style = f"""
+    <style>
+    div[data-testid="stToolbar"],
+    div[data-testid="stDecoration"],
+    div[data-testid="stStatusWidget"],
+    #MainMenu,
+    header,
+    footer {{
+        visibility: hidden;
+        height: 0%;
+        position: fixed;
+    }}
+
+    .stApp {{
+        background-image: url("data:image/jpg;base64,{encoded_img}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        position: relative;
+    }}
+
+    .stApp::before {{
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(255, 255, 255, 0.6);  /* semi-transparent overlay */
+        z-index: -1;
+    }}
+    </style>
+"""
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 with open( "style.css" ) as css:
     st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
 
