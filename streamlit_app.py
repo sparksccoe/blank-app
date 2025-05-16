@@ -311,19 +311,29 @@ st.header("🎚️ Metronome Master")
 # 🎼 Show relatable response only after the user enters BPM
 
 # 🎵 Ask for BPM input (default None)
-st.markdown("Enter the BPM (Beats Per Minute) of your song (40–250):")  # Full-width prompt
 
-# Only the input field is centered
+# Full-width prompt with inline-block container
+st.markdown(
+    """
+    <div style='margin-bottom: 0rem; font-weight: 500; font-size: 1rem;'>
+        Enter the BPM (Beats Per Minute) of your song (40–250):
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# Centered number input with minimal top margin
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
-    st.markdown("<div style='margin-top: -4rem'></div>", unsafe_allow_html=True)  # Pull field closer to the prompt
+    # Use empty label so the input field has no built-in spacing
     bpm = st.number_input(
-        label="",  # No label, prompt is above
+        label=" ",  # a single space to suppress default spacing
         min_value=40,
         max_value=250,
         value=None,
         step=1,
-        format="%d"
+        format="%d",
+        label_visibility="collapsed"  # If using Streamlit 1.20+, hides label spacing
     )
 
 if bpm is not None:
