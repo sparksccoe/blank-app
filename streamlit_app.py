@@ -210,7 +210,7 @@ with col3:
 
 st.markdown(
     "<div style='text-align: center; font-size: 24px; font-weight: normal;'>"
-    "Welcome to Symphonia! Let's start our Creature Concert."
+    "Welcome to Symphonia! Let's start our Creature Concerto."
     "</div>", 
     unsafe_allow_html=True
 )
@@ -311,10 +311,18 @@ st.header("🎚️ Metronome Master")
 # 🎼 Show relatable response only after the user enters BPM
 
 # 🎵 Ask for BPM input (default None)
-col1, col2, col3 = st.columns([1, 2, 1])  # Adjust column ratios as needed
+st.markdown("### Enter the BPM (Beats Per Minute) of your song (40–250):")
+col1, col2, col3 = st.columns([1, 2, 1])  # Centered input field
 with col2:
-    bpm = st.number_input("Enter the BPM (Beats Per Minute) of your song (40–250):", 
-                          min_value=40, max_value=250, value=None, step=1, format="%d")
+    bpm = st.number_input(
+        label="",  # Hide label, already shown above
+        min_value=40,
+        max_value=250,
+        value=None,
+        step=1,
+        format="%d"
+    )
+
 if bpm is not None:
     if bpm < 60:
         st.write("This is a **super chill, slow-tempo song**—perfect for relaxation or deep focus.")
@@ -326,6 +334,7 @@ if bpm is not None:
         st.write("A **fast-paced song**, great for working out or getting pumped up!")
     else:
         st.write("This is **ultra-fast**—likely a drum & bass, punk, or extreme techno beat!")
+
 
 # 🥁 Function to generate a percussive sound (kick, snare, hi-hat)
 def generate_drum_sound(sample_rate=44100, drum_type="kick"):
