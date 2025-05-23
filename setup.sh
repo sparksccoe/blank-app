@@ -1,7 +1,10 @@
 #!/bin/bash
 
-mkdir -p ~/.streamlit/
+# Install system-level PortAudio
+apt-get update && apt-get install -y portaudio19-dev
 
+# Create .streamlit config
+mkdir -p ~/.streamlit/
 cat <<EOF > ~/.streamlit/config.toml
 [theme]
 primaryColor = '#DB661D'
@@ -15,7 +18,8 @@ enableCORS = false
 enableXsrfProtection = false
 EOF
 
+# Install Python dependencies
 pip install -r requirements.txt
 
-# DO NOT put $PORT in the config file — only pass it here
+# Run the Streamlit app
 streamlit run streamlit_app.py --server.address=0.0.0.0 --server.port=$PORT
