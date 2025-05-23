@@ -260,7 +260,7 @@ with st.expander("**🗝️ Treasure Hunt: Tap to Find Your Saved Playlist**", e
                 # Store in session state
                 st.session_state.saved_playlist_name = playlist_base_name
 
-                st.success(f"✅ Playlist with code `{entered_code}` loaded successfully! Let's keep building your playlist.")
+                st.success(f"🪄 Your playlist was summoned! Let's keep building your playlist.")
 
                 # 🎶 Display Playlist
                 if "saved_playlist_name" in st.session_state:
@@ -598,8 +598,8 @@ if st.session_state.user_playlist:
             meta_file.write(expiration_date.strftime("%Y-%m-%d %H:%M:%S"))
 
         # 🎉 Confirm to the user that their playlist has been saved
-        st.success(f"✅ Playlist '{playlist_name}' saved successfully!")
-        st.info(f"🔹 **Your Playlist Code:**\n\n### `{playlist_code}`\n\nUse this code to retrieve your playlist later. It will be available for **two weeks**.")
+        st.success(f"📜 Playlist '{playlist_name}' has been inscribed in the archives.")
+        st.info(f"📜 **Your Playlist Code:**\n\n### `{playlist_code}`\n\nUse this code to summon your playlist again. The magic holds for **two weeks**.")
 
 
 # 🗑️ Cleanup Function (Run Periodically)
