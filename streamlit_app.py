@@ -278,7 +278,7 @@ with st.expander("**🗝️ Treasure Hunt: Tap to Find Your Saved Playlist**", e
                             st.markdown(f"**Tempo:** {song['Tempo (BPM)']} BPM &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; **Loudness:** {song['Loudness (dB)']} dB")
 
                     # 🎥 Toggle YouTube Embed Section
-                    show_youtube = st.checkbox("🔮 Show YouTube Playlist", value=False)
+                    show_youtube = st.checkbox("📺 Show YouTube Playlist", value=False)
 
                     if show_youtube:
                         st.subheader("🎧 Listen to your playlist on YouTube")
@@ -467,7 +467,7 @@ if loudness is not None:
 if bpm is not None and loudness is not None:
 
     # 👉 Wait for user to trigger matching with a button
-    if st.button("📜 Reveal the Musical Match", type="primary"):
+    if st.button("🔮 Reveal the Musical Match", type="primary"):
         if not df_tracks.empty:
             df_tracks["Tempo Difference"] = abs(df_tracks["Tempo (BPM)"] - bpm)
             df_tracks["Loudness Difference"] = abs(df_tracks["Loudness (dB)"] - loudness)
@@ -510,16 +510,28 @@ if "best_match" in st.session_state:
 
     # 🎵 Display Playlist
     st.subheader(f"🎶 Your Playlist: {st.session_state.get('saved_playlist_name', '')}".strip())
+
     if st.session_state.user_playlist:
-        for song in st.session_state.user_playlist:
-            col1, col2 = st.columns([1, 3])
+        updated_playlist = []
+
+        for idx, song in enumerate(st.session_state.user_playlist):
+            col1, col2, col3 = st.columns([1, 3, 1])  # Add a third column for the button
+
             with col1:
                 st.image(song["Image"], width=80)
+
             with col2:
                 st.write(f"**{song['Name']}** by {song['Artist']}")
                 st.markdown(f"**Tempo:** {song['Tempo (BPM)']} BPM &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; **Loudness:** {song['Loudness (dB)']} dB")
+
+            with col3:
+                if st.button("🧹 Remove", key=f"remove_{idx}", type="primary"):
+                    st.session_state.user_playlist.pop(idx)
+                    st.experimental_rerun()  # Refresh to reflect deletion
+
     else:
-        st.write("Your playlist is empty. Add songs to create one!")
+        st.write("Your playlist is empty. Add songs to bring Symphonia to life!")
+
 
     # 🎥 Embed YouTube playlist
     st.subheader("🎧 Listen to your playlist on YouTube")
@@ -599,7 +611,7 @@ if st.session_state.user_playlist:
 
         # 🎉 Confirm to the user that their playlist has been saved
         st.success(f"📜 Playlist '{playlist_name}' has been inscribed in the archives.")
-        st.info(f"📜 **Your Playlist Code:**\n\n### `{playlist_code}`\n\nUse this code to summon your playlist again. The magic holds for **two weeks**.")
+        st.info(f"🪄 **Your Playlist Code:**\n\n### `{playlist_code}`\n\nUse this code to summon your playlist again. The magic holds for **two weeks**.")
 
 
 # 🗑️ Cleanup Function (Run Periodically)
