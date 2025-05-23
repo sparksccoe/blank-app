@@ -278,7 +278,7 @@ with st.expander("**🗝️ Treasure Hunt: Tap to Find Your Saved Playlist**", e
                             st.markdown(f"**Tempo:** {song['Tempo (BPM)']} BPM &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; **Loudness:** {song['Loudness (dB)']} dB")
 
                     # 🎥 Toggle YouTube Embed Section
-                    show_youtube = st.checkbox("🎧 Show YouTube Playlist", value=False)
+                    show_youtube = st.checkbox("🔮 Show YouTube Playlist", value=False)
 
                     if show_youtube:
                         st.subheader("🎧 Listen to your playlist on YouTube")
@@ -522,7 +522,7 @@ if "best_match" in st.session_state:
         st.write("Your playlist is empty. Add songs to create one!")
 
     # 🎥 Embed YouTube playlist
-    st.subheader("📺 Listen to your playlist on YouTube")
+    st.subheader("🎧 Listen to your playlist on YouTube")
     if "youtube_video_ids" not in st.session_state:
         st.session_state.youtube_video_ids = []
 
