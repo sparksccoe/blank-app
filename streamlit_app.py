@@ -561,12 +561,12 @@ word_choices = [
 # 📝 Save Playlist Section
 if st.session_state.user_playlist:
     st.markdown("---")
-    st.subheader("💾 Save Your Playlist")
+    st.subheader("📝 Save Your Playlist")
 
     # Prompt user to enter a playlist name first
     playlist_name = st.text_input("Enter a name for your playlist:")
 
-    if st.button("💾 Save Playlist", type="primary") and playlist_name:
+    if st.button("📝 Save Playlist", type="primary") and playlist_name:
         # Generate a unique, lowercase one-word playlist code
         base_word = random.choice(word_choices).lower()
 
