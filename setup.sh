@@ -1,18 +1,21 @@
 #!/bin/bash
 
-# Create .streamlit config directory
 mkdir -p ~/.streamlit/
 
-# Write the Streamlit server config
 cat <<EOF > ~/.streamlit/config.toml
+[theme]
+primaryColor = '#DB661D'
+backgroundColor = '#FBFBFA'
+secondaryBackgroundColor = '#AD98B0'
+textColor = '#2D2B3E'
+font = "sans serif"
+
 [server]
-headless = true
-port = \$PORT
 enableCORS = false
+enableXsrfProtection = false
 EOF
 
-# Install Python packages
 pip install -r requirements.txt
 
-# Run the Streamlit app
-streamlit run streamlit_app.py --server.port=$PORT --server.address=0.0.0.0
+# DO NOT put $PORT in the config file — only pass it here
+streamlit run streamlit_app.py --server.address=0.0.0.0 --server.port=$PORT
