@@ -74,6 +74,10 @@ import numpy as np
 import soundfile as sf
 import sounddevice as sd
 
+def remove_song(idx):
+    if "user_playlist" in st.session_state and idx < len(st.session_state.user_playlist):
+        st.session_state.user_playlist.pop(idx)
+
 # Initialize playlist_id as None or hardcoded here (Spotify)
 playlist_id = "3BGJRi9zQrIjLDtBbRYy5n"
 
@@ -512,26 +516,24 @@ if "best_match" in st.session_state:
     st.subheader(f"🎶 Your Playlist: {st.session_state.get('saved_playlist_name', '')}".strip())
 
     if st.session_state.user_playlist:
-        updated_playlist = []
-
         for idx, song in enumerate(st.session_state.user_playlist):
-            col1, col2, col3 = st.columns([1, 3, 1])  # Add a third column for the button
+            col1, col2, col3 = st.columns([1, 3, 1])  # Third column for the button
 
             with col1:
                 st.image(song["Image"], width=80)
 
             with col2:
                 st.write(f"**{song['Name']}** by {song['Artist']}")
-                st.markdown(f"**Tempo:** {song['Tempo (BPM)']} BPM &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; **Loudness:** {song['Loudness (dB)']} dB")
+                st.markdown(
+                    f"**Tempo:** {song['Tempo (BPM)']} BPM &nbsp;&nbsp;&nbsp;&nbsp; | "
+                    f"&nbsp;&nbsp;&nbsp;&nbsp; **Loudness:** {song['Loudness (dB)']} dB"
+                )
 
             with col3:
-                if st.button("🧹 Remove", key=f"remove_{idx}", type="primary"):
-                    st.session_state.user_playlist.pop(idx)
-                    st.experimental_rerun()  # Refresh to reflect deletion
-
+                st.button("🧹 Remove", key=f"remove_{idx}", type="primary",
+                          on_click=remove_song, args=(idx,))
     else:
-        st.write("Your playlist is empty. Add songs to bring Symphonia to life!")
-
+        st.write("📜 Your playlist scroll is blank. Add songs to bring Symphonia to life!")
 
     # 🎥 Embed YouTube playlist
     st.subheader("🎧 Listen to your playlist on YouTube")
