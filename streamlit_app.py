@@ -10,6 +10,13 @@ from datetime import datetime, timedelta
 
 from PIL import Image
 
+st.set_page_config(
+    page_title="Data Adventures",  # 👈 This is what shows in the browser tab
+    page_icon="🧭",                # Optional: shows in the tab as a favicon
+    layout="wide",                 # Optional: "centered" or "wide"
+    initial_sidebar_state="auto",  # Optional: "expanded", "collapsed", or "auto"
+)
+
 # Combine hiding UI elements and background image styling
 hide_streamlit_style = """
     <style>
