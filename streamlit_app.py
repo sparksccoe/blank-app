@@ -465,82 +465,76 @@ if loudness is not None:
 
 # 🟢 Ensure both BPM & Loudness are entered before proceeding
 if bpm is not None and loudness is not None:
-    # 🎯 Find the closest matching song in the playlist
-    if not df_tracks.empty:
-        # Calculate differences in tempo and loudness
-        df_tracks["Tempo Difference"] = abs(df_tracks["Tempo (BPM)"] - bpm)
-        df_tracks["Loudness Difference"] = abs(df_tracks["Loudness (dB)"] - loudness)
 
-        # Compute a "match score" (lower is better)
-        df_tracks["Match Score"] = df_tracks["Tempo Difference"] + df_tracks["Loudness Difference"]
+    # 👉 Wait for user to trigger matching with a button
+    if st.button("🎯 Find the Closest Match"):
+        if not df_tracks.empty:
+            # Calculate differences in tempo and loudness
+            df_tracks["Tempo Difference"] = abs(df_tracks["Tempo (BPM)"] - bpm)
+            df_tracks["Loudness Difference"] = abs(df_tracks["Loudness (dB)"] - loudness)
 
-        # Get the best-matching song
-        best_match = df_tracks.loc[df_tracks["Match Score"].idxmin()]
+            # Compute a "match score" (lower is better)
+            df_tracks["Match Score"] = df_tracks["Tempo Difference"] + df_tracks["Loudness Difference"]
 
-        # 🎵 Display the result
-        st.subheader(f"🎵 Your song is **{best_match['Name']}** by **{best_match['Artist']}**")
-        
-        # Create columns for layout
-        col1, spacer, col2 = st.columns([1, 0.5, 1]) 
+            # Get the best-matching song
+            best_match = df_tracks.loc[df_tracks["Match Score"].idxmin()]
 
-        # Display album cover in first column
-        with col1:
-            st.image(best_match["Image"], caption=best_match["Name"], width=250)
+            # 🎵 Display the result
+            st.subheader(f"🎵 Your song is **{best_match['Name']}** by **{best_match['Artist']}**")
 
-        # Display BPM and Loudness in second column
-        with col2:
-            st.write(f"🎚️ **BPM:** {best_match['Tempo (BPM)']}")
-            st.write(f"🔊 **Loudness:** {best_match['Loudness (dB)']} dB")
+            col1, spacer, col2 = st.columns([1, 0.5, 1]) 
 
-        # 🎥 Embed YouTube video if available
-        if pd.notna(best_match["YouTube Video ID"]): # Ensure there is a valid video ID
-            youtube_embed_url = f"https://www.youtube.com/embed/{best_match['YouTube Video ID']}"
-            st.video(youtube_embed_url)
-        else:
-            st.write("⚠️ No YouTube video available for this track.")
-    
-        # ➕ Add Song to Playlist Button
-        if "user_playlist" not in st.session_state:
-            st.session_state.user_playlist = []  # Initialize playlist if not set
-        
-        if st.button("➕ Add to Playlist", key=best_match["Track ID"]):
-            song_data = {
-                "Track ID": best_match["Track ID"],
-                "Name": best_match["Name"],
-                "Artist": best_match["Artist"],
-                "Album": best_match["Album"],
-                "Popularity": best_match["Popularity"],
-                "Release Date": best_match["Release Date"],
-                "Decade": best_match["Decade"],
-                "Image": best_match["Image"],
-                "Danceability": best_match["Danceability"],
-                "Energy": best_match["Energy"],
-                "Loudness (dB)": best_match["Loudness (dB)"],
-                "Acousticness": best_match["Acousticness"],
-                "Instrumentalness": best_match["Instrumentalness"],
-                "Liveness": best_match["Liveness"],
-                "Happiness": best_match["Happiness"],
-                "Tempo (BPM)": best_match["Tempo (BPM)"],
-                "Time Signature": best_match["Time Signature"],
-                "Speechiness": best_match["Speechiness"],
-                "Key": best_match["Key"],
-                "Duration": best_match["Duration"],
-                # "Genre": best_match["Genre"],
-                "YouTube Video ID": best_match["YouTube Video ID"]
-            }
+            with col1:
+                st.image(best_match["Image"], caption=best_match["Name"], width=250)
 
-            # Add song only if it's not already in the playlist
-            if song_data not in st.session_state.user_playlist:
-                st.session_state.user_playlist.append(song_data)
-                st.success(f"✅ Added {best_match['Name']} to your playlist!")
+            with col2:
+                st.write(f"🎚️ **BPM:** {best_match['Tempo (BPM)']}")
+                st.write(f"🔊 **Loudness:** {best_match['Loudness (dB)']} dB")
+
+            # 🎥 Embed YouTube video if available
+            if pd.notna(best_match["YouTube Video ID"]):
+                youtube_embed_url = f"https://www.youtube.com/embed/{best_match['YouTube Video ID']}"
+                st.video(youtube_embed_url)
             else:
-                st.warning("⚠️ This song is already in your playlist!")
+                st.write("⚠️ No YouTube video available for this track.")
 
-        # 🎵 Display the User's Playlist Below
-        if "saved_playlist_name" in st.session_state:
-            st.subheader(f"🎶 Your Playlist: {st.session_state.saved_playlist_name}")
-        else:
-            st.subheader("🎶 Your Playlist")
+            # ➕ Add Song to Playlist Button
+            if "user_playlist" not in st.session_state:
+                st.session_state.user_playlist = []
+            
+            if st.button("➕ Add to Playlist", key=best_match["Track ID"]):
+                song_data = {
+                    "Track ID": best_match["Track ID"],
+                    "Name": best_match["Name"],
+                    "Artist": best_match["Artist"],
+                    "Album": best_match["Album"],
+                    "Popularity": best_match["Popularity"],
+                    "Release Date": best_match["Release Date"],
+                    "Decade": best_match["Decade"],
+                    "Image": best_match["Image"],
+                    "Danceability": best_match["Danceability"],
+                    "Energy": best_match["Energy"],
+                    "Loudness (dB)": best_match["Loudness (dB)"],
+                    "Acousticness": best_match["Acousticness"],
+                    "Instrumentalness": best_match["Instrumentalness"],
+                    "Liveness": best_match["Liveness"],
+                    "Happiness": best_match["Happiness"],
+                    "Tempo (BPM)": best_match["Tempo (BPM)"],
+                    "Time Signature": best_match["Time Signature"],
+                    "Speechiness": best_match["Speechiness"],
+                    "Key": best_match["Key"],
+                    "Duration": best_match["Duration"],
+                    "YouTube Video ID": best_match["YouTube Video ID"]
+                }
+
+                if song_data not in st.session_state.user_playlist:
+                    st.session_state.user_playlist.append(song_data)
+                    st.success(f"✅ Added {best_match['Name']} to your playlist!")
+                else:
+                    st.warning("⚠️ This song is already in your playlist!")
+
+        # 🎵 Display Playlist
+        st.subheader(f"🎶 Your Playlist: {st.session_state.get('saved_playlist_name', '')}".strip())
         if st.session_state.user_playlist:
             for song in st.session_state.user_playlist:
                 col1, col2 = st.columns([1, 3])
@@ -550,41 +544,20 @@ if bpm is not None and loudness is not None:
                     st.write(f"**{song['Name']}** by {song['Artist']}")
                     st.markdown(f"**Tempo:** {song['Tempo (BPM)']} BPM &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; **Loudness:** {song['Loudness (dB)']} dB")
         else:
-                st.write("Your playlist is empty. Add songs to create one!")
+            st.write("Your playlist is empty. Add songs to create one!")
 
-    # 🎥 Embed YouTube playlist for all songs in the user's playlist
-    st.subheader("📺 Listen to your playlist on YouTube")
+        # 🎥 Embed YouTube playlist
+        st.subheader("📺 Listen to your playlist on YouTube")
+        if "youtube_video_ids" not in st.session_state:
+            st.session_state.youtube_video_ids = []
 
-    # Ensure session state stores video IDs persistently
-    if "youtube_video_ids" not in st.session_state:
-        st.session_state.youtube_video_ids = []
+        new_video_ids = [song["YouTube Video ID"] for song in st.session_state.user_playlist if pd.notna(song["YouTube Video ID"])]
+        if set(new_video_ids) != set(st.session_state.youtube_video_ids):
+            st.session_state.youtube_video_ids = new_video_ids
 
-    # Collect valid YouTube Video IDs from user playlist
-    new_video_ids = [song["YouTube Video ID"] for song in st.session_state.user_playlist if pd.notna(song["YouTube Video ID"])]
-
-    # Only update session state if new videos are added (to prevent resets)
-    if set(new_video_ids) != set(st.session_state.youtube_video_ids):
-        st.session_state.youtube_video_ids = new_video_ids  # Update stored video list
-
-    # Display YouTube player only if there are valid videos
-    if st.session_state.youtube_video_ids:
-        if len(st.session_state.youtube_video_ids) == 1:
-            # Single video case (play the only video)
-            youtube_embed_url = f"https://www.youtube.com/embed/{st.session_state.youtube_video_ids[0]}"
-        else:
-            # Ensure the first video is part of the queue
-            first_video = st.session_state.youtube_video_ids[0]
-            playlist_videos = ",".join(st.session_state.youtube_video_ids)  # Include the first video in the playlist
-            youtube_embed_url = f"https://www.youtube.com/embed/{first_video}?playlist={playlist_videos}"
-
-        # Use an iframe to prevent Streamlit from reloading the component
-        st.markdown(
-            f'<iframe width="100%" height="400" src="{youtube_embed_url}" frameborder="0" allowfullscreen></iframe>',
-            unsafe_allow_html=True
-        )
-
-    else:
-        st.write("⚠️ No YouTube videos available for your playlist.")
+        if st.session_state.youtube_video_ids:
+            if len(st.session_state.youtube_video_ids) == 1:
+                youtube_embed_url = f"https://www.youtube.com/embed/{
 
 # Ensure 'saved_user_playlists' directory exists
 playlist_dir = "saved_user_playlists"
