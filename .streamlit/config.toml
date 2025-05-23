@@ -1,7 +1,7 @@
 [theme]
 
 # Primary accent for interactive elements
-primaryColor = "#A0522D"  # A bardic warm brown
+primaryColor = "#D86F1E"  # Bardic bronze-orange
 
 # Background color for the main content area
 backgroundColor = '#FBFBFA'

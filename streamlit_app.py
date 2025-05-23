@@ -415,7 +415,7 @@ def generate_drum_beat(bpm, duration=20, sample_rate=44100):
 
 # 🎧 Button to play drum beat (only after BPM is entered)
 if bpm is not None:
-    if st.button("🥁 Play Your Tempo as a Drum Loop"):
+    if st.button("🥁 Play Your Tempo as a Drum Loop", type="primary"):
         drum_beat = generate_drum_beat(bpm)
         sf.write("drum_beat.wav", drum_beat, 44100)
         st.audio("drum_beat.wav")
@@ -502,7 +502,7 @@ if bpm is not None and loudness is not None:
             if "user_playlist" not in st.session_state:
                 st.session_state.user_playlist = []
             
-            if st.button("➕ Add to Playlist", key=best_match["Track ID"]):
+            if st.button("➕ Add to Playlist", key=best_match["Track ID"], type="primary"):
                 song_data = {
                     "Track ID": best_match["Track ID"],
                     "Name": best_match["Name"],
@@ -590,7 +590,7 @@ if st.session_state.user_playlist:
     # Prompt user to enter a playlist name first
     playlist_name = st.text_input("Enter a name for your playlist:")
 
-    if st.button("💾 Save Playlist") and playlist_name:
+    if st.button("💾 Save Playlist", type="primary") and playlist_name:
         # Generate a unique, lowercase one-word playlist code
         base_word = random.choice(word_choices).lower()
 
