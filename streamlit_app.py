@@ -530,8 +530,10 @@ if "best_match" in st.session_state:
                 )
 
             with col3:
+                st.markdown("<div style='margin-top: 1.5em;'></div>", unsafe_allow_html=True)
                 st.button("🧹 Remove", key=f"remove_{idx}", type="primary",
-                          on_click=remove_song, args=(idx,))
+                        on_click=remove_song, args=(idx,))
+
     else:
         st.write("📜 Your playlist scroll is blank. Add songs to bring Symphonia to life!")
 
