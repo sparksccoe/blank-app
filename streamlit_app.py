@@ -467,7 +467,7 @@ if loudness is not None:
 if bpm is not None and loudness is not None:
 
     # 👉 Wait for user to trigger matching with a button
-    if st.button("🧩 Find the Closest Match"):
+    if st.button("📜 Reveal the Musical Match"):
         if not df_tracks.empty:
             # Calculate differences in tempo and loudness
             df_tracks["Tempo Difference"] = abs(df_tracks["Tempo (BPM)"] - bpm)
