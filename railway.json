@@ -6,7 +6,7 @@
   "deploy": {
     "runtime": "V2",
     "numReplicas": 1,
-    "startCommand": "streamlit run streamlit_app.py --server.address 0.0.0.0 --server.port $PORT",
+    "startCommand": "sh setup.sh",
     "sleepApplication": false,
     "multiRegionConfig": {
       "us-west2": {
