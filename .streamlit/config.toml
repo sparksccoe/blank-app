@@ -42,4 +42,3 @@ enableXsrfProtection = false
 # - Show the URL on the terminal
 # - Open the browser
 # Default: "localhost"
-serverAddress = "https://www.dataadventures.org"
