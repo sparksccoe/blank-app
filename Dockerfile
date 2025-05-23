@@ -14,8 +14,8 @@ COPY . .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Inform Docker about the port
+# Optional: Symbolic port exposure
 EXPOSE 8501
 
-# Run Streamlit app (shell form to allow $PORT expansion)
+# Final CMD: Streamlit binds to $PORT from Railway
 CMD streamlit run streamlit_app.py --server.port=$PORT --server.address=0.0.0.0
