@@ -7,8 +7,48 @@ import string
 import shutil
 import base64
 from datetime import datetime, timedelta
-
 from PIL import Image
+
+def set_bg_tile_with_overlay(image_path: str, overlay_color="rgba(255,255,255,0.75)"):
+    """
+    Sets a repeating background image tile with a semi-transparent overlay for readability.
+
+    Parameters
+    ----------
+    image_path : str
+        Path to the background image file.
+    overlay_color : str
+        RGBA or HSLA color string to use for overlay. Default is light white.
+    """
+    ext = image_path.split(".")[-1]
+    base64_img = base64.b64encode(open(image_path, "rb").read()).decode()
+
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image: url("data:image/{ext};base64,{base64_img}");
+            background-repeat: repeat;
+            background-attachment: fixed;
+            background-position: top left;
+            background-size: auto;
+            position: relative;
+        }}
+
+        .stApp::before {{
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: {overlay_color};
+            z-index: -1;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
 st.set_page_config(
     page_title="Data Adventures",  # 👈 This is what shows in the browser tab
@@ -16,6 +56,13 @@ st.set_page_config(
     layout="centered",                 # Optional: "centered" or "wide"
     initial_sidebar_state="auto",  # Optional: "expanded", "collapsed", or "auto"
 )
+
+# Light parchment overlay
+set_bg_tile_with_overlay("zelda.jpg", overlay_color="rgba(255, 248, 220, 0.6)")  # cornsilk / parchment
+
+# Or a soft dark overlay for contrast
+# set_bg_tile_with_overlay("your_tile_image.png", overlay_color="rgba(0, 0, 0, 0.5)")
+
 
 # Combine hiding UI elements and background image styling
 hide_streamlit_style = """
