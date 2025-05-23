@@ -14,8 +14,8 @@ COPY . .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Streamlit uses this port
-ENV PORT=8501
+# Inform Docker about the port
+EXPOSE 8501
 
-# Run Streamlit app
-CMD ["streamlit", "run", "streamlit_app.py", "--server.port=$PORT", "--server.address=0.0.0.0"]
+# Run Streamlit app (shell form to allow $PORT expansion)
+CMD streamlit run streamlit_app.py --server.port=$PORT --server.address=0.0.0.0
