@@ -13,7 +13,7 @@ from PIL import Image
 st.set_page_config(
     page_title="Data Adventures",  # 👈 This is what shows in the browser tab
     page_icon="🧭",                # Optional: shows in the tab as a favicon
-    layout="wide",                 # Optional: "centered" or "wide"
+    layout="centered",                 # Optional: "centered" or "wide"
     initial_sidebar_state="auto",  # Optional: "expanded", "collapsed", or "auto"
 )
 
