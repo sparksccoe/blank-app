@@ -557,7 +557,19 @@ if bpm is not None and loudness is not None:
 
         if st.session_state.youtube_video_ids:
             if len(st.session_state.youtube_video_ids) == 1:
-                youtube_embed_url = f"https://www.youtube.com/embed/{
+                youtube_embed_url = f"https://www.youtube.com/embed/{st.session_state.youtube_video_ids[0]}"
+            else:
+                first_video = st.session_state.youtube_video_ids[0]
+                playlist_videos = ",".join(st.session_state.youtube_video_ids)
+                youtube_embed_url = f"https://www.youtube.com/embed/{first_video}?playlist={playlist_videos}"
+
+            st.markdown(
+                f'<iframe width="100%" height="400" src="{youtube_embed_url}" frameborder="0" allowfullscreen></iframe>',
+                unsafe_allow_html=True
+            )
+        else:
+            st.write("⚠️ No YouTube videos available for your playlist.")
+
 
 # Ensure 'saved_user_playlists' directory exists
 playlist_dir = "saved_user_playlists"
