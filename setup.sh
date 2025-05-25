@@ -22,4 +22,4 @@ EOF
 pip install -r requirements.txt
 
 # Run the Streamlit app
-streamlit run streamlit_app.py --server.port=${PORT:-8080} --server.address=0.0.0.0
+streamlit run DA_app.py --server.port=${PORT:-8080} --server.address=0.0.0.0
