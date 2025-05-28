@@ -236,9 +236,9 @@ with st.expander("**🗝️ Treasure Hunt: Tap to Find Your Saved Playlist**", e
     st.write("Enter your 1-word Playlist Code to load your saved playlist:")
 
     # Narrow input field only
-    col1, col2, col3 = st.columns([4, 2, 4])  # Adjust to control width
+    col1, col2, col3 = st.columns([1, 2, 1])  # Adjust to control width
     with col2:
-        entered_code = st.text_input(label="", placeholder="e.g. sunsetmix").strip().lower()
+        entered_code = st.text_input(label=" ", label_visibility="collapsed").strip().lower()
 
     # Define the directory where playlists are saved
     playlist_dir = "saved_user_playlists"
