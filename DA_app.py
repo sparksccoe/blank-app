@@ -232,13 +232,13 @@ st.markdown("<br>", unsafe_allow_html=True)
 
 # 📂 Retrieve Saved Playlist Section
 with st.expander("**🗝️ Treasure Hunt: Tap to Find Your Saved Playlist**", expanded=False):
-    # Use columns to narrow the width of the input field
-    col1, col2, col3 = st.columns([2, 3, 5])  # Adjust width ratios as needed
+    # Full-width label
+    st.write("Enter your 1-word Playlist Code to load your saved playlist:")
 
+    # Narrow input field only
+    col1, col2, col3 = st.columns([4, 2, 4])  # Adjust to control width
     with col2:
-        entered_code = st.text_input(
-            "Enter your 1-word Playlist Code to load your saved playlist:"
-        ).strip().lower()
+        entered_code = st.text_input(label="", placeholder="e.g. sunsetmix").strip().lower()
 
     # Define the directory where playlists are saved
     playlist_dir = "saved_user_playlists"
