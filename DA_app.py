@@ -230,11 +230,15 @@ st.markdown(
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-
 # 📂 Retrieve Saved Playlist Section
 with st.expander("**🗝️ Treasure Hunt: Tap to Find Your Saved Playlist**", expanded=False):
-    # Always show input for playlist code
-    entered_code = st.text_input("Enter your 1-word playlist code here to load your saved songs:").strip().lower()
+    # Use columns to narrow the width of the input field
+    col1, col2, col3 = st.columns([2, 3, 5])  # Adjust width ratios as needed
+
+    with col2:
+        entered_code = st.text_input(
+            "Enter your 1-word Playlist Code to load your saved playlist:"
+        ).strip().lower()
 
     # Define the directory where playlists are saved
     playlist_dir = "saved_user_playlists"
@@ -283,22 +287,18 @@ with st.expander("**🗝️ Treasure Hunt: Tap to Find Your Saved Playlist**", e
                 if show_youtube:
                     st.subheader("🎧 Listen to your playlist on YouTube")
 
-                    # Ensure session state stores video IDs persistently
                     if "youtube_video_ids" not in st.session_state:
                         st.session_state.youtube_video_ids = []
 
-                    # Collect valid YouTube Video IDs from user playlist
                     new_video_ids = [
                         song["YouTube Video ID"]
                         for song in st.session_state.user_playlist
                         if pd.notna(song.get("YouTube Video ID"))
                     ]
 
-                    # Only update session state if changed
                     if set(new_video_ids) != set(st.session_state.youtube_video_ids):
                         st.session_state.youtube_video_ids = new_video_ids
 
-                    # Display player if available
                     if st.session_state.youtube_video_ids:
                         if len(st.session_state.youtube_video_ids) == 1:
                             youtube_embed_url = f"https://www.youtube.com/embed/{st.session_state.youtube_video_ids[0]}"
@@ -315,7 +315,6 @@ with st.expander("**🗝️ Treasure Hunt: Tap to Find Your Saved Playlist**", e
                         st.write("⚠️ No YouTube videos available for your playlist.")
         else:
             st.error("❌ No playlist found with that code. Please double-check and try again.")
-
 
 st.header("🎚️ Metronome Master")
 # 🎼 Show relatable response only after the user enters BPM
