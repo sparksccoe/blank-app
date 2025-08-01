@@ -562,7 +562,7 @@ if "best_match" in st.session_state:
             )
 
             if selected_creature_obj is not None:
-                st.markdown("### 🎼 Which music task would you like your creature to complete?")
+                st.markdown("### 🪄 Which music task would you like your creature to complete?")
 
                 music_tasks = [
                     "-- Select Task --",
@@ -578,7 +578,7 @@ if "best_match" in st.session_state:
                 )
 
                 if selected_task != "-- Select Task --":
-                    st.info(f"🧠 Task chosen: **{selected_task}**")
+                    st.info(f"Task chosen: **{selected_task}**")
 
 
     # ➕ Add Song to Playlist Button
