@@ -205,6 +205,19 @@ if playlist_id:
         "YouTube Video ID": track_video_id[:len(track_id)],  # Ensure lengths match
     })
 
+# Load creature data
+if playlist_id:
+    creatures_csv = "DA_Creatures.csv"
+    df_creatures_data = pd.read_csv(creatures_csv)
+
+    # Extract individual creature attributes
+    creature_names = df_creatures_data["Name"].tolist()
+    creature_tempo_preferences = df_creatures_data["Tempo Preference"].tolist()
+    creature_loudness_preferences = df_creatures_data["Loudness Preference"].tolist()
+    creature_task_categories = df_creatures_data["Task Category"].tolist()
+    creature_task_specific_1 = df_creatures_data["Task Specific 1"].tolist()
+    creature_task_specific_2 = df_creatures_data["Task Specific 2"].tolist()
+
 # Initialize user playlist in session state if it doesn’t exist
 if "user_playlist" not in st.session_state:
     st.session_state.user_playlist = []
@@ -475,6 +488,31 @@ if bpm is not None and loudness is not None:
             best_match = df_tracks.loc[df_tracks["Match Score"].idxmin()]
             st.session_state.best_match = best_match.to_dict()
 
+def find_matching_creatures_either(tempo, loudness, df):
+    matched = []
+
+    def parse_range(r):
+        try:
+            return tuple(map(int, r.split(" - ")))
+        except:
+            return (None, None)
+
+    for _, row in df.iterrows():
+        tempo_low, tempo_high = parse_range(row["Tempo Preference"])
+        loud_low, loud_high = parse_range(row["Loudness Preference"])
+
+        tempo_match = (
+            tempo_low is not None and tempo_high is not None and tempo_low <= tempo <= tempo_high
+        )
+        loudness_match = (
+            loud_low is not None and loud_high is not None and loud_low <= loudness <= loud_high
+        )
+
+        if tempo_match or loudness_match:
+            matched.append(row)
+
+    return matched
+
 # 🪄 Display best match if it's stored in session
 if "best_match" in st.session_state:
     best_match = st.session_state.best_match
@@ -488,6 +526,27 @@ if "best_match" in st.session_state:
     with col2:
         st.write(f"🎚️ **BPM:** {best_match['Tempo (BPM)']}")
         st.write(f"🔊 **Loudness:** {best_match['Loudness (dB)']} dB")
+
+    # Matching with creatures
+    matched_creatures = find_matching_creatures_either(
+        best_match["Tempo (BPM)"], best_match["Loudness (dB)"], df_creatures_data
+    )
+
+    if matched_creatures:
+        st.markdown("### 🧩 This song activates the following creatures. Which one did you pair up in the game?")
+        
+        creature_names = [creature["Name"] for creature in matched_creatures]
+        
+        selected_creature = st.selectbox(
+            "Select your paired creature:",
+            creature_names,
+            index=0,
+            key="creature_pair_selection"
+        )
+
+        st.success(f"You paired up with: **{selected_creature}**")
+    else:
+        st.warning("No creatures matched this song's tempo or loudness.")
 
     # 🎥 Embed YouTube video if available
     if pd.notna(best_match["YouTube Video ID"]):
