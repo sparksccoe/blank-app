@@ -545,30 +545,41 @@ if "best_match" in st.session_state:
 
         creature_names = ["-- Select Creature --"] + [creature["Name"] for creature in matched_creatures]
 
-        selected_creature = st.selectbox(
+        selected_creature_name = st.selectbox(
             "Select your paired creature:",
             creature_names,
             index=0,
             key="creature_pair_selection"
         )
 
-        if selected_creature != "-- Select Creature --":
-            st.success(f"You paired up with: **{selected_creature}**")
+        if selected_creature_name != "-- Select Creature --":
+            st.success(f"You paired up with: **{selected_creature_name}**")
 
-            # Second dropdown: choose a music task
-            st.markdown("### 🎼 Which music task would you like your creature to complete?")
-
-            music_tasks = ["-- Select Task --", "Task Specific 1", "Task Specific 2"]
-
-            selected_task = st.selectbox(
-                "Choose a music task:",
-                music_tasks,
-                index=0,
-                key="music_task_selection"
+            # Find the selected creature object
+            selected_creature_obj = next(
+                (creature for creature in matched_creatures if creature["Name"] == selected_creature_name),
+                None
             )
 
-            if selected_task != "-- Select Task --":
-                st.info(f"🧠 Task chosen: **{selected_task}**")
+            if selected_creature_obj:
+                st.markdown("### 🎼 Which music task would you like your creature to complete?")
+
+                music_tasks = [
+                    "-- Select Task --",
+                    selected_creature_obj["creature_task_specific_1"],
+                    selected_creature_obj["creature_task_specific_2"]
+                ]
+
+                selected_task = st.selectbox(
+                    "Choose a music task:",
+                    music_tasks,
+                    index=0,
+                    key="music_task_selection"
+                )
+
+                if selected_task != "-- Select Task --":
+                    st.info(f"🧠 Task chosen: **{selected_task}**")
+
 
     # ➕ Add Song to Playlist Button
     if "user_playlist" not in st.session_state:
