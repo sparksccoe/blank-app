@@ -527,16 +527,24 @@ if "best_match" in st.session_state:
         st.write(f"🎚️ **BPM:** {best_match['Tempo (BPM)']}")
         st.write(f"🔊 **Loudness:** {best_match['Loudness (dB)']} dB")
 
+    # 🎥 Embed YouTube video if available
+    if pd.notna(best_match["YouTube Video ID"]):
+        youtube_embed_url = f"https://www.youtube.com/embed/{best_match['YouTube Video ID']}"
+        st.video(youtube_embed_url)
+    else:
+        st.write("⚠️ No YouTube video available for this track.")
+    
     # Matching with creatures
     matched_creatures = find_matching_creatures_either(
         best_match["Tempo (BPM)"], best_match["Loudness (dB)"], df_creatures_data
     )
 
+    # First dropdown: choose a matching creature
     if matched_creatures:
         st.markdown("### 🧩 This song activates the following creatures. Which one did you pair up in the game?")
-        
-        creature_names = [creature["Name"] for creature in matched_creatures]
-        
+
+        creature_names = ["-- Select Creature --"] + [creature["Name"] for creature in matched_creatures]
+
         selected_creature = st.selectbox(
             "Select your paired creature:",
             creature_names,
@@ -544,16 +552,23 @@ if "best_match" in st.session_state:
             key="creature_pair_selection"
         )
 
-        st.success(f"You paired up with: **{selected_creature}**")
-    else:
-        st.warning("No creatures matched this song's tempo or loudness.")
+        if selected_creature != "-- Select Creature --":
+            st.success(f"You paired up with: **{selected_creature}**")
 
-    # 🎥 Embed YouTube video if available
-    if pd.notna(best_match["YouTube Video ID"]):
-        youtube_embed_url = f"https://www.youtube.com/embed/{best_match['YouTube Video ID']}"
-        st.video(youtube_embed_url)
-    else:
-        st.write("⚠️ No YouTube video available for this track.")
+            # Second dropdown: choose a music task
+            st.markdown("### 🎼 Which music task would you like your creature to complete?")
+
+            music_tasks = ["-- Select Task --", "Task Specific 1", "Task Specific 2"]
+
+            selected_task = st.selectbox(
+                "Choose a music task:",
+                music_tasks,
+                index=0,
+                key="music_task_selection"
+            )
+
+            if selected_task != "-- Select Task --":
+                st.info(f"🧠 Task chosen: **{selected_task}**")
 
     # ➕ Add Song to Playlist Button
     if "user_playlist" not in st.session_state:
