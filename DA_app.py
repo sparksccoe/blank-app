@@ -566,8 +566,8 @@ if "best_match" in st.session_state:
 
                 music_tasks = [
                     "-- Select Task --",
-                    selected_creature_obj["creature_task_specific_1"],
-                    selected_creature_obj["creature_task_specific_2"]
+                    selected_creature_obj["Task Specific 1"],
+                    selected_creature_obj["Task Specific 2"]
                 ]
 
                 selected_task = st.selectbox(
