@@ -202,7 +202,7 @@ if playlist_id:
         "Speechiness": track_speechiness,
         "Key": track_keys_converted,
         "Duration": track_duration,
-        "Bard": track_bard
+        "Bard": track_bard,
         # "Genre": track_genres,
         "YouTube Video ID": track_video_id[:len(track_id)],  # Ensure lengths match
     })
