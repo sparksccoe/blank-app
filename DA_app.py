@@ -541,7 +541,31 @@ if "best_match" in st.session_state:
         best_match["Tempo (BPM)"], best_match["Loudness (dB)"], df_creatures_data
     )
 
-    # First dropdown: choose a matching creature
+    # Find the selected creature object
+    selected_creature_obj = next(
+        (creature for creature in matched_creatures if creature["Name"] == selected_creature_name),
+        None
+    )
+
+    if selected_creature_obj is not None:
+        st.markdown("### 🎼 Which music task would you like your creature to complete?")
+
+        music_tasks = [
+            "-- Select Task --",
+            selected_creature_obj["Creature Task Specific 1"],
+            selected_creature_obj["Creature Task Specific 2"]
+        ]
+
+        selected_task = st.selectbox(
+            "Choose a music task:",
+            music_tasks,
+            index=0,
+            key="music_task_selection"
+        )
+
+        if selected_task != "-- Select Task --":
+            st.info(f"🧠 Task chosen: **{selected_task}**")
+
     
     # ➕ Add Song to Playlist Button
     if "user_playlist" not in st.session_state:
