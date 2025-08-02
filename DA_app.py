@@ -86,7 +86,7 @@ youtube_playlist_url = "https://www.youtube.com/playlist?list=PLtg7R4Q_LfGU-WLVp
 youtube_playlist_id = youtube_playlist_url.split("list=")[-1]
 
 # Define the CSV filename as a variable
-song_features_csv = "Symphonia Bards-3-images(3).csv"
+song_features_csv = "Symphonia Bards-3.csv"
 
 if playlist_id:
     # 🟢 Load additional song features from CSV
