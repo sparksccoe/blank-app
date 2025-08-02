@@ -547,9 +547,9 @@ if "best_match" in st.session_state:
     if "user_playlist" not in st.session_state:
         st.session_state.user_playlist = []
 
-    # # These need to be available from earlier selection logic
-    # selected_creature_name = st.session_state.get("creature_pair_selection")
-    # selected_task = st.session_state.get("music_task_selection")
+    # These need to be available from earlier selection logic
+    selected_creature_name = st.session_state.get("creature_pair_selection")
+    selected_task = st.session_state.get("music_task_selection")
 
     if st.button("✨ Add to Playlist", key=f"add_{best_match['Track ID']}", type="primary"):
         # Add selected creature and task info to the song data
