@@ -664,7 +664,7 @@ if "best_match" in st.session_state:
         st.markdown("### 📋 Playlist Table")
         st.dataframe(
             playlist_summary_df.reset_index(drop=True),
-            use_container_width=True,
+            use_container_width=False,
             hide_index=True  # 👈 this hides the 0-based index column
         )
 
