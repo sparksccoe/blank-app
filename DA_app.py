@@ -495,7 +495,11 @@ def find_matching_creatures_either(tempo, loudness, df):
 
     def parse_range(r):
         try:
-            return tuple(map(int, r.split(" - ")))
+            nums = list(map(float, re.findall(r'-?\d+\.?\d*', r)))
+            if len(nums) == 2:
+                return nums[0], nums[1]
+            else:
+                return (None, None)
         except:
             return (None, None)
 
