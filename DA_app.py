@@ -497,11 +497,10 @@ def find_matching_creatures_either(tempo, loudness, df):
         try:
             nums = list(map(float, re.findall(r'-?\d+\.?\d*', str(r))))
             if len(nums) == 2:
-                return nums[0], nums[1]
-            else:
-                return (None, None)
+                return min(nums[0], nums[1]), max(nums[0], nums[1])
         except:
             return (None, None)
+        return (None, None)
 
     for _, row in df.iterrows():
         tempo_low, tempo_high = parse_range(row["Tempo Preference"])
