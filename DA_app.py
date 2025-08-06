@@ -634,7 +634,7 @@ if "best_match" in st.session_state:
                 st.image(song["Image"], width=80)
 
             with col2:
-                st.write(f"**{song['Name']}** by {song['Artist']}")
+                st.write(f"**{song['Name']}** by {song['Bard']}")
                 st.markdown(
                     f"**Tempo:** {song['Tempo (BPM)']} BPM &nbsp;&nbsp;&nbsp;&nbsp; | "
                     f"&nbsp;&nbsp;&nbsp;&nbsp; **Loudness:** {song['Loudness (dB)']} dB"
