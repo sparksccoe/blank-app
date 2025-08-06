@@ -3,3 +3,8 @@
 body * {
     font-family: 'Montserrat', sans-serif !important;
 }
+
+/* ✅ Force wider DataFrame tables */
+.stDataFrame table {
+    min-width: 1200px;  /* You can increase this if needed */
+}
