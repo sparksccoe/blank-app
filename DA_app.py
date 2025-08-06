@@ -606,7 +606,8 @@ if "best_match" in st.session_state:
             song_with_context["Task Category"] = ""
 
         # Avoid duplicates
-        if song_with_context not in st.session_state.user_playlist:
+        track_ids = [song["Track ID"] for song in st.session_state.user_playlist]
+        if best_match["Track ID"] not in track_ids:
             st.session_state.user_playlist.append(song_with_context)
             st.success(f"✅ Added {best_match['Name']} to your playlist!")
         else:
