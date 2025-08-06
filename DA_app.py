@@ -541,6 +541,10 @@ if "best_match" in st.session_state:
         best_match["Tempo (BPM)"], best_match["Loudness (dB)"], df_creatures_data
     )
 
+    # These need to be available from earlier selection logic
+    selected_creature_name = st.session_state.get("creature_pair_selection")
+    selected_task = st.session_state.get("music_task_selection")
+
     # Find the selected creature object
     selected_creature_obj = next(
         (creature for creature in matched_creatures if creature["Name"] == selected_creature_name),
@@ -548,7 +552,7 @@ if "best_match" in st.session_state:
     )
 
     if selected_creature_obj is not None:
-        st.markdown("### 🎼 Which music task would you like your creature to complete?")
+        st.markdown("### Which music task would you like your creature to complete?")
 
         music_tasks = [
             "-- Select Task --",
@@ -564,16 +568,11 @@ if "best_match" in st.session_state:
         )
 
         if selected_task != "-- Select Task --":
-            st.info(f"🧠 Task chosen: **{selected_task}**")
+            st.info(f"Task chosen: **{selected_task}**")
 
-    
     # ➕ Add Song to Playlist Button
     if "user_playlist" not in st.session_state:
         st.session_state.user_playlist = []
-
-    # These need to be available from earlier selection logic
-    selected_creature_name = st.session_state.get("creature_pair_selection")
-    selected_task = st.session_state.get("music_task_selection")
 
     if st.button("✨ Add to Playlist", key=f"add_{best_match['Track ID']}", type="primary"):
         # Add selected creature and task info to the song data
