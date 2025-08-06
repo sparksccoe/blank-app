@@ -648,6 +648,21 @@ if "best_match" in st.session_state:
     else:
         st.write("📜 Your playlist scroll is blank. Add songs to bring Symphonia to life!")
 
+    # 🎼 Display Playlist Table Summary
+    if st.session_state.user_playlist:
+        playlist_summary_df = pd.DataFrame([{
+            "Bard": song.get("Bard", "Unknown"),
+            "Song Name": song.get("Name", "Unknown"),
+            "Tempo (BPM)": song.get("Tempo (BPM)", ""),
+            "Loudness (dB)": song.get("Loudness (dB)", ""),
+            "Creature": song.get("Creature", ""),
+            "Category of Task": song.get("Task Category", ""),
+            "Task Selected": song.get("Task Selected", "")
+        } for song in st.session_state.user_playlist])
+
+        st.markdown("### 📋 Playlist Summary Table")
+        st.dataframe(playlist_summary_df, use_container_width=True)
+
     # 🎥 Embed YouTube playlist
     st.subheader("🎧 Listen to your playlist on YouTube")
     if "youtube_video_ids" not in st.session_state:
@@ -671,7 +686,6 @@ if "best_match" in st.session_state:
         )
     else:
         st.write("⚠️ No YouTube videos available for your playlist.")
-
 
 
 # Ensure 'saved_user_playlists' directory exists
