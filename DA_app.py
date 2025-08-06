@@ -589,12 +589,6 @@ if "best_match" in st.session_state:
     selected_creature_name = st.session_state.get("creature_pair_selection", "-- Select Creature --")
     selected_task = st.session_state.get("music_task_selection", "-- Select Task --")
 
-    if st.button("✨ Add to Playlist", key=f"add_{best_match['Track ID']}", type="primary"):
-        # Add selected creature and task info to the song data
-        song_with_context = best_match.copy()
-        song_with_context["Creature"] = selected_creature_name if selected_creature_name != "-- Select Creature --" else ""
-        song_with_context["Task Selected"] = selected_task if selected_task != "-- Select Task --" else ""
-
     if st.button("✨ Add to Playlist", key=f"add_{best_match['Track ID']}", type="primary"):        
         # Build song object with context
         song_with_context = best_match.copy()
