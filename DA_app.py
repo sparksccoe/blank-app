@@ -564,7 +564,7 @@ if "best_match" in st.session_state:
             )
 
             if selected_creature_obj is not None:
-                st.markdown("### Which music task would you like your {selected_creature_obj['Name']} to complete?")
+                st.markdown(f"### Which music task would you like your {selected_creature_obj['Name']} to complete?")
 
                 music_tasks = [
                     "-- Select Task --",
