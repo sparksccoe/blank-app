@@ -651,6 +651,7 @@ if "best_match" in st.session_state:
     # 🎼 Display Playlist Table Summary
     if st.session_state.user_playlist:
         playlist_summary_df = pd.DataFrame([{
+            "No.": idx +1,
             "Bard": song.get("Bard", "Unknown"),
             "Song Name": song.get("Name", "Unknown"),
             "Tempo (BPM)": song.get("Tempo (BPM)", ""),
@@ -660,7 +661,7 @@ if "best_match" in st.session_state:
             "Task Selected": song.get("Task Selected", "")
         } for song in st.session_state.user_playlist])
 
-        st.markdown("### 📋 Playlist Summary Table")
+        st.markdown("### 📋 Playlist Table")
         st.dataframe(playlist_summary_df, use_container_width=True)
 
     # 🎥 Embed YouTube playlist
