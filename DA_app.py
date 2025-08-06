@@ -659,10 +659,10 @@ if "best_match" in st.session_state:
             "Creature": song.get("Creature", ""),
             "Category of Task": song.get("Task Category", ""),
             "Task Selected": song.get("Task Selected", "")
-        } for song in st.session_state.user_playlist])
+        } for idx, song in enumerate(st.session_state.user_playlist)])
 
         st.markdown("### 📋 Playlist Table")
-        st.dataframe(playlist_summary_df, use_container_width=True)
+        st.dataframe(playlist_summary_df.reset_index(drop=True), use_container_width=True)
 
     # 🎥 Embed YouTube playlist
     st.subheader("🎧 Listen to your playlist on YouTube")
