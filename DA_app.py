@@ -209,7 +209,7 @@ if playlist_id:
 
 # Load creature data
 if playlist_id:
-    creatures_csv = "DA_Creatures.csv"
+    creatures_csv = "DA Creatures.csv"
     df_creatures_data = pd.read_csv(creatures_csv)
 
     # Extract individual creature attributes
@@ -544,7 +544,7 @@ if "best_match" in st.session_state:
     # 🧠 Creature selection dropdown
     selected_creature_name = "-- Select Creature --"
     if matched_creatures:
-        st.markdown("### 🧩 This song activates the following creatures. Which one did you pair up in the game?")
+        st.markdown("### This song activates the following creatures. Which one did you pair up in the game?")
 
         creature_names = ["-- Select Creature --"] + [creature["Name"] for creature in matched_creatures]
 
@@ -564,7 +564,7 @@ if "best_match" in st.session_state:
             )
 
             if selected_creature_obj is not None:
-                st.markdown("### 🎯 Which music task would you like your creature to complete?")
+                st.markdown("### Which music task would you like your {selected_creature_obj['Name']} to complete?")
 
                 music_tasks = [
                     "-- Select Task --",
