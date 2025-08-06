@@ -600,7 +600,7 @@ if "best_match" in st.session_state:
             (creature for creature in matched_creatures if creature["Name"] == selected_creature_name),
             None
         )
-        if selected_creature_obj:
+        if selected_creature_obj is not None:
             song_with_context["Task Category"] = selected_creature_obj["Task Category"]
         else:
             song_with_context["Task Category"] = ""
