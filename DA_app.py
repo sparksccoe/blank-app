@@ -519,7 +519,7 @@ def find_matching_creatures_either(tempo, loudness, df):
 if "best_match" in st.session_state:
     best_match = st.session_state.best_match
 
-    st.subheader(f"🎵 Your song is **{best_match['Name']}** by **{best_match['Artist']}**")
+    st.subheader(f"🎵 Your song is **{best_match['Name']}** by **{best_match['Bard']}**")
     col1, spacer, col2 = st.columns([1, 0.5, 1])
 
     with col1:
