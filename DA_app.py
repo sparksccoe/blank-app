@@ -12,7 +12,7 @@ from PIL import Image
 st.set_page_config(
     page_title="Data Adventures",  # 👈 This is what shows in the browser tab
     page_icon="🧭",                # Optional: shows in the tab as a favicon
-    layout="centered",                 # Optional: "centered" or "wide"
+    layout="wide",                 # Optional: "centered" or "wide"
     initial_sidebar_state="auto",  # Optional: "expanded", "collapsed", or "auto"
 )
 
@@ -667,7 +667,6 @@ if "best_match" in st.session_state:
             playlist_summary_df.reset_index(drop=True),
             use_container_width=False,  # 👈 disable auto-width
             hide_index=True,
-            height=400,
             width=1400  # 👈 manually set the width
         )
 
