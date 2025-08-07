@@ -568,7 +568,7 @@ if "best_match" in st.session_state:
         )
 
         if selected_creature_name != "-- Select Creature --":
-            st.success(f"You paired up with: **{selected_creature_name}**")
+            # st.success(f"You paired up with: **{selected_creature_name}**")
 
             selected_creature_obj = next(
                 (creature for creature in matched_creatures if creature["Name"] == selected_creature_name),
@@ -591,8 +591,8 @@ if "best_match" in st.session_state:
                     key="music_task_selection"
                 )
 
-                if selected_task != "-- Select Task --":
-                    st.info(f"Task chosen: **{selected_task}**")
+                # if selected_task != "-- Select Task --":
+                #    st.info(f"Task chosen: **{selected_task}**")
 
     # ➕ Add Song to Playlist Button
     if "user_playlist" not in st.session_state:
