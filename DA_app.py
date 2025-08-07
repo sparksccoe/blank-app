@@ -343,140 +343,50 @@ with st.expander("**🗝️ Treasure Hunt: Tap to Find Your Saved Playlist**", e
         else:
             st.error("❌ No playlist found with that code. Please double-check and try again.")
 
-# st.header("🎚️ Metronome Master")
-# # 🎼 Show relatable response only after the user enters BPM
+st.header("🎚️ Metronome Master")
+# 🎼 Show relatable response only after the user enters BPM
 
-# # 🎵 Ask for BPM input (default None)
+# 🎵 Ask for BPM input (default None)
 
-# # Full-width prompt with inline-block container
-# st.markdown(
-#     """
-#     <div style='margin-bottom: 0.5rem; font-weight: 500; font-size: 1rem;'>
-#         Enter the BPM (Beats Per Minute) of your song (40–250):
-#     </div>
-#     """,
-#     unsafe_allow_html=True
-# )
+# Full-width prompt with inline-block container
+st.markdown(
+    """
+    <div style='margin-bottom: 0.5rem; font-weight: 500; font-size: 1rem;'>
+        Enter the BPM (Beats Per Minute) of your song (40–250):
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
-# # Create a unique key that changes when we want to reset
-# reset_counter = st.session_state.get("reset_counter", 0)
+# Create a unique key that changes when we want to reset
+reset_counter = st.session_state.get("reset_counter", 0)
 
-# # Centered number input with dynamic key
-# col1, col2, col3 = st.columns([1, 2, 1])
-# with col2:
-#     bpm = st.number_input(
-#         label=" ",
-#         min_value=40,
-#         max_value=250,
-#         value=None,
-#         step=1,
-#         format="%d",
-#         label_visibility="collapsed",
-#         key=f"bpm_input_{reset_counter}"  # Dynamic key
-#     )
+# Centered number input with dynamic key
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    bpm = st.number_input(
+        label=" ",
+        min_value=40,
+        max_value=250,
+        value=None,
+        step=1,
+        format="%d",
+        label_visibility="collapsed",
+        key=f"bpm_input_{reset_counter}"  # Dynamic key
+    )
 
-# if bpm is not None:
-#     if bpm < 60:
-#         st.write("This is a **super chill, slow-tempo song**—perfect for relaxation or deep focus.")
-#     elif bpm < 90:
-#         st.write("A **laid-back groove**, great for R&B, lo-fi beats, or smooth jazz.")
-#     elif bpm < 120:
-#         st.write("A **mid-tempo track**—probably a good dance groove or pop beat!")
-#     elif bpm < 150:
-#         st.write("A **fast-paced song**, great for working out or getting pumped up!")
-#     else:
-#         st.write("This is **ultra-fast**—likely a drum & bass, punk, or extreme techno beat!")
+if bpm is not None:
+    if bpm < 60:
+        st.write("This is a **super chill, slow-tempo song**—perfect for relaxation or deep focus.")
+    elif bpm < 90:
+        st.write("A **laid-back groove**, great for R&B, lo-fi beats, or smooth jazz.")
+    elif bpm < 120:
+        st.write("A **mid-tempo track**—probably a good dance groove or pop beat!")
+    elif bpm < 150:
+        st.write("A **fast-paced song**, great for working out or getting pumped up!")
+    else:
+        st.write("This is **ultra-fast**—likely a drum & bass, punk, or extreme techno beat!")
 
-
-# # 🥁 Function to generate a percussive sound (kick, snare, hi-hat)
-# def generate_drum_sound(sample_rate=44100, drum_type="kick"):
-#     duration = 0.15  # Length of drum sound
-#     t = np.linspace(0, duration, int(sample_rate * duration), False)
-
-#     if drum_type == "kick":
-#         # Deep sine wave for kick drum
-#         envelope = np.exp(-t / 0.05)  # Short decay
-#         sound = 0.8 * envelope * np.sin(2 * np.pi * 60 * t)  # 60 Hz kick
-
-#     elif drum_type == "snare":
-#         # White noise for snare drum + low pass filter
-#         envelope = np.exp(-t / 0.04)  # Snappier decay
-#         noise = np.random.normal(0, 0.5, t.shape)
-#         sound = 0.5 * envelope * noise  # White noise snare
-
-#     elif drum_type == "hihat":
-#         # High-frequency noise for hi-hat
-#         envelope = np.exp(-t / 0.02)  # Very short decay
-#         noise = np.random.normal(0, 0.3, t.shape)
-#         sound = 0.3 * envelope * noise  # Crisp hi-hat
-
-#     return np.clip(sound, -1, 1)
-
-# # 🥁 Function to generate a drum beat loop
-# def generate_drum_beat(bpm, duration=20, sample_rate=44100):
-#     interval = 60 / bpm  # Seconds per beat
-#     num_beats = int(duration / interval)  # Total beats in duration
-#     audio = np.zeros(int(sample_rate * duration))  # Empty audio track
-
-#     # Generate individual drum sounds
-#     kick = generate_drum_sound(drum_type="kick")
-#     snare = generate_drum_sound(drum_type="snare")
-#     hihat = generate_drum_sound(drum_type="hihat")
-
-#     for i in range(num_beats):
-#         start = int(i * interval * sample_rate)
-#         end = start + len(kick)
-
-#         # Add kick on beats 1 & 3
-#         if i % 4 in [0, 2]:
-#             audio[start:end] += kick
-
-#         # Add snare on beats 2 & 4
-#         if i % 4 == 1 or i % 4 == 3:
-#             audio[start:end] += snare
-
-#         # Add hi-hat on every beat
-#         hh_start = int(i * interval * sample_rate)
-#         hh_end = hh_start + len(hihat)
-#         audio[hh_start:hh_end] += hihat
-
-#     return np.clip(audio, -1, 1)  # Prevent distortion
-
-# # 🎧 Button to play drum beat (only after BPM is entered)
-# if bpm is not None:
-#     if st.button("🥁 Play Your Tempo as a Drum Loop", type="primary"):
-#         drum_beat = generate_drum_beat(bpm)
-#         sf.write("drum_beat.wav", drum_beat, 44100)
-#         st.audio("drum_beat.wav")
-
-
-# # 🔊 Section: Loudness Analysis
-# st.header("🔊 Volume Virtuoso")
-
-# # 🎧 Ask for Loudness input (default None)
-
-# # Full-width prompt with a small gap below
-# st.markdown(
-#     """
-#     <div style='margin-bottom: 0.5rem; font-weight: 500; font-size: 1rem;'>
-#         Enter the relative loudness of your song (in dB, between -60 and 0):
-#     </div>
-#     """,
-#     unsafe_allow_html=True
-# )
-
-# col1, col2, col3 = st.columns([1, 2, 1])
-# with col2:
-#     loudness = st.number_input(
-#         label=" ",
-#         min_value=-60,
-#         max_value=0,
-#         value=None,
-#         step=1,
-#         format="%d",
-#         label_visibility="collapsed",
-#         key=f"loudness_input_{reset_counter}"  # Dynamic key
-#     )
 
 # 🥁 Function to generate a percussive sound (kick, snare, hi-hat)
 def generate_drum_sound(sample_rate=44100, drum_type="kick"):
@@ -532,7 +442,97 @@ def generate_drum_beat(bpm, duration=20, sample_rate=44100):
 
     return np.clip(audio, -1, 1)  # Prevent distortion
 
-# 🎚️🔊 Combined Input Section - Single Column
+# 🎧 Button to play drum beat (only after BPM is entered)
+if bpm is not None:
+    if st.button("🥁 Play Your Tempo as a Drum Loop", type="primary"):
+        drum_beat = generate_drum_beat(bpm)
+        sf.write("drum_beat.wav", drum_beat, 44100)
+        st.audio("drum_beat.wav")
+
+
+# 🔊 Section: Loudness Analysis
+st.header("🔊 Volume Virtuoso")
+
+# 🎧 Ask for Loudness input (default None)
+
+# Full-width prompt with a small gap below
+st.markdown(
+    """
+    <div style='margin-bottom: 0.5rem; font-weight: 500; font-size: 1rem;'>
+        Enter the relative loudness of your song (in dB, between -60 and 0):
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    loudness = st.number_input(
+        label=" ",
+        min_value=-60,
+        max_value=0,
+        value=None,
+        step=1,
+        format="%d",
+        label_visibility="collapsed",
+        key=f"loudness_input_{reset_counter}"  # Dynamic key
+    )
+
+# 🥁 Function to generate a percussive sound (kick, snare, hi-hat)
+def generate_drum_sound(sample_rate=44100, drum_type="kick"):
+    duration = 0.15  # Length of drum sound
+    t = np.linspace(0, duration, int(sample_rate * duration), False)
+
+    if drum_type == "kick":
+        # Deep sine wave for kick drum
+        envelope = np.exp(-t / 0.05)  # Short decay
+        sound = 0.8 * envelope * np.sin(2 * np.pi * 60 * t)  # 60 Hz kick
+
+    elif drum_type == "snare":
+        # White noise for snare drum + low pass filter
+        envelope = np.exp(-t / 0.04)  # Snappier decay
+        noise = np.random.normal(0, 0.5, t.shape)
+        sound = 0.5 * envelope * noise  # White noise snare
+
+    elif drum_type == "hihat":
+        # High-frequency noise for hi-hat
+        envelope = np.exp(-t / 0.02)  # Very short decay
+        noise = np.random.normal(0, 0.3, t.shape)
+        sound = 0.3 * envelope * noise  # Crisp hi-hat
+
+    return np.clip(sound, -1, 1)
+
+# 🥁 Function to generate a drum beat loop
+def generate_drum_beat(bpm, duration=20, sample_rate=44100):
+    interval = 60 / bpm  # Seconds per beat
+    num_beats = int(duration / interval)  # Total beats in duration
+    audio = np.zeros(int(sample_rate * duration))  # Empty audio track
+
+    # Generate individual drum sounds
+    kick = generate_drum_sound(drum_type="kick")
+    snare = generate_drum_sound(drum_type="snare")
+    hihat = generate_drum_sound(drum_type="hihat")
+
+    for i in range(num_beats):
+        start = int(i * interval * sample_rate)
+        end = start + len(kick)
+
+        # Add kick on beats 1 & 3
+        if i % 4 in [0, 2]:
+            audio[start:end] += kick
+
+        # Add snare on beats 2 & 4
+        if i % 4 == 1 or i % 4 == 3:
+            audio[start:end] += snare
+
+        # Add hi-hat on every beat
+        hh_start = int(i * interval * sample_rate)
+        hh_end = hh_start + len(hihat)
+        audio[hh_start:hh_end] += hihat
+
+    return np.clip(audio, -1, 1)  # Prevent distortion
+
+# 🎚️🔊 Combined Input Section - Fantasy themed
 st.markdown(
     """
     <div style='
@@ -556,9 +556,20 @@ st.markdown(
             font-size: 14px;
         '>MUSICAL QUEST</div>
         <h2 style='color: #f39c12; text-align: center; margin-bottom: 25px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);'>🎚️ Metronome Master & 🔊 Volume Virtuoso</h2>
-        <p style='color: #ecf0f1; text-align: center; margin-bottom: 30px; font-size: 16px;'>
-            Discover your song's musical DNA by analyzing its tempo and volume characteristics
-        </p>
+        <div style='display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px;'>
+            <div style='flex: 1; min-width: 300px;'>
+                <h3 style='color: #ecf0f1; text-align: center; margin-bottom: 10px;'>🎚️ Tempo Discovery</h3>
+                <p style='color: #bdc3c7; text-align: center; font-size: 14px; margin-bottom: 15px;'>
+                    Enter the BPM (Beats Per Minute) of your song (40–250):
+                </p>
+            </div>
+            <div style='flex: 1; min-width: 300px;'>
+                <h3 style='color: #ecf0f1; text-align: center; margin-bottom: 10px;'>🔊 Volume Analysis</h3>
+                <p style='color: #bdc3c7; text-align: center; font-size: 14px; margin-bottom: 15px;'>
+                    Enter the relative loudness of your song (in dB, between -60 and 0):
+                </p>
+            </div>
+        </div>
     </div>
     """,
     unsafe_allow_html=True
@@ -567,20 +578,11 @@ st.markdown(
 # Create a unique key that changes when we want to reset
 reset_counter = st.session_state.get("reset_counter", 0)
 
-# 🎚️ BPM Section
-st.markdown("### 🎚️ **Step 1: Tempo Discovery**")
-st.markdown(
-    """
-    <div style='margin-bottom: 0.5rem; font-weight: 500; font-size: 1rem;'>
-        Enter the BPM (Beats Per Minute) of your song (40–250):
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+# Two-column layout for inputs
+col1, col2 = st.columns(2)
 
-# Centered BPM input
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
+with col1:
+    st.markdown("<h4 style='text-align: center;'>🎚️ BPM Input</h4>", unsafe_allow_html=True)
     bpm = st.number_input(
         label=" ",
         min_value=40,
@@ -591,44 +593,29 @@ with col2:
         label_visibility="collapsed",
         key=f"bpm_input_{reset_counter}"
     )
+    
+    # BPM response text
+    if bpm is not None:
+        if bpm < 60:
+            st.write("**Super chill** 🧘‍♀️ - perfect for relaxation")
+        elif bpm < 90:
+            st.write("**Laid-back groove** 🎷 - smooth vibes")
+        elif bpm < 120:
+            st.write("**Mid-tempo** 💃 - good dance beat!")
+        elif bpm < 150:
+            st.write("**Fast-paced** 🏃‍♂️ - workout energy!")
+        else:
+            st.write("**Ultra-fast** ⚡ - extreme beats!")
+    
+    # Drum beat button
+    if bpm is not None:
+        if st.button("🥁 Play Drum Loop", type="primary", key="drum_button"):
+            drum_beat = generate_drum_beat(bpm)
+            sf.write("drum_beat.wav", drum_beat, 44100)
+            st.audio("drum_beat.wav")
 
-# Original BPM response
-if bpm is not None:
-    if bpm < 60:
-        st.write("This is a **super chill, slow-tempo song**—perfect for relaxation or deep focus.")
-    elif bpm < 90:
-        st.write("A **laid-back groove**, great for R&B, lo-fi beats, or smooth jazz.")
-    elif bpm < 120:
-        st.write("A **mid-tempo track**—probably a good dance groove or pop beat!")
-    elif bpm < 150:
-        st.write("A **fast-paced song**, great for working out or getting pumped up!")
-    else:
-        st.write("This is **ultra-fast**—likely a drum & bass, punk, or extreme techno beat!")
-
-# Original drum beat button
-if bpm is not None:
-    if st.button("🥁 Play Your Tempo as a Drum Loop", type="primary"):
-        drum_beat = generate_drum_beat(bpm)
-        sf.write("drum_beat.wav", drum_beat, 44100)
-        st.audio("drum_beat.wav")
-
-# Add some spacing
-st.markdown("<br>", unsafe_allow_html=True)
-
-# 🔊 Loudness Section  
-st.markdown("### 🔊 **Step 2: Volume Analysis**")
-st.markdown(
-    """
-    <div style='margin-bottom: 0.5rem; font-weight: 500; font-size: 1rem;'>
-        Enter the relative loudness of your song (in dB, between -60 and 0):
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-# Centered loudness input
-col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
+    st.markdown("<h4 style='text-align: center;'>🔊 Loudness Input</h4>", unsafe_allow_html=True)
     loudness = st.number_input(
         label=" ",
         min_value=-60,
@@ -639,8 +626,21 @@ with col2:
         label_visibility="collapsed",
         key=f"loudness_input_{reset_counter}"
     )
+    
+    # Loudness response text
+    if loudness is not None:
+        if loudness < -40:
+            st.write("**Super quiet** 🤫 - peaceful vibes")
+        elif loudness < -25:
+            st.write("**Soft & gentle** 🌙 - calm melodies")
+        elif loudness < -15:
+            st.write("**Moderate** 🎵 - balanced energy")
+        elif loudness < -5:
+            st.write("**Fairly loud** 🎉 - dynamic & exciting")
+        else:
+            st.write("**Max loudness** 🔥 - club-ready!")
 
-# Original loudness response
+# 🎼 Show relatable response only after the user enters loudness
 if loudness is not None:
     if loudness < -40:
         st.write("This is **super quiet**, like the peaceful piano in *Clair de Lune* or the soft intro of *Lofi Girl* study beats.")
