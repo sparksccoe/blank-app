@@ -369,7 +369,7 @@ with col2:
         value=None,
         step=1,
         format="%d",
-        label_visibility="collapsed"  # If using Streamlit 1.20+, hides label spacing,
+        label_visibility="collapsed",  # If using Streamlit 1.20+, hides label spacing,
         key="bpm_input"
     )
 
