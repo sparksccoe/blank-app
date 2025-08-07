@@ -3,8 +3,3 @@
 body * {
     font-family: 'Montserrat', sans-serif !important;
 }
-
-/* Only widen the table container */
-.wider-table .stDataFrame table {
-    min-width: 1400px;
-}

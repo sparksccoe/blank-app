@@ -664,10 +664,19 @@ if "best_match" in st.session_state:
 
         st.markdown("### 📋 Playlist Table")
         
-        # Wrap table in a full-width div
+        # Inject CSS to widen the table only
         st.markdown(
             """
-            <div class="wider-table">
+            <style>
+            /* Target the most recent .stDataFrame rendered */
+            .element-container:has(.stDataFrame) {
+                max-width: 1400px !important;
+                width: 100% !important;
+            }
+            .stDataFrame table {
+                min-width: 1400px !important;
+            }
+            </style>
             """,
             unsafe_allow_html=True
         )
@@ -677,8 +686,6 @@ if "best_match" in st.session_state:
             use_container_width=True,
             hide_index=True
         )
-
-        st.markdown("</div>", unsafe_allow_html=True)
 
     # 🎥 Embed YouTube playlist
     st.subheader("🎧 Listen to your playlist on YouTube")
