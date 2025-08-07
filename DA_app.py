@@ -625,21 +625,21 @@ if "best_match" in st.session_state:
             track_ids = [song["Track ID"] for song in st.session_state.user_playlist]
             if best_match["Track ID"] not in track_ids:
                 st.session_state.user_playlist.append(song_with_context)
-                # st.success(f"✅ Added {best_match['Name']} to your playlist!")
-                
-                # Reset BPM and loudness inputs to None
-                st.session_state.bpm_input = None
-                st.session_state.loudness_input = None
                 
                 # Clear the best match from session state to hide the match section
                 if "best_match" in st.session_state:
                     del st.session_state.best_match
+                
+                # Clear the creature and task selections
+                if "creature_pair_selection" in st.session_state:
+                    del st.session_state.creature_pair_selection
+                if "music_task_selection" in st.session_state:
+                    del st.session_state.music_task_selection
                     
-                # Force a rerun to update the UI
+                # Force a rerun to reset the form
                 st.rerun()
             else:
-                st.warning("⚠️ This song is already in your playlist!")
-            
+                st.warning("⚠️ This song is already in your playlist!")            
 
     # # ➕ Add Song to Playlist Button
     # if "user_playlist" not in st.session_state:
