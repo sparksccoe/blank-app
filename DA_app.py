@@ -12,7 +12,7 @@ from PIL import Image
 st.set_page_config(
     page_title="Data Adventures",  # 👈 This is what shows in the browser tab
     page_icon="🧭",                # Optional: shows in the tab as a favicon
-    layout="wide",                 # Optional: "centered" or "wide"
+    layout="centered",                 # Optional: "centered" or "wide"
     initial_sidebar_state="auto",  # Optional: "expanded", "collapsed", or "auto"
 )
 
@@ -663,12 +663,22 @@ if "best_match" in st.session_state:
         } for idx, song in enumerate(st.session_state.user_playlist)])
 
         st.markdown("### 📋 Playlist Table")
+        
+        # Wrap table in a full-width div
+        st.markdown(
+            """
+            <div class="wider-table">
+            """,
+            unsafe_allow_html=True
+        )
+
         st.dataframe(
             playlist_summary_df.reset_index(drop=True),
-            use_container_width=False,  # 👈 disable auto-width
-            hide_index=True,
-            width=1400  # 👈 manually set the width
+            use_container_width=True,
+            hide_index=True
         )
+
+        st.markdown("</div>", unsafe_allow_html=True)
 
     # 🎥 Embed YouTube playlist
     st.subheader("🎧 Listen to your playlist on YouTube")

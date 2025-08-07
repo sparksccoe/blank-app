@@ -4,7 +4,8 @@ body * {
     font-family: 'Montserrat', sans-serif !important;
 }
 
-/* ✅ Force wider DataFrame tables */
-.stDataFrame table {
-    min-width: 1400px;  /* You can increase this if needed */
+/* Only widen the table container */
+.wider-table {
+    overflow-x: auto;
+    padding-right: 16px;
 }
