@@ -667,6 +667,7 @@ if "best_match" in st.session_state:
             playlist_summary_df.reset_index(drop=True),
             use_container_width=False,  # 👈 disable auto-width
             hide_index=True,
+            height=400,
             width=1400  # 👈 manually set the width
         )
 
