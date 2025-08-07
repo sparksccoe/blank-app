@@ -665,8 +665,9 @@ if "best_match" in st.session_state:
         st.markdown("### 📋 Playlist Table")
         st.dataframe(
             playlist_summary_df.reset_index(drop=True),
-            use_container_width=True,
-            hide_index=True  # 👈 this hides the 0-based index column
+            use_container_width=False,  # 👈 disable auto-width
+            hide_index=True,
+            width=1400  # 👈 manually set the width
         )
 
     # 🎥 Embed YouTube playlist
