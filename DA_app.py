@@ -665,8 +665,8 @@ if "best_match" in st.session_state:
                 st.button("🧹 Remove", key=f"remove_{idx}", type="primary",
                         on_click=remove_song, args=(idx,))
 
-    else:
-        st.write("📜 Your playlist scroll is blank. Add songs to bring Symphonia to life!")
+    #else:
+    #    st.write("📜 Your playlist scroll is blank. Add songs to bring Symphonia to life!")
 
     # 🎼 Display Playlist Table Summary
     if st.session_state.user_playlist:
