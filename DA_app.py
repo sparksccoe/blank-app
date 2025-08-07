@@ -473,7 +473,7 @@ with col2:
         value=None,
         step=1,
         format="%d",
-        label_visibility="collapsed"  # Use if Streamlit version supports it,
+        label_visibility="collapsed",  # Use if Streamlit version supports it
         key="loudness_input"
     )
 
