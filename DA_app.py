@@ -16,6 +16,18 @@ st.set_page_config(
     initial_sidebar_state="auto",  # Optional: "expanded", "collapsed", or "auto"
 )
 
+# Inject custom CSS to adjust the max-width of the main content area
+st.markdown(
+    """
+    <style>
+    .reportview-container .main .block-container {
+        max-width: 900px; /* Adjust this value as needed */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 # Combine hiding UI elements and background image styling
 hide_streamlit_style = """
     <style>
