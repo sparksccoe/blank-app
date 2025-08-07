@@ -5,7 +5,6 @@ body * {
 }
 
 /* Only widen the table container */
-.wider-table {
-    overflow-x: auto;
-    padding-right: 16px;
+.wider-table .stDataFrame table {
+    min-width: 1400px;
 }
