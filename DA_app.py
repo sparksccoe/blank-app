@@ -601,29 +601,31 @@ if "best_match" in st.session_state:
     selected_creature_name = st.session_state.get("creature_pair_selection", "-- Select Creature --")
     selected_task = st.session_state.get("music_task_selection", "-- Select Task --")
 
-    if st.button("✨ Add to Playlist", key=f"add_{best_match['Track ID']}", type="primary"):        
-        # Build song object with context
-        song_with_context = best_match.copy()
-        song_with_context["Creature"] = selected_creature_name if selected_creature_name != "-- Select Creature --" else ""
-        song_with_context["Task Selected"] = selected_task if selected_task != "-- Select Task --" else ""
+    # ✅ Only show button *after* a task has been selected
+    if selected_creature_name != "-- Select Creature --" and selected_task != "-- Select Task --":
+        if st.button("✨ Add to Playlist", key=f"add_{best_match['Track ID']}", type="primary"):        
+            # Build song object with context
+            song_with_context = best_match.copy()
+            song_with_context["Creature"] = selected_creature_name if selected_creature_name != "-- Select Creature --" else ""
+            song_with_context["Task Selected"] = selected_task if selected_task != "-- Select Task --" else ""
 
-        # Add task category if available
-        selected_creature_obj = next(
-            (creature for creature in matched_creatures if creature["Name"] == selected_creature_name),
-            None
-        )
-        if selected_creature_obj is not None:
-            song_with_context["Task Category"] = selected_creature_obj["Task Category"]
-        else:
-            song_with_context["Task Category"] = ""
+            # Add task category if available
+            selected_creature_obj = next(
+                (creature for creature in matched_creatures if creature["Name"] == selected_creature_name),
+                None
+            )
+            if selected_creature_obj is not None:
+                song_with_context["Task Category"] = selected_creature_obj["Task Category"]
+            else:
+                song_with_context["Task Category"] = ""
 
-        # Avoid duplicates
-        track_ids = [song["Track ID"] for song in st.session_state.user_playlist]
-        if best_match["Track ID"] not in track_ids:
-            st.session_state.user_playlist.append(song_with_context)
-            st.success(f"✅ Added {best_match['Name']} to your playlist!")
-        else:
-            st.warning("⚠️ This song is already in your playlist!")
+            # Avoid duplicates
+            track_ids = [song["Track ID"] for song in st.session_state.user_playlist]
+            if best_match["Track ID"] not in track_ids:
+                st.session_state.user_playlist.append(song_with_context)
+                # st.success(f"✅ Added {best_match['Name']} to your playlist!")
+            else:
+                st.warning("⚠️ This song is already in your playlist!")
 
     # # ➕ Add Song to Playlist Button
     # if "user_playlist" not in st.session_state:
