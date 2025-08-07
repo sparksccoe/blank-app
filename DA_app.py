@@ -659,7 +659,7 @@ if st.session_state.user_playlist:
             setTimeout(function() {
                 var element = document.getElementById('playlist-section');
                 var elementPosition = element.offsetTop;
-                var offsetPosition = elementPosition - 188; // Scroll 188px above the playlist
+                var offsetPosition = elementPosition - 190; // Scroll 190px above the playlist
                 
                 window.scrollTo({
                     top: offsetPosition,
