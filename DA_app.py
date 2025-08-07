@@ -659,7 +659,7 @@ if st.session_state.user_playlist:
             setTimeout(function() {
                 document.getElementById('playlist-section').scrollIntoView({
                     behavior: 'smooth',
-                    block: 'center'
+                    block: 'start'
                 });
             }, 100);
             </script>
