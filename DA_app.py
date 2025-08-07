@@ -624,8 +624,14 @@ if "best_match" in st.session_state:
             if best_match["Track ID"] not in track_ids:
                 st.session_state.user_playlist.append(song_with_context)
                 # st.success(f"✅ Added {best_match['Name']} to your playlist!")
+
+                # ✅ Reset tempo and loudness input fields
+                st.session_state["bpm_input"] = None
+                st.session_state["loudness_input"] = None
             else:
                 st.warning("⚠️ This song is already in your playlist!")
+            
+
 
     # # ➕ Add Song to Playlist Button
     # if "user_playlist" not in st.session_state:
