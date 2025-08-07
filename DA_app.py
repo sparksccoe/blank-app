@@ -661,8 +661,7 @@ if st.session_state.user_playlist:
             st.markdown("<div style='margin-top: 1.5em;'></div>", unsafe_allow_html=True)
             st.button("🧹 Remove", key=f"remove_{idx}", type="primary",
                     on_click=remove_song, args=(idx,))
-else:
-    #st.write("📜 Your playlist scroll is blank. Add songs to bring Symphonia to life!")
+
 
 # 🎼 Display Playlist Table Summary (also moved outside)
 if st.session_state.user_playlist:
@@ -723,10 +722,7 @@ if st.session_state.user_playlist:
             f'<iframe width="100%" height="400" src="{youtube_embed_url}" frameborder="0" allowfullscreen></iframe>',
             unsafe_allow_html=True
         )
-    else:
-        st.write("⚠️ No YouTube videos available for your playlist.")
-else:
-    #st.write("⚠️ No YouTube videos available for your playlist.")
+
 
 # Ensure 'saved_user_playlists' directory exists
 playlist_dir = "saved_user_playlists"
