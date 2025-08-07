@@ -643,11 +643,13 @@ if "best_match" in st.session_state:
             else:
                 st.warning("⚠️ This song is already in your playlist!")
 
+ # Add an anchor point for scrolling
+    st.markdown('<div id="playlist-section"></div>', unsafe_allow_html=True)
+
 # 🎵 MOVED OUTSIDE: Display Playlist (always show if playlist exists)
 if st.session_state.user_playlist:
     st.markdown("---")
-    # Add an anchor point for scrolling
-    st.markdown('<div id="playlist-section"></div>', unsafe_allow_html=True)
+   
     st.subheader(f"🎶 Your Playlist: {st.session_state.get('saved_playlist_name', '')}".strip())
 
     # Check if we should scroll to playlist
@@ -657,19 +659,11 @@ if st.session_state.user_playlist:
             """
             <script>
             setTimeout(function() {
-                var element = document.getElementById('playlist-section');
-                if (element) {
-                    var rect = element.getBoundingClientRect();
-                    var currentScroll = window.pageYOffset;
-                    var elementTop = rect.top + currentScroll;
-                    var targetPosition = elementTop - 200; // Try odd numbers like 75, 125, 175
-                    
-                    window.scrollTo({
-                        top: targetPosition,
-                        behavior: 'auto'
-                    });
-                }
-            }, 200); // Increased timeout to ensure page is fully loaded
+                document.getElementById('playlist-section').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }, 100);
             </script>
             """,
             unsafe_allow_html=True
