@@ -366,7 +366,7 @@ with col2:
         label=" ",  # a single space to suppress default spacing
         min_value=40,
         max_value=250,
-        value=current_bpm if current_bpm is not None else None,
+        value=None,
         step=1,
         format="%d",
         label_visibility="collapsed",  # If using Streamlit 1.20+, hides label spacing,
@@ -470,7 +470,7 @@ with col2:
         label=" ",
         min_value=-60,
         max_value=0,
-        value=current_loudness if current_loudness is not None else None,
+        value=None,
         step=1,
         format="%d",
         label_visibility="collapsed",  # Use if Streamlit version supports it
@@ -625,17 +625,14 @@ if "best_match" in st.session_state:
             track_ids = [song["Track ID"] for song in st.session_state.user_playlist]
             if best_match["Track ID"] not in track_ids:
                 st.session_state.user_playlist.append(song_with_context)
-                # st.success(f"✅ Added {best_match['Name']} to your playlist!")
                 
-                # Reset BPM and loudness inputs to None
-                st.session_state.bpm_input = None
-                st.session_state.loudness_input = None
-                
-                # Clear the best match from session state to hide the match section
-                if "best_match" in st.session_state:
-                    del st.session_state.best_match
+                # Reset only the BPM and loudness inputs by deleting their keys
+                if "bpm_input" in st.session_state:
+                    del st.session_state.bpm_input
+                if "loudness_input" in st.session_state:
+                    del st.session_state.loudness_input
                     
-                # Force a rerun to update the UI
+                # Force a rerun to reset the inputs
                 st.rerun()
             else:
                 st.warning("⚠️ This song is already in your playlist!")
