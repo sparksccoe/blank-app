@@ -628,8 +628,8 @@ if "best_match" in st.session_state:
                 # st.success(f"✅ Added {best_match['Name']} to your playlist!")
 
                 # ✅ Reset tempo and loudness input fields
-                st.session_state["bpm_input"] = None
-                st.session_state["loudness_input"] = None
+                st.session_state["bpm_input"] = 0
+                st.session_state["loudness_input"] = -60
             else:
                 st.warning("⚠️ This song is already in your playlist!")
             
