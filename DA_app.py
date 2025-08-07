@@ -570,8 +570,6 @@ if "best_match" in st.session_state:
         )
 
         if selected_creature_name != "-- Select Creature --":
-            # st.success(f"You paired up with: **{selected_creature_name}**")
-
             selected_creature_obj = next(
                 (creature for creature in matched_creatures if creature["Name"] == selected_creature_name),
                 None
@@ -592,9 +590,6 @@ if "best_match" in st.session_state:
                     index=0,
                     key="music_task_selection"
                 )
-
-                # if selected_task != "-- Select Task --":
-                #    st.info(f"Task chosen: **{selected_task}**")
 
     # ➕ Add Song to Playlist Button
     if "user_playlist" not in st.session_state:
@@ -626,91 +621,90 @@ if "best_match" in st.session_state:
             if best_match["Track ID"] not in track_ids:
                 st.session_state.user_playlist.append(song_with_context)
                 
-                # Reset only the BPM and loudness inputs by deleting their keys
+                # Reset only the BPM and loudness inputs
                 if "bpm_input" in st.session_state:
                     del st.session_state.bpm_input
                 if "loudness_input" in st.session_state:
                     del st.session_state.loudness_input
+                
+                # Clear creature and task selections for next song
+                if "creature_pair_selection" in st.session_state:
+                    del st.session_state.creature_pair_selection
+                if "music_task_selection" in st.session_state:
+                    del st.session_state.music_task_selection
+                
+                # Clear the best match so user needs to make a new match
+                if "best_match" in st.session_state:
+                    del st.session_state.best_match
                     
                 # Force a rerun to reset the inputs
                 st.rerun()
             else:
                 st.warning("⚠️ This song is already in your playlist!")
-            
 
-    # # ➕ Add Song to Playlist Button
-    # if "user_playlist" not in st.session_state:
-    #     st.session_state.user_playlist = []
-
-    # if st.button("✨ Add to Playlist", key=f"add_{best_match['Track ID']}", type="primary"):
-    #     if best_match not in st.session_state.user_playlist:
-    #         st.session_state.user_playlist.append(best_match)
-    #         st.success(f"✅ Added {best_match['Name']} to your playlist!")
-    #     else:
-    #         st.warning("⚠️ This song is already in your playlist!")
-
-    # 🎵 Display Playlist
+# 🎵 MOVED OUTSIDE: Display Playlist (always show if playlist exists)
+if st.session_state.user_playlist:
     st.subheader(f"🎶 Your Playlist: {st.session_state.get('saved_playlist_name', '')}".strip())
+    
+    for idx, song in enumerate(st.session_state.user_playlist):
+        col1, col2, col3 = st.columns([1, 3, 1])  # Third column for the button
 
-    if st.session_state.user_playlist:
-        for idx, song in enumerate(st.session_state.user_playlist):
-            col1, col2, col3 = st.columns([1, 3, 1])  # Third column for the button
+        with col1:
+            st.image(song["Image"], width=80)
 
-            with col1:
-                st.image(song["Image"], width=80)
+        with col2:
+            st.write(f"**{song['Name']}** by {song['Bard']}")
+            st.markdown(
+                f"**Tempo:** {song['Tempo (BPM)']} BPM &nbsp;&nbsp;&nbsp;&nbsp; | "
+                f"&nbsp;&nbsp;&nbsp;&nbsp; **Loudness:** {song['Loudness (dB)']} dB"
+            )
 
-            with col2:
-                st.write(f"**{song['Name']}** by {song['Bard']}")
-                st.markdown(
-                    f"**Tempo:** {song['Tempo (BPM)']} BPM &nbsp;&nbsp;&nbsp;&nbsp; | "
-                    f"&nbsp;&nbsp;&nbsp;&nbsp; **Loudness:** {song['Loudness (dB)']} dB"
-                )
+        with col3:
+            st.markdown("<div style='margin-top: 1.5em;'></div>", unsafe_allow_html=True)
+            st.button("🧹 Remove", key=f"remove_{idx}", type="primary",
+                    on_click=remove_song, args=(idx,))
+else:
+    st.write("📜 Your playlist scroll is blank. Add songs to bring Symphonia to life!")
 
-            with col3:
-                st.markdown("<div style='margin-top: 1.5em;'></div>", unsafe_allow_html=True)
-                st.button("🧹 Remove", key=f"remove_{idx}", type="primary",
-                        on_click=remove_song, args=(idx,))
-    else:
-        st.write("📜 Your playlist scroll is blank. Add songs to bring Symphonia to life!")
+# 🎼 Display Playlist Table Summary (also moved outside)
+if st.session_state.user_playlist:
+    playlist_summary_df = pd.DataFrame([{
+        "Bard": song.get("Bard", "Unknown"),
+        "Song Name": song.get("Name", "Unknown"),
+        "Tempo(BPM)": song.get("Tempo (BPM)", ""),
+        "Loudness(dB)": song.get("Loudness (dB)", ""),
+        "Creature": song.get("Creature", ""),
+        "Task Category": song.get("Task Category", ""),
+        "Task Selected": song.get("Task Selected", "")
+    } for idx, song in enumerate(st.session_state.user_playlist)])
 
-    # 🎼 Display Playlist Table Summary
-    if st.session_state.user_playlist:
-        playlist_summary_df = pd.DataFrame([{
-            "Bard": song.get("Bard", "Unknown"),
-            "Song Name": song.get("Name", "Unknown"),
-            "Tempo(BPM)": song.get("Tempo (BPM)", ""),
-            "Loudness(dB)": song.get("Loudness (dB)", ""),
-            "Creature": song.get("Creature", ""),
-            "Task Category": song.get("Task Category", ""),
-            "Task Selected": song.get("Task Selected", "")
-        } for idx, song in enumerate(st.session_state.user_playlist)])
+    st.markdown("### 📋 Playlist Table")
+    
+    # Inject CSS to widen the table only
+    st.markdown(
+        """
+        <style>
+        /* Target the most recent .stDataFrame rendered */
+        .element-container:has(.stDataFrame) {
+            max-width: 1400px !important;
+            width: 100% !important;
+        }
+        .stDataFrame table {
+            min-width: 1400px !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
-        st.markdown("### 📋 Playlist Table")
-        
-        # Inject CSS to widen the table only
-        st.markdown(
-            """
-            <style>
-            /* Target the most recent .stDataFrame rendered */
-            .element-container:has(.stDataFrame) {
-                max-width: 1400px !important;
-                width: 100% !important;
-            }
-            .stDataFrame table {
-                min-width: 1400px !important;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
+    st.dataframe(
+        playlist_summary_df.reset_index(drop=True),
+        use_container_width=True,
+        hide_index=True
+    )
 
-        st.dataframe(
-            playlist_summary_df.reset_index(drop=True),
-            use_container_width=True,
-            hide_index=True
-        )
-
-    # 🎥 Embed YouTube playlist
+# 🎥 Embed YouTube playlist (also moved outside)
+if st.session_state.user_playlist:
     st.subheader("🎧 Listen to your playlist on YouTube")
     if "youtube_video_ids" not in st.session_state:
         st.session_state.youtube_video_ids = []
@@ -733,7 +727,8 @@ if "best_match" in st.session_state:
         )
     else:
         st.write("⚠️ No YouTube videos available for your playlist.")
-
+else:
+    st.write("⚠️ No YouTube videos available for your playlist.")
 
 # Ensure 'saved_user_playlists' directory exists
 playlist_dir = "saved_user_playlists"
