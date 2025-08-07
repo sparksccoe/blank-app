@@ -358,19 +358,21 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Centered number input with minimal top margin
+# Create a unique key that changes when we want to reset
+reset_counter = st.session_state.get("reset_counter", 0)
+
+# Centered number input with dynamic key
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
-    # Use empty label so the input field has no built-in spacing
     bpm = st.number_input(
-        label=" ",  # a single space to suppress default spacing
+        label=" ",
         min_value=40,
         max_value=250,
         value=None,
         step=1,
         format="%d",
-        label_visibility="collapsed",  # If using Streamlit 1.20+, hides label spacing,
-        key="bpm_input"
+        label_visibility="collapsed",
+        key=f"bpm_input_{reset_counter}"  # Dynamic key
     )
 
 if bpm is not None:
@@ -463,7 +465,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Centered number input
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
     loudness = st.number_input(
@@ -473,8 +474,8 @@ with col2:
         value=None,
         step=1,
         format="%d",
-        label_visibility="collapsed",  # Use if Streamlit version supports it
-        key="loudness_input"
+        label_visibility="collapsed",
+        key=f"loudness_input_{reset_counter}"  # Dynamic key
     )
 
 # 🎼 Show relatable response only after the user enters loudness
@@ -621,11 +622,8 @@ if "best_match" in st.session_state:
             if best_match["Track ID"] not in track_ids:
                 st.session_state.user_playlist.append(song_with_context)
                 
-                # Reset only the BPM and loudness inputs
-                if "bpm_input" in st.session_state:
-                    del st.session_state.bpm_input
-                if "loudness_input" in st.session_state:
-                    del st.session_state.loudness_input
+                # Increment reset counter to create new widget keys
+                st.session_state.reset_counter = st.session_state.get("reset_counter", 0) + 1
                 
                 # Clear creature and task selections for next song
                 if "creature_pair_selection" in st.session_state:
