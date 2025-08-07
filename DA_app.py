@@ -658,14 +658,18 @@ if st.session_state.user_playlist:
             <script>
             setTimeout(function() {
                 var element = document.getElementById('playlist-section');
-                var elementPosition = element.offsetTop;
-                var offsetPosition = elementPosition - 225; // Scroll 200px above the playlist
-                
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: 'smooth'
-                });
-            }, 100);
+                if (element) {
+                    var rect = element.getBoundingClientRect();
+                    var currentScroll = window.pageYOffset;
+                    var elementTop = rect.top + currentScroll;
+                    var targetPosition = elementTop - 210; // Try odd numbers like 75, 125, 175
+                    
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            }, 200); // Increased timeout to ensure page is fully loaded
             </script>
             """,
             unsafe_allow_html=True
