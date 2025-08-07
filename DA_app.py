@@ -634,7 +634,10 @@ if "best_match" in st.session_state:
                 # Clear the best match so user needs to make a new match
                 if "best_match" in st.session_state:
                     del st.session_state.best_match
-                    
+
+                # Set a flag to scroll to playlist after rerun
+                st.session_state.scroll_to_playlist = True
+
                 # Force a rerun to reset the inputs
                 st.rerun()
             else:
@@ -644,6 +647,25 @@ if "best_match" in st.session_state:
 if st.session_state.user_playlist:
     st.markdown("---")
     st.subheader(f"🎶 Your Playlist: {st.session_state.get('saved_playlist_name', '')}".strip())
+
+    # Check if we should scroll to playlist
+    if st.session_state.get("scroll_to_playlist", False):
+        # Add JavaScript to scroll to the playlist section
+        st.markdown(
+            """
+            <script>
+            setTimeout(function() {
+                document.getElementById('playlist-section').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }, 100);
+            </script>
+            """,
+            unsafe_allow_html=True
+        )
+        # Clear the scroll flag
+        del st.session_state.scroll_to_playlist
     
     for idx, song in enumerate(st.session_state.user_playlist):
         col1, col2, col3 = st.columns([1, 3, 1])  # Third column for the button
