@@ -50,8 +50,8 @@ hide_streamlit_style = """
     <div class="background-container"></div>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-with open( "style.css" ) as css:
-    st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
+with open("style.css") as css:
+    st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
 
 import spotipy
 from PIL import Image
@@ -664,24 +664,28 @@ if "best_match" in st.session_state:
 
         st.markdown("### 📋 Playlist Table")
         
-    
-    # Optional: Add CSS to widen the table container
-    st.markdown(
-        """
-        <style>
-        .element-container:has(table) {
-            max-width: 1400px !important;
-            width: 100% !important;
-        }
-        table {
-            width: 100% !important;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+        # Inject CSS to widen the table only
+        st.markdown(
+            """
+            <style>
+            /* Target the most recent .stDataFrame rendered */
+            .element-container:has(.stDataFrame) {
+                max-width: 1400px !important;
+                width: 100% !important;
+            }
+            .stDataFrame table {
+                min-width: 1400px !important;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
 
-    st.table(playlist_summary_df)
+        st.dataframe(
+            playlist_summary_df.reset_index(drop=True),
+            use_container_width=True,
+            hide_index=True
+        )
 
     # 🎥 Embed YouTube playlist
     st.subheader("🎧 Listen to your playlist on YouTube")

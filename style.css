@@ -3,3 +3,10 @@
 body * {
     font-family: 'Montserrat', sans-serif !important;
 }
+
+/* Widen the main centered layout container */
+.main .block-container {
+    max-width: 1200px !important;  /* Or any width you prefer */
+    padding-left: 2rem;
+    padding-right: 2rem;
+}
