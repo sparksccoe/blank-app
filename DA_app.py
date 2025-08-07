@@ -532,7 +532,6 @@ def find_matching_creatures_either(tempo, loudness, df):
 
 # 🪄 Display best match if it's stored in session
 if "best_match" in st.session_state:
-    st.markdown("---")
     best_match = st.session_state.best_match
 
     st.subheader(f"🎵 Your song is **{best_match['Name']}** by **{best_match['Bard']}**")
@@ -643,6 +642,7 @@ if "best_match" in st.session_state:
 
 # 🎵 MOVED OUTSIDE: Display Playlist (always show if playlist exists)
 if st.session_state.user_playlist:
+    st.markdown("---")
     st.subheader(f"🎶 Your Playlist: {st.session_state.get('saved_playlist_name', '')}".strip())
     
     for idx, song in enumerate(st.session_state.user_playlist):
