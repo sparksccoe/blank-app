@@ -21,7 +21,7 @@ st.markdown(
     """
     <style>
     .reportview-container .main .block-container {
-        max-width: 900px; /* Adjust this value as needed */
+        max-width: 1200px; /* Adjust this value as needed */
     }
     </style>
     """,
@@ -664,13 +664,12 @@ if "best_match" in st.session_state:
     # 🎼 Display Playlist Table Summary
     if st.session_state.user_playlist:
         playlist_summary_df = pd.DataFrame([{
-            "No.": idx +1,
             "Bard": song.get("Bard", "Unknown"),
             "Song Name": song.get("Name", "Unknown"),
-            "Tempo (BPM)": song.get("Tempo (BPM)", ""),
-            "Loudness (dB)": song.get("Loudness (dB)", ""),
+            "Tempo(BPM)": song.get("Tempo (BPM)", ""),
+            "Loudness(dB)": song.get("Loudness (dB)", ""),
             "Creature": song.get("Creature", ""),
-            "Category of Task": song.get("Task Category", ""),
+            "Task Category": song.get("Task Category", ""),
             "Task Selected": song.get("Task Selected", "")
         } for idx, song in enumerate(st.session_state.user_playlist)])
 
