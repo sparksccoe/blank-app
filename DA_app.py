@@ -369,7 +369,8 @@ with col2:
         value=None,
         step=1,
         format="%d",
-        label_visibility="collapsed"  # If using Streamlit 1.20+, hides label spacing
+        label_visibility="collapsed"  # If using Streamlit 1.20+, hides label spacing,
+        key="bpm_input"
     )
 
 if bpm is not None:
@@ -472,7 +473,8 @@ with col2:
         value=None,
         step=1,
         format="%d",
-        label_visibility="collapsed"  # Use if Streamlit version supports it
+        label_visibility="collapsed"  # Use if Streamlit version supports it,
+        key="loudness_input"
     )
 
 # 🎼 Show relatable response only after the user enters loudness
