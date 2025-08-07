@@ -6,5 +6,5 @@ body * {
 
 /* ✅ Force wider DataFrame tables */
 .stDataFrame table {
-    min-width: 1200px;  /* You can increase this if needed */
+    min-width: 1400px;  /* You can increase this if needed */
 }
