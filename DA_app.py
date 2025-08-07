@@ -662,7 +662,7 @@ if st.session_state.user_playlist:
                     var rect = element.getBoundingClientRect();
                     var currentScroll = window.pageYOffset;
                     var elementTop = rect.top + currentScroll;
-                    var targetPosition = elementTop - 190; // Try odd numbers like 75, 125, 175
+                    var targetPosition = elementTop - 200; // Try odd numbers like 75, 125, 175
                     
                     window.scrollTo({
                         top: targetPosition,
