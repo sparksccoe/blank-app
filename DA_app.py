@@ -626,11 +626,20 @@ if "best_match" in st.session_state:
             if best_match["Track ID"] not in track_ids:
                 st.session_state.user_playlist.append(song_with_context)
                 # st.success(f"✅ Added {best_match['Name']} to your playlist!")
-
+                
+                # Reset BPM and loudness inputs to None
+                st.session_state.bpm_input = None
+                st.session_state.loudness_input = None
+                
+                # Clear the best match from session state to hide the match section
+                if "best_match" in st.session_state:
+                    del st.session_state.best_match
+                    
+                # Force a rerun to update the UI
+                st.rerun()
             else:
                 st.warning("⚠️ This song is already in your playlist!")
             
-
 
     # # ➕ Add Song to Playlist Button
     # if "user_playlist" not in st.session_state:
@@ -664,9 +673,8 @@ if "best_match" in st.session_state:
                 st.markdown("<div style='margin-top: 1.5em;'></div>", unsafe_allow_html=True)
                 st.button("🧹 Remove", key=f"remove_{idx}", type="primary",
                         on_click=remove_song, args=(idx,))
-
-    #else:
-    #    st.write("📜 Your playlist scroll is blank. Add songs to bring Symphonia to life!")
+    else:
+        st.write("📜 Your playlist scroll is blank. Add songs to bring Symphonia to life!")
 
     # 🎼 Display Playlist Table Summary
     if st.session_state.user_playlist:
