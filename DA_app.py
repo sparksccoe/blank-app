@@ -646,6 +646,8 @@ if "best_match" in st.session_state:
 # 🎵 MOVED OUTSIDE: Display Playlist (always show if playlist exists)
 if st.session_state.user_playlist:
     st.markdown("---")
+    # Add an anchor point for scrolling
+    st.markdown('<div id="playlist-section"></div>', unsafe_allow_html=True)
     st.subheader(f"🎶 Your Playlist: {st.session_state.get('saved_playlist_name', '')}".strip())
 
     # Check if we should scroll to playlist
