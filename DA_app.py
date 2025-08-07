@@ -366,7 +366,7 @@ with col2:
         label=" ",  # a single space to suppress default spacing
         min_value=40,
         max_value=250,
-        value=current_bmp if current_bpm is not None else None,
+        value=current_bpm if current_bpm is not None else None,
         step=1,
         format="%d",
         label_visibility="collapsed",  # If using Streamlit 1.20+, hides label spacing,
