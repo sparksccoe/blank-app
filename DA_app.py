@@ -666,7 +666,7 @@ if st.session_state.user_playlist:
                     
                     window.scrollTo({
                         top: targetPosition,
-                        behavior: 'smooth'
+                        behavior: 'auto'
                     });
                 }
             }, 200); // Increased timeout to ensure page is fully loaded
