@@ -657,9 +657,13 @@ if st.session_state.user_playlist:
             """
             <script>
             setTimeout(function() {
-                document.getElementById('playlist-section').scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
+                var element = document.getElementById('playlist-section');
+                var elementPosition = element.offsetTop;
+                var offsetPosition = elementPosition - 150; // Scroll 150px above the playlist
+                
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
                 });
             }, 100);
             </script>
