@@ -662,7 +662,7 @@ if st.session_state.user_playlist:
             st.button("🧹 Remove", key=f"remove_{idx}", type="primary",
                     on_click=remove_song, args=(idx,))
 else:
-    st.write("📜 Your playlist scroll is blank. Add songs to bring Symphonia to life!")
+    #st.write("📜 Your playlist scroll is blank. Add songs to bring Symphonia to life!")
 
 # 🎼 Display Playlist Table Summary (also moved outside)
 if st.session_state.user_playlist:
@@ -726,7 +726,7 @@ if st.session_state.user_playlist:
     else:
         st.write("⚠️ No YouTube videos available for your playlist.")
 else:
-    st.write("⚠️ No YouTube videos available for your playlist.")
+    #st.write("⚠️ No YouTube videos available for your playlist.")
 
 # Ensure 'saved_user_playlists' directory exists
 playlist_dir = "saved_user_playlists"
