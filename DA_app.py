@@ -8,830 +8,1164 @@ import shutil
 import base64
 from datetime import datetime, timedelta
 from PIL import Image
-import pandas as pd
-import numpy as np
-import soundfile as sf
-import sounddevice as sd
-import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
 
-# ============================================
-# PAGE CONFIGURATION
-# ============================================
 st.set_page_config(
-    page_title="Data Adventures: Symphonia",
-    page_icon="🎵",
-    layout="wide",  # Changed to wide for better tablet experience
-    initial_sidebar_state="collapsed",
+    page_title="Data Adventures",  # 👈 This is what shows in the browser tab
+    page_icon="🧭",                # Optional: shows in the tab as a favicon
+    layout="centered",                 # Optional: "centered" or "wide"
+    initial_sidebar_state="auto",  # Optional: "expanded", "collapsed", or "auto"
 )
 
-# ============================================
-# CUSTOM CSS FOR PROFESSIONAL DESIGN
-# ============================================
-st.markdown("""
+# Inject custom CSS to adjust the max-width of the main content area
+st.markdown(
+    """
     <style>
-    /* Main container optimization for tablets */
-    .main > div {
-        max-width: 1024px;
-        margin: 0 auto;
-        padding: 1rem;
-    }
-    
-    /* Professional color scheme */
-    :root {
-        --primary-color: #2E86AB;
-        --secondary-color: #A23B72;
-        --accent-color: #F18F01;
-        --success-color: #06D6A0;
-        --background-light: #F7F9FB;
-        --text-dark: #2D3436;
-    }
-    
-    /* Hide Streamlit branding */
-    #MainMenu, header, footer, .css-1dp5vir {
-        visibility: hidden;
-    }
-    
-    /* Custom header styling */
-    .main-header {
-        text-align: center;
-        padding: 2rem 0;
-        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-        color: white;
-        border-radius: 20px;
-        margin-bottom: 2rem;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    }
-    
-    .main-header h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin: 0;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    }
-    
-    .subtitle {
-        font-size: 1.2rem;
-        opacity: 0.95;
-        margin-top: 0.5rem;
-    }
-    
-    /* Card-style sections */
-    .card-section {
-        background: white;
-        border-radius: 15px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        border: 1px solid rgba(0,0,0,0.05);
-    }
-    
-    /* Professional button styling */
-    .stButton > button {
-        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-        color: white;
-        border: none;
-        padding: 0.75rem 2rem;
-        border-radius: 30px;
-        font-weight: 600;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(46, 134, 171, 0.3);
-    }
-    
-    .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(46, 134, 171, 0.4);
-    }
-    
-    /* Input field styling */
-    .stNumberInput > div > div > input,
-    .stTextInput > div > div > input {
-        border-radius: 10px;
-        border: 2px solid #E0E6ED;
-        padding: 0.75rem;
-        font-size: 1rem;
-        transition: border-color 0.3s ease;
-    }
-    
-    .stNumberInput > div > div > input:focus,
-    .stTextInput > div > div > input:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(46, 134, 171, 0.1);
-    }
-    
-    /* Metric cards for BPM and Loudness display */
-    .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 15px;
-        padding: 1.5rem;
-        color: white;
-        text-align: center;
-        margin: 1rem 0;
-    }
-    
-    .metric-value {
-        font-size: 2.5rem;
-        font-weight: bold;
-        margin: 0.5rem 0;
-    }
-    
-    .metric-label {
-        font-size: 1rem;
-        opacity: 0.9;
-    }
-    
-    /* Song card styling */
-    .song-card {
-        background: white;
-        border-radius: 12px;
-        padding: 1rem;
-        margin: 0.5rem 0;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        transition: transform 0.2s ease;
-    }
-    
-    .song-card:hover {
-        transform: translateX(5px);
-    }
-    
-    /* Playlist section */
-    .playlist-header {
-        background: linear-gradient(135deg, var(--success-color), var(--accent-color));
-        color: white;
-        padding: 1.5rem;
-        border-radius: 15px 15px 0 0;
-        margin-bottom: 0;
-    }
-    
-    /* Success/Info messages */
-    .stSuccess, .stInfo {
-        border-radius: 10px;
-        padding: 1rem;
-        border-left: 4px solid var(--success-color);
-    }
-    
-    /* Expander styling */
-    .streamlit-expanderHeader {
-        background-color: var(--background-light);
-        border-radius: 10px;
-        font-weight: 600;
-    }
-    
-    /* Table styling */
-    .stDataFrame {
-        border-radius: 10px;
-        overflow: hidden;
-    }
-    
-    /* Responsive design for tablets */
-    @media (max-width: 768px) {
-        .main > div {
-            padding: 0.5rem;
-        }
-        
-        .main-header h1 {
-            font-size: 2rem;
-        }
-        
-        .card-section {
-            padding: 1.5rem;
-        }
-    }
-    
-    /* Hide default Streamlit styling */
-    .css-1629p8f h1, .css-1629p8f h2, .css-1629p8f h3 {
-        padding: 0;
-    }
-    
-    /* Progress indicator */
-    .progress-step {
-        display: inline-block;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: #E0E6ED;
-        color: white;
-        text-align: center;
-        line-height: 40px;
-        font-weight: bold;
-        margin: 0 0.5rem;
-        transition: all 0.3s ease;
-    }
-    
-    .progress-step.active {
-        background: var(--primary-color);
-        transform: scale(1.1);
-    }
-    
-    .progress-step.completed {
-        background: var(--success-color);
-    }
-    
-    /* Smooth scrolling */
-    html {
-        scroll-behavior: smooth;
+    .reportview-container .main .block-container {
+        max-width: 1200px; /* Adjust this value as needed */
     }
     </style>
-""", unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True,
+)
 
-# ============================================
-# INITIALIZE SESSION STATE
-# ============================================
-if "user_playlist" not in st.session_state:
-    st.session_state.user_playlist = []
-if "current_step" not in st.session_state:
-    st.session_state.current_step = 1
-if "bpm_value" not in st.session_state:
-    st.session_state.bpm_value = None
-if "loudness_value" not in st.session_state:
-    st.session_state.loudness_value = None
+# Combine hiding UI elements and background image styling
+hide_streamlit_style = """
+    <style>
+    /* Hide Streamlit default UI elements */
+    div[data-testid="stToolbar"],
+    div[data-testid="stDecoration"],
+    div[data-testid="stStatusWidget"],
+    #MainMenu,
+    header,
+    footer {
+        visibility: hidden;
+        height: 0%;
+        position: fixed;
+    }
 
-# ============================================
-# SPOTIFY CONFIGURATION
-# ============================================
+    /* Add a full-screen background image with transparency */
+    .background-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        z-index: -1;
+        background-image: url('zelda.jpg');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        opacity: 0.5; /* Adjust transparency */
+    }
+    </style>
+
+    <div class="background-container"></div>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+with open("style.css") as css:
+    st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
+
+import spotipy
+from PIL import Image
+from spotipy.oauth2 import SpotifyClientCredentials
+
 client_id = '922604ee2b934fbd9d1223f4ec023fba'
 client_secret = '1bdf88cb16d64e54ba30220a8f126997'
+
 client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
-# ============================================
-# DATA LOADING
-# ============================================
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+from sklearn.preprocessing import MinMaxScaler
+from datetime import datetime
+from plotly.colors import qualitative
+import numpy as np
+import soundfile as sf
+import sounddevice as sd
+
+def remove_song(idx):
+    if "user_playlist" in st.session_state and idx < len(st.session_state.user_playlist):
+        st.session_state.user_playlist.pop(idx)
+
+# Initialize playlist_id as None or hardcoded here (Spotify)
 playlist_id = "3BGJRi9zQrIjLDtBbRYy5n"
-api_key = "AIzaSyAxHBK8MxzePcos86BOaBwUtTurr_ZbpNg"
+
+# YouTube API key and playlist ID (replace with your own)
+api_key = "AIzaSyAxHBK8MxzePcos86BOaBwUtTurr_ZbpNg"  # Replace with your API key
 youtube_playlist_url = "https://www.youtube.com/playlist?list=PLtg7R4Q_LfGU-WLVp5jeOoD7tdUiS6FHg"
 youtube_playlist_id = youtube_playlist_url.split("list=")[-1]
+
+# Define the CSV filename as a variable
 song_features_csv = "Symphonia Bards-3.csv"
 
-@st.cache_data
-def load_song_data():
-    """Load and cache song data"""
+if playlist_id:
+    # 🟢 Load additional song features from CSV
     df_audio_features = pd.read_csv(song_features_csv)
-    
-    # Process decades
-    df_decades = pd.DataFrame({'Release Date': df_audio_features["Album Date"]})
+
+    # Extract individual audio feature columns
+    track_id = df_audio_features["Spotify Track Id"].tolist()
+    track_names = df_audio_features["Song"].tolist()
+    track_artists = df_audio_features["Artist"].tolist()
+    track_popularity = df_audio_features["Popularity"].tolist()
+    track_duration = df_audio_features["Time"].tolist()
+    track_album = df_audio_features["Album"].tolist()
+    track_image = df_audio_features["Image"].tolist()
+    track_release_date = df_audio_features["Album Date"].tolist()
+    track_danceability = df_audio_features["Dance"].tolist()
+    track_duration = df_audio_features["Time"].tolist()
+    track_energy = df_audio_features["Energy"].tolist()
+    track_loudness = df_audio_features["Loud (Db)"].tolist()
+    track_acousticness = df_audio_features["Acoustic"].tolist()
+    track_instrumentalness = df_audio_features["Instrumental"].tolist()
+    track_liveness = df_audio_features["Live"].tolist()
+    track_valence = df_audio_features["Happy"].tolist()
+    track_tempo = df_audio_features["BPM"].apply(round).tolist()
+    track_signature = df_audio_features["Time Signature"].tolist()
+    track_speechiness = df_audio_features["Speech"].tolist()
+    track_keys_converted = df_audio_features["Key"].tolist()
+    track_bard = df_audio_features["Bard"].tolist()
+
+     # Create a DataFrame for track decades
+    df_decades = pd.DataFrame({'Release Date': track_release_date})
     df_decades['Year'] = pd.to_datetime(df_decades['Release Date']).dt.year
     df_decades['Decade'] = (df_decades['Year'] // 10) * 10
     track_decade = df_decades['Decade'].astype(str) + "s"
-    
-    # Fetch YouTube videos
-    videos, track_video_id = fetch_playlist_videos(api_key, youtube_playlist_id)
-    
-    # Create main dataframe
-    df_tracks = pd.DataFrame({
-        "Track ID": df_audio_features["Spotify Track Id"].tolist(),
-        "Name": df_audio_features["Song"].tolist(),
-        "Artist": df_audio_features["Artist"].tolist(),
-        "Album": df_audio_features["Album"].tolist(),
-        "Popularity": df_audio_features["Popularity"].tolist(),
-        "Release Date": df_audio_features["Album Date"].tolist(),
-        "Decade": track_decade,
-        "Image": df_audio_features["Image"].tolist(),
-        "Danceability": df_audio_features["Dance"].tolist(),
-        "Energy": df_audio_features["Energy"].tolist(),
-        "Loudness (dB)": df_audio_features["Loud (Db)"].tolist(),
-        "Acousticness": df_audio_features["Acoustic"].tolist(),
-        "Instrumentalness": df_audio_features["Instrumental"].tolist(),
-        "Liveness": df_audio_features["Live"].tolist(),
-        "Happiness": df_audio_features["Happy"].tolist(),
-        "Tempo (BPM)": df_audio_features["BPM"].apply(round).tolist(),
-        "Time Signature": df_audio_features["Time Signature"].tolist(),
-        "Speechiness": df_audio_features["Speech"].tolist(),
-        "Key": df_audio_features["Key"].tolist(),
-        "Duration": df_audio_features["Time"].tolist(),
-        "Bard": df_audio_features["Bard"].tolist(),
-        "YouTube Video ID": track_video_id[:len(df_audio_features)],
-    })
-    
-    return df_tracks
 
-@st.cache_data
-def load_creature_data():
-    """Load and cache creature data"""
-    creatures_csv = "DA Creatures.csv"
-    return pd.read_csv(creatures_csv)
+    # # Extract genres by fetching artist details
+    # track_genres = []
+    # for track in tracks:
+    #     artist_id = track["track"]["artists"][0]["id"]  # Get the first artist for simplicity
+    #     artist = sp.artist(artist_id)  # Fetch artist information
+    #     genres = artist.get("genres", [])  # Extract genres from artist
+    #     first_genre = genres[0] if genres else "No genre available"  # Get the first genre, or a default if no genres exist
+    #     track_genres.append(first_genre)
 
-def fetch_playlist_videos(api_key, youtube_playlist_id):
-    """Fetch YouTube playlist videos"""
-    base_url = "https://www.googleapis.com/youtube/v3/playlistItems"
-    params = {
-        "part": "snippet",
-        "playlistId": youtube_playlist_id,
-        "maxResults": 50,
-        "key": api_key
-    }
-    response = requests.get(base_url, params=params)
-    
-    if response.status_code == 200:
-        data = response.json()
-        videos = [
-            {
-                "title": item["snippet"]["title"],
-                "url": f"https://www.youtube.com/watch?v={item['snippet']['resourceId']['videoId']}",
-                "video_id": item["snippet"]["resourceId"].get("videoId", None)
-            }
-            for item in data.get("items", [])
-        ]
-        track_video_id = [video["video_id"] for video in videos if video["video_id"] is not None]
-        return videos, track_video_id
-    else:
-        return [], []
-
-# Load data
-df_tracks = load_song_data()
-df_creatures_data = load_creature_data()
-
-# ============================================
-# HEADER SECTION
-# ============================================
-st.markdown("""
-    <div class="main-header">
-        <h1>🎵 Data Adventures: Symphonia</h1>
-        <div class="subtitle">Create Your Magical Creature Concerto</div>
-    </div>
-""", unsafe_allow_html=True)
-
-# ============================================
-# PROGRESS INDICATOR
-# ============================================
-col1, col2, col3, col4, col5 = st.columns(5)
-steps = ["🎹 BPM", "🔊 Volume", "🎯 Match", "🐾 Creature", "📝 Save"]
-for i, (col, step) in enumerate(zip([col1, col2, col3, col4, col5], steps), 1):
-    with col:
-        if i < st.session_state.current_step:
-            status = "completed"
-        elif i == st.session_state.current_step:
-            status = "active"
-        else:
-            status = ""
-        st.markdown(f"""
-            <div style="text-align: center;">
-                <div class="progress-step {status}">{i}</div>
-                <div style="margin-top: 0.5rem; font-size: 0.9rem;">{step}</div>
-            </div>
-        """, unsafe_allow_html=True)
-
-# ============================================
-# SAVED PLAYLIST RETRIEVAL
-# ============================================
-with st.container():
-    st.markdown('<div class="card-section">', unsafe_allow_html=True)
-    with st.expander("🗝️ **Load Saved Playlist**", expanded=False):
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            st.write("Enter your playlist code:")
-            entered_code = st.text_input("", label_visibility="collapsed", placeholder="Enter code").strip().lower()
+    # # Extract genres using artist IDs from CSV
+    # track_genres = []
+    # for artist_name in track_artists:
+    #     # Search for the artist on Spotify
+    #     results = sp.search(q=artist_name, type="artist", limit=1)
         
-        if entered_code:
-            playlist_dir = "saved_user_playlists"
-            os.makedirs(playlist_dir, exist_ok=True)
+    #     if results["artists"]["items"]:
+    #         artist = results["artists"]["items"][0]  # Get the first matching artist
+    #         genres = artist.get("genres", [])  # Extract genres from artist data
+    #         first_genre = genres[0] if genres else "No genre available"
+    #     else:
+    #         first_genre = "No genre available"  # Handle case where artist is not found
+        
+    #     track_genres.append(first_genre)
+
+    # Function to fetch playlist details using the YouTube API
+    def fetch_playlist_videos(api_key, youtube_playlist_id):
+        base_url = "https://www.googleapis.com/youtube/v3/playlistItems"
+        params = {
+            "part": "snippet",
+            "playlistId": youtube_playlist_id,
+            "maxResults": 50,  # Max number of videos per API call
+            "key": api_key
+        }
+        response = requests.get(base_url, params=params)
+        
+        if response.status_code == 200:
+            data = response.json()
             
-            matching_files = [
-                f for f in os.listdir(playlist_dir)
-                if f.lower().endswith(f"{entered_code}.csv")
+            # Extract video title, URL, and video ID
+            videos = [
+                {
+                    "title": item["snippet"]["title"],
+                    "url": f"https://www.youtube.com/watch?v={item['snippet']['resourceId']['videoId']}",
+                    "video_id": item["snippet"]["resourceId"].get("videoId", None)  # Extract YouTube video ID
+                }
+                for item in data.get("items", [])
             ]
-            
-            if matching_files:
-                playlist_file = matching_files[0]
-                filepath = os.path.join(playlist_dir, playlist_file)
-                retrieved_df = pd.read_csv(filepath)
-                st.session_state.user_playlist = retrieved_df.to_dict(orient="records")
-                playlist_base_name = playlist_file.rsplit("_", 1)[0].replace("_", " ")
-                st.session_state.saved_playlist_name = playlist_base_name
-                st.success(f"✅ Playlist '{playlist_base_name}' loaded successfully!")
-                st.session_state.current_step = 5
-            else:
-                st.error("❌ No playlist found with that code.")
-    st.markdown('</div>', unsafe_allow_html=True)
 
-# ============================================
-# STEP 1: BPM INPUT
-# ============================================
-st.markdown('<div class="card-section">', unsafe_allow_html=True)
-st.markdown("### 🎹 Step 1: Set Your Tempo")
+                # Create track_video_id list from extracted video IDs
+            track_video_id = [video["video_id"] for video in videos if video["video_id"] is not None]
 
-col1, col2 = st.columns([2, 1])
-with col1:
-    bpm = st.number_input(
-        "Enter BPM (40-250)",
-        min_value=40,
-        max_value=250,
-        value=st.session_state.bpm_value,
-        step=1,
-        help="Beats Per Minute - the tempo of your song"
-    )
-    
-    if bpm:
-        st.session_state.bpm_value = bpm
-        if st.session_state.current_step < 2:
-            st.session_state.current_step = 2
-        
-        # Display tempo interpretation
-        if bpm < 60:
-            tempo_desc = "🐌 **Extremely Slow** - Meditative & Peaceful"
-        elif bpm < 90:
-            tempo_desc = "🚶 **Slow** - Relaxed & Groovy"
-        elif bpm < 120:
-            tempo_desc = "🚶‍♂️ **Moderate** - Walking Pace"
-        elif bpm < 150:
-            tempo_desc = "🏃 **Fast** - Energetic & Upbeat"
+            return videos, track_video_id  # Return both video details and video IDs
         else:
-            tempo_desc = "⚡ **Very Fast** - Intense & Driving"
-        
-        st.info(tempo_desc)
+            st.error("❌ Failed to fetch playlist details. Check your API key and playlist ID.")
+            return []
+            
+    # 🔍 Fetch video details and extract track_video_id
+    videos, track_video_id = fetch_playlist_videos(api_key, youtube_playlist_id)
+
+    # 🟢 Combine All Data into One DataFrame
+    df_tracks = pd.DataFrame({
+        "Track ID": track_id,
+        "Name": track_names,
+        "Artist": track_artists,
+        "Album": track_album,
+        "Popularity": track_popularity,
+        "Release Date": track_release_date,
+        "Decade": track_decade,
+        "Image": track_image,
+        "Danceability": track_danceability,
+        "Energy": track_energy,
+        "Loudness (dB)": track_loudness,
+        "Acousticness": track_acousticness,
+        "Instrumentalness": track_instrumentalness,
+        "Liveness": track_liveness,
+        "Happiness": track_valence,
+        "Tempo (BPM)": track_tempo,
+        "Time Signature": track_signature,
+        "Speechiness": track_speechiness,
+        "Key": track_keys_converted,
+        "Duration": track_duration,
+        "Bard": track_bard,
+        # "Genre": track_genres,
+        "YouTube Video ID": track_video_id[:len(track_id)],  # Ensure lengths match
+    })
+
+# Load creature data
+if playlist_id:
+    creatures_csv = "DA Creatures.csv"
+    df_creatures_data = pd.read_csv(creatures_csv)
+
+    # Extract individual creature attributes
+    creature_names = df_creatures_data["Name"].tolist()
+    creature_tempo_preferences = df_creatures_data["Tempo Preference"].tolist()
+    creature_loudness_preferences = df_creatures_data["Loudness Preference"].tolist()
+    creature_task_categories = df_creatures_data["Task Category"].tolist()
+    creature_task_specific_1 = df_creatures_data["Task Specific 1"].tolist()
+    creature_task_specific_2 = df_creatures_data["Task Specific 2"].tolist()
+
+# Initialize user playlist in session state if it doesn’t exist
+if "user_playlist" not in st.session_state:
+    st.session_state.user_playlist = []
+
+image = Image.open('data_adventures_logo.png')
+col1, col2, col3 = st.columns([1,6,1])
+
+with col1:
+    st.write("")
 
 with col2:
-    if bpm:
-        st.markdown(f"""
-            <div class="metric-card">
-                <div class="metric-label">Current BPM</div>
-                <div class="metric-value">{bpm}</div>
-            </div>
-        """, unsafe_allow_html=True)
+    st.image(image, width=int(image.width * 0.4))
 
-# Generate drum sound functions (kept from original)
+with col3:
+    st.write("")
+
+st.markdown(
+    "<div style='text-align: center; font-size: 24px; font-weight: normal;'>"
+    "Welcome to Symphonia! Let's start our Creature Concerto."
+    "</div>", 
+    unsafe_allow_html=True
+)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# 📂 Retrieve Saved Playlist Section
+with st.expander("**🗝️ Treasure Hunt: Tap to Find Your Saved Playlist**", expanded=False):
+    # Full-width label
+    st.write("Enter your 1-word Playlist Code to load your saved playlist:")
+
+    # Narrow input field only
+    col1, col2, col3 = st.columns([1, 2, 1])  # Adjust to control width
+    with col2:
+        entered_code = st.text_input(label=" ", label_visibility="collapsed").strip().lower()
+
+    # Define the directory where playlists are saved
+    playlist_dir = "saved_user_playlists"
+
+    if entered_code:
+        # Case-insensitive match
+        matching_files = [
+            f for f in os.listdir(playlist_dir)
+            if f.lower().endswith(f"{entered_code}.csv")
+        ]
+
+        if matching_files:
+            playlist_file = matching_files[0]
+            filepath = os.path.join(playlist_dir, playlist_file)
+
+            # Load the playlist into session state
+            retrieved_df = pd.read_csv(filepath)
+            st.session_state.user_playlist = retrieved_df.to_dict(orient="records")
+
+            # Extract playlist name from filename
+            playlist_base_name = playlist_file.rsplit("_", 1)[0].replace("_", " ")
+
+            # Store in session state
+            st.session_state.saved_playlist_name = playlist_base_name
+
+            st.success(f"🪄 Your playlist was summoned! Let's keep building your playlist.")
+
+            # 🎶 Display Playlist
+            if "saved_playlist_name" in st.session_state:
+                st.markdown(f"#### 🎶 Your Playlist: **{st.session_state.saved_playlist_name}**")
+            else:
+                st.subheader("🎶 Your Playlist")
+
+            if st.session_state.user_playlist:
+                for song in st.session_state.user_playlist:
+                    col1, col2 = st.columns([1, 3])
+                    with col1:
+                        st.image(song["Image"], width=80)
+                    with col2:
+                        st.write(f"**{song['Name']}** by {song['Artist']}")
+                        st.markdown(f"**Tempo:** {song['Tempo (BPM)']} BPM &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; **Loudness:** {song['Loudness (dB)']} dB")
+
+                # 🎥 Toggle YouTube Embed Section
+                show_youtube = st.checkbox("📺 Show YouTube Playlist", value=False)
+
+                if show_youtube:
+                    st.subheader("🎧 Listen to your playlist on YouTube")
+
+                    if "youtube_video_ids" not in st.session_state:
+                        st.session_state.youtube_video_ids = []
+
+                    new_video_ids = [
+                        song["YouTube Video ID"]
+                        for song in st.session_state.user_playlist
+                        if pd.notna(song.get("YouTube Video ID"))
+                    ]
+
+                    if set(new_video_ids) != set(st.session_state.youtube_video_ids):
+                        st.session_state.youtube_video_ids = new_video_ids
+
+                    if st.session_state.youtube_video_ids:
+                        if len(st.session_state.youtube_video_ids) == 1:
+                            youtube_embed_url = f"https://www.youtube.com/embed/{st.session_state.youtube_video_ids[0]}"
+                        else:
+                            first_video = st.session_state.youtube_video_ids[0]
+                            playlist_videos = ",".join(st.session_state.youtube_video_ids)
+                            youtube_embed_url = f"https://www.youtube.com/embed/{first_video}?playlist={playlist_videos}"
+
+                        st.markdown(
+                            f'<iframe width="100%" height="400" src="{youtube_embed_url}" frameborder="0" allowfullscreen></iframe>',
+                            unsafe_allow_html=True
+                        )
+                    else:
+                        st.write("⚠️ No YouTube videos available for your playlist.")
+        else:
+            st.error("❌ No playlist found with that code. Please double-check and try again.")
+
+st.header("🎚️ Metronome Master")
+# 🎼 Show relatable response only after the user enters BPM
+
+# 🎵 Ask for BPM input (default None)
+
+# Full-width prompt with inline-block container
+st.markdown(
+    """
+    <div style='margin-bottom: 0.5rem; font-weight: 500; font-size: 1rem;'>
+        Enter the BPM (Beats Per Minute) of your song (40–250):
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# Create a unique key that changes when we want to reset
+reset_counter = st.session_state.get("reset_counter", 0)
+
+# Centered number input with dynamic key
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    bpm = st.number_input(
+        label=" ",
+        min_value=40,
+        max_value=250,
+        value=None,
+        step=1,
+        format="%d",
+        label_visibility="collapsed",
+        key=f"bpm_input_{reset_counter}"  # Dynamic key
+    )
+
+if bpm is not None:
+    if bpm < 60:
+        st.write("This is a **super chill, slow-tempo song**—perfect for relaxation or deep focus.")
+    elif bpm < 90:
+        st.write("A **laid-back groove**, great for R&B, lo-fi beats, or smooth jazz.")
+    elif bpm < 120:
+        st.write("A **mid-tempo track**—probably a good dance groove or pop beat!")
+    elif bpm < 150:
+        st.write("A **fast-paced song**, great for working out or getting pumped up!")
+    else:
+        st.write("This is **ultra-fast**—likely a drum & bass, punk, or extreme techno beat!")
+
+
+# 🥁 Function to generate a percussive sound (kick, snare, hi-hat)
 def generate_drum_sound(sample_rate=44100, drum_type="kick"):
-    duration = 0.15
+    duration = 0.15  # Length of drum sound
     t = np.linspace(0, duration, int(sample_rate * duration), False)
-    
+
     if drum_type == "kick":
-        envelope = np.exp(-t / 0.05)
-        sound = 0.8 * envelope * np.sin(2 * np.pi * 60 * t)
+        # Deep sine wave for kick drum
+        envelope = np.exp(-t / 0.05)  # Short decay
+        sound = 0.8 * envelope * np.sin(2 * np.pi * 60 * t)  # 60 Hz kick
+
     elif drum_type == "snare":
-        envelope = np.exp(-t / 0.04)
+        # White noise for snare drum + low pass filter
+        envelope = np.exp(-t / 0.04)  # Snappier decay
         noise = np.random.normal(0, 0.5, t.shape)
-        sound = 0.5 * envelope * noise
+        sound = 0.5 * envelope * noise  # White noise snare
+
     elif drum_type == "hihat":
-        envelope = np.exp(-t / 0.02)
+        # High-frequency noise for hi-hat
+        envelope = np.exp(-t / 0.02)  # Very short decay
         noise = np.random.normal(0, 0.3, t.shape)
-        sound = 0.3 * envelope * noise
-    
+        sound = 0.3 * envelope * noise  # Crisp hi-hat
+
     return np.clip(sound, -1, 1)
 
+# 🥁 Function to generate a drum beat loop
 def generate_drum_beat(bpm, duration=20, sample_rate=44100):
-    interval = 60 / bpm
-    num_beats = int(duration / interval)
-    audio = np.zeros(int(sample_rate * duration))
-    
+    interval = 60 / bpm  # Seconds per beat
+    num_beats = int(duration / interval)  # Total beats in duration
+    audio = np.zeros(int(sample_rate * duration))  # Empty audio track
+
+    # Generate individual drum sounds
     kick = generate_drum_sound(drum_type="kick")
     snare = generate_drum_sound(drum_type="snare")
     hihat = generate_drum_sound(drum_type="hihat")
-    
+
     for i in range(num_beats):
         start = int(i * interval * sample_rate)
         end = start + len(kick)
-        
+
+        # Add kick on beats 1 & 3
         if i % 4 in [0, 2]:
             audio[start:end] += kick
+
+        # Add snare on beats 2 & 4
         if i % 4 == 1 or i % 4 == 3:
             audio[start:end] += snare
-        
+
+        # Add hi-hat on every beat
         hh_start = int(i * interval * sample_rate)
         hh_end = hh_start + len(hihat)
         audio[hh_start:hh_end] += hihat
-    
-    return np.clip(audio, -1, 1)
 
-if bpm:
-    if st.button("🥁 Preview Tempo", use_container_width=True):
+    return np.clip(audio, -1, 1)  # Prevent distortion
+
+# 🎧 Button to play drum beat (only after BPM is entered)
+if bpm is not None:
+    if st.button("🥁 Play Your Tempo as a Drum Loop", type="primary"):
         drum_beat = generate_drum_beat(bpm)
         sf.write("drum_beat.wav", drum_beat, 44100)
         st.audio("drum_beat.wav")
 
-st.markdown('</div>', unsafe_allow_html=True)
 
-# ============================================
-# STEP 2: LOUDNESS INPUT
-# ============================================
-if st.session_state.bpm_value:
-    st.markdown('<div class="card-section">', unsafe_allow_html=True)
-    st.markdown("### 🔊 Step 2: Set Your Volume")
-    
-    col1, col2 = st.columns([2, 1])
-    with col1:
-        loudness = st.number_input(
-            "Enter Loudness (-60 to 0 dB)",
-            min_value=-60,
-            max_value=0,
-            value=st.session_state.loudness_value,
-            step=1,
-            help="Relative loudness in decibels"
-        )
-        
-        if loudness is not None:
-            st.session_state.loudness_value = loudness
-            if st.session_state.current_step < 3:
-                st.session_state.current_step = 3
-            
-            # Display loudness interpretation
-            if loudness < -40:
-                loud_desc = "🔇 **Very Quiet** - Whisper Soft"
-            elif loudness < -25:
-                loud_desc = "🔈 **Quiet** - Background Music"
-            elif loudness < -15:
-                loud_desc = "🔉 **Moderate** - Comfortable Listening"
-            elif loudness < -5:
-                loud_desc = "🔊 **Loud** - Party Volume"
-            else:
-                loud_desc = "📢 **Very Loud** - Maximum Impact"
-            
-            st.info(loud_desc)
-    
-    with col2:
-        if loudness is not None:
-            st.markdown(f"""
-                <div class="metric-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                    <div class="metric-label">Current Volume</div>
-                    <div class="metric-value">{loudness} dB</div>
-                </div>
-            """, unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+# 🔊 Section: Loudness Analysis
+st.header("🔊 Volume Virtuoso")
 
-# ============================================
-# STEP 3: FIND MATCH
-# ============================================
-if st.session_state.bpm_value and st.session_state.loudness_value is not None:
-    st.markdown('<div class="card-section">', unsafe_allow_html=True)
-    st.markdown("### 🎯 Step 3: Find Your Musical Match")
-    
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        if st.button("🔮 Reveal Musical Match", use_container_width=True, type="primary"):
-            if not df_tracks.empty:
-                df_tracks["Tempo Difference"] = abs(df_tracks["Tempo (BPM)"] - st.session_state.bpm_value)
-                df_tracks["Loudness Difference"] = abs(df_tracks["Loudness (dB)"] - st.session_state.loudness_value)
-                df_tracks["Match Score"] = df_tracks["Tempo Difference"] + df_tracks["Loudness Difference"]
-                
-                best_match = df_tracks.loc[df_tracks["Match Score"].idxmin()]
-                st.session_state.best_match = best_match.to_dict()
-                if st.session_state.current_step < 4:
-                    st.session_state.current_step = 4
-    
-    # Display match if found
-    if "best_match" in st.session_state:
-        best_match = st.session_state.best_match
-        
-        st.markdown("---")
-        col1, col2 = st.columns([1, 2])
-        
-        with col1:
-            st.image(best_match["Image"], use_column_width=True)
-        
-        with col2:
-            st.markdown(f"### 🎵 {best_match['Name']}")
-            st.markdown(f"**Artist:** {best_match['Bard']}")
-            
-            # Display match metrics
-            col_a, col_b = st.columns(2)
-            with col_a:
-                st.metric("BPM", f"{best_match['Tempo (BPM)']} BPM")
-            with col_b:
-                st.metric("Loudness", f"{best_match['Loudness (dB)']} dB")
-        
-        # YouTube embed
-        if pd.notna(best_match.get("YouTube Video ID")):
-            youtube_embed_url = f"https://www.youtube.com/embed/{best_match['YouTube Video ID']}"
-            st.video(youtube_embed_url)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+# 🎧 Ask for Loudness input (default None)
 
-# ============================================
-# STEP 4: CREATURE PAIRING
-# ============================================
+# Full-width prompt with a small gap below
+st.markdown(
+    """
+    <div style='margin-bottom: 0.5rem; font-weight: 500; font-size: 1rem;'>
+        Enter the relative loudness of your song (in dB, between -60 and 0):
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    loudness = st.number_input(
+        label=" ",
+        min_value=-60,
+        max_value=0,
+        value=None,
+        step=1,
+        format="%d",
+        label_visibility="collapsed",
+        key=f"loudness_input_{reset_counter}"  # Dynamic key
+    )
+
+# 🎼 Show relatable response only after the user enters loudness
+if loudness is not None:
+    if loudness < -40:
+        st.write("This is **super quiet**, like the peaceful piano in *Clair de Lune* or the soft intro of *Lofi Girl* study beats.")
+    elif loudness < -25:
+        st.write("This is a **soft, gentle track**, like *Golden Hour* by JVKE or the calm melodies in *Somewhere Over the Rainbow* by Israel Kamakawiwo'ole.")
+    elif loudness < -15:
+        st.write("A **moderate loudness level**, like *Watermelon Sugar* by Harry Styles or *Sunroof* by Nicky Youre—smooth but with some energy!")
+    elif loudness < -5:
+        st.write("This is **fairly loud**, like *Uptown Funk* by Bruno Mars or *Industry Baby* by Lil Nas X—big, dynamic, and exciting!")
+    else:
+        st.write("**Max loudness!** This is like *Blinding Lights* by The Weeknd or *Sicko Mode* by Travis Scott—high-energy, booming, and club-ready!")
+
+
+# 🟢 Ensure both BPM & Loudness are entered before proceeding
+if bpm is not None and loudness is not None:
+
+    # 👉 Wait for user to trigger matching with a button
+    if st.button("🔮 Reveal the Musical Match", type="primary"):
+        if not df_tracks.empty:
+            df_tracks["Tempo Difference"] = abs(df_tracks["Tempo (BPM)"] - bpm)
+            df_tracks["Loudness Difference"] = abs(df_tracks["Loudness (dB)"] - loudness)
+            df_tracks["Match Score"] = df_tracks["Tempo Difference"] + df_tracks["Loudness Difference"]
+
+            best_match = df_tracks.loc[df_tracks["Match Score"].idxmin()]
+            st.session_state.best_match = best_match.to_dict()
+
 def find_matching_creatures_either(tempo, loudness, df):
     matched = []
-    
+
     def parse_range(r):
         try:
             return tuple(map(int, r.split(" - ")))
         except:
             return (None, None)
-    
+
     for _, row in df.iterrows():
         tempo_low, tempo_high = parse_range(row["Tempo Preference"])
         loud_low, loud_high = parse_range(row["Loudness Preference"])
-        
+
         tempo_match = (
-            tempo_low is not None and tempo_high is not None and 
-            tempo_low <= tempo <= tempo_high
+            tempo_low is not None and tempo_high is not None and tempo_low <= tempo <= tempo_high
         )
         loudness_match = (
-            loud_low is not None and loud_high is not None and 
-            loud_low <= loudness <= loud_high
+            loud_low is not None and loud_high is not None and loud_low <= loudness <= loud_high
         )
-        
+
         if tempo_match or loudness_match:
             matched.append(row)
-    
+
     return matched
 
+# 🪄 Display best match if it's stored in session
 if "best_match" in st.session_state:
-    st.markdown('<div class="card-section">', unsafe_allow_html=True)
-    st.markdown("### 🐾 Step 4: Pair with a Creature")
-    
     best_match = st.session_state.best_match
-    matched_creatures = find_matching_creatures_either(
-        best_match["Tempo (BPM)"], 
-        best_match["Loudness (dB)"], 
-        df_creatures_data
-    )
+
+    st.subheader(f"🎵 Your song is **{best_match['Name']}** by **{best_match['Bard']}**")
+    col1, spacer, col2 = st.columns([1, 0.5, 1])
+
+    with col1:
+        st.image(best_match["Image"], caption=best_match["Name"], width=250)
+
+    with col2:
+        st.write(f"🎚️ **BPM:** {best_match['Tempo (BPM)']}")
+        st.write(f"🔊 **Loudness:** {best_match['Loudness (dB)']} dB")
+
+    # 🎥 Embed YouTube video if available
+    if pd.notna(best_match["YouTube Video ID"]):
+        youtube_embed_url = f"https://www.youtube.com/embed/{best_match['YouTube Video ID']}"
+        st.video(youtube_embed_url)
+    else:
+        st.write("⚠️ No YouTube video available for this track.")
     
+    # Matching with creatures
+    matched_creatures = find_matching_creatures_either(
+        best_match["Tempo (BPM)"], best_match["Loudness (dB)"], df_creatures_data
+    )
+
+    # 🧠 Creature selection dropdown
+    selected_creature_name = "-- Select Creature --"
     if matched_creatures:
+        st.markdown("### This song activates the following creatures. Which one did you pair up in the game?")
+
         creature_names = ["-- Select Creature --"] + [creature["Name"] for creature in matched_creatures]
-        
+
         selected_creature_name = st.selectbox(
-            "Which creature did you pair with?",
+            "Select your paired creature:",
             creature_names,
             index=0,
             key="creature_pair_selection"
         )
-        
+
         if selected_creature_name != "-- Select Creature --":
             selected_creature_obj = next(
                 (creature for creature in matched_creatures if creature["Name"] == selected_creature_name),
                 None
             )
-            
+
             if selected_creature_obj is not None:
+                st.markdown(f"### Which music task would you like {selected_creature_obj['Name']} to complete?")
+
                 music_tasks = [
                     "-- Select Task --",
                     selected_creature_obj["Task Specific 1"],
                     selected_creature_obj["Task Specific 2"]
                 ]
-                
+
                 selected_task = st.selectbox(
-                    f"What task should {selected_creature_name} complete?",
+                    "Choose a music task:",
                     music_tasks,
                     index=0,
                     key="music_task_selection"
                 )
-                
-                # Add to playlist button
-                if selected_task != "-- Select Task --":
-                    if st.button("✨ Add to Playlist", use_container_width=True, type="primary"):
-                        song_with_context = best_match.copy()
-                        song_with_context["Creature"] = selected_creature_name
-                        song_with_context["Task Selected"] = selected_task
-                        song_with_context["Task Category"] = selected_creature_obj["Task Category"]
-                        
-                        track_ids = [song["Track ID"] for song in st.session_state.user_playlist]
-                        if best_match["Track ID"] not in track_ids:
-                            st.session_state.user_playlist.append(song_with_context)
-                            st.success("✅ Added to playlist!")
-                            
-                            # Reset for next song
-                            st.session_state.bpm_value = None
-                            st.session_state.loudness_value = None
-                            if "best_match" in st.session_state:
-                                del st.session_state.best_match
-                            st.session_state.current_step = 1
-                            st.rerun()
-                        else:
-                            st.warning("⚠️ This song is already in your playlist!")
-    
-    st.markdown('</div>', unsafe_allow_html=True)
 
-# ============================================
-# PLAYLIST DISPLAY
-# ============================================
-if st.session_state.user_playlist:
-    st.markdown('<div class="card-section">', unsafe_allow_html=True)
-    st.markdown(f"### 🎶 Your Playlist {st.session_state.get('saved_playlist_name', '')}")
-    
-    # Display each song
-    for idx, song in enumerate(st.session_state.user_playlist):
-        col1, col2, col3 = st.columns([1, 4, 1])
-        
-        with col1:
-            st.image(song["Image"], use_column_width=True)
-        
-        with col2:
-            st.markdown(f"**{song['Name']}** by {song['Bard']}")
-            st.caption(f"BPM: {song['Tempo (BPM)']} | Volume: {song['Loudness (dB)']} dB")
-            if song.get("Creature"):
-                st.caption(f"🐾 {song['Creature']} - {song.get('Task Selected', '')}")
-        
-        with col3:
-            if st.button("🗑️", key=f"remove_{idx}", help="Remove from playlist"):
-                st.session_state.user_playlist.pop(idx)
-                st.rerun()
-    
-    # Playlist summary table
-    if len(st.session_state.user_playlist) > 1:
-        with st.expander("📊 View Detailed Playlist Summary"):
-            playlist_df = pd.DataFrame(st.session_state.user_playlist)
-            display_df = playlist_df[["Name", "Bard", "Tempo (BPM)", "Loudness (dB)", 
-                                     "Creature", "Task Selected"]].copy()
-            st.dataframe(display_df, use_container_width=True, hide_index=True)
-    
-    # YouTube playlist
-    with st.expander("🎧 Play on YouTube"):
-        video_ids = [song["YouTube Video ID"] for song in st.session_state.user_playlist 
-                    if pd.notna(song.get("YouTube Video ID"))]
-        
-        if video_ids:
-            if len(video_ids) == 1:
-                youtube_embed_url = f"https://www.youtube.com/embed/{video_ids[0]}"
-            else:
-                first_video = video_ids[0]
-                playlist_videos = ",".join(video_ids)
-                youtube_embed_url = f"https://www.youtube.com/embed/{first_video}?playlist={playlist_videos}"
-            
-            st.markdown(
-                f'<iframe width="100%" height="400" src="{youtube_embed_url}" '
-                f'frameborder="0" allowfullscreen></iframe>',
-                unsafe_allow_html=True
+    # ➕ Add Song to Playlist Button
+    if "user_playlist" not in st.session_state:
+        st.session_state.user_playlist = []
+
+    selected_creature_name = st.session_state.get("creature_pair_selection", "-- Select Creature --")
+    selected_task = st.session_state.get("music_task_selection", "-- Select Task --")
+
+    # ✅ Only show button *after* a task has been selected
+    if selected_creature_name != "-- Select Creature --" and selected_task != "-- Select Task --":
+        if st.button("✨ Add to Playlist", key=f"add_{best_match['Track ID']}", type="primary"):        
+            # Build song object with context
+            song_with_context = best_match.copy()
+            song_with_context["Creature"] = selected_creature_name if selected_creature_name != "-- Select Creature --" else ""
+            song_with_context["Task Selected"] = selected_task if selected_task != "-- Select Task --" else ""
+
+            # Add task category if available
+            selected_creature_obj = next(
+                (creature for creature in matched_creatures if creature["Name"] == selected_creature_name),
+                None
             )
-        else:
-            st.info("No YouTube videos available for this playlist.")
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+            if selected_creature_obj is not None:
+                song_with_context["Task Category"] = selected_creature_obj["Task Category"]
+            else:
+                song_with_context["Task Category"] = ""
 
-# ============================================
-# SAVE PLAYLIST SECTION
-# ============================================
+            # Avoid duplicates
+            track_ids = [song["Track ID"] for song in st.session_state.user_playlist]
+            if best_match["Track ID"] not in track_ids:
+                st.session_state.user_playlist.append(song_with_context)
+                
+                # Increment reset counter to create new widget keys
+                st.session_state.reset_counter = st.session_state.get("reset_counter", 0) + 1
+                
+                # Clear creature and task selections for next song
+                if "creature_pair_selection" in st.session_state:
+                    del st.session_state.creature_pair_selection
+                if "music_task_selection" in st.session_state:
+                    del st.session_state.music_task_selection
+                
+                # Clear the best match so user needs to make a new match
+                if "best_match" in st.session_state:
+                    del st.session_state.best_match
+
+                # Set a flag to scroll to playlist after rerun
+                st.session_state.scroll_to_playlist = True
+
+                # Force a rerun to reset the inputs
+                st.rerun()
+            else:
+                st.warning("⚠️ This song is already in your playlist!")
+
+# 🎵 MOVED OUTSIDE: Display Playlist (always show if playlist exists)
 if st.session_state.user_playlist:
-    st.markdown('<div class="card-section">', unsafe_allow_html=True)
-    st.markdown("### 💾 Save Your Playlist")
-    
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
-        playlist_name = st.text_input(
-            "Playlist Name",
-            placeholder="Enter a memorable name for your playlist"
-        )
-    
-    with col2:
-        if st.button("💾 Save", use_container_width=True, type="primary") and playlist_name:
-            # Word list for code generation
-            word_choices = [
-                "Graph", "Tempo", "Volume", "Loud", "Soft", "Fast", "Slow", 
-                "Data", "Creature", "Bard", "Village", "Music", "Band"
-            ]
-            
-            playlist_dir = "saved_user_playlists"
-            os.makedirs(playlist_dir, exist_ok=True)
-            
-            # Generate unique code
-            base_word = random.choice(word_choices).lower()
-            existing_codes = {
-                f.rsplit("_", 1)[-1].replace(".csv", "").lower()
-                for f in os.listdir(playlist_dir) if f.endswith(".csv")
-            }
-            
-            playlist_code = base_word
-            suffix = 1
-            while playlist_code in existing_codes:
-                playlist_code = f"{base_word}{suffix}"
-                suffix += 1
-            
-            # Save playlist
-            filename = f"{playlist_name.replace(' ', '_')}_{playlist_code}.csv"
-            filepath = os.path.join(playlist_dir, filename)
-            
-            df_playlist = pd.DataFrame(st.session_state.user_playlist)
-            df_playlist.to_csv(filepath, index=False)
-            
-            # Set expiration
-            expiration_date = datetime.now() + timedelta(weeks=2)
-            meta_filepath = os.path.join(playlist_dir, f"{filename}.meta")
-            with open(meta_filepath, "w") as meta_file:
-                meta_file.write(expiration_date.strftime("%Y-%m-%d %H:%M:%S"))
-            
-            st.success(f"✅ Playlist saved successfully!")
-            st.info(f"**Your Playlist Code:** `{playlist_code}`\n\nUse this code to reload your playlist anytime within 2 weeks.")
-            st.session_state.current_step = 5
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("---")
+    # Add an anchor point for scrolling
+    st.markdown('<div id="playlist-section"></div>', unsafe_allow_html=True)
+    st.subheader(f"🎶 Your Playlist: {st.session_state.get('saved_playlist_name', '')}".strip())
 
-# ============================================
-# CLEANUP OLD PLAYLISTS
-# ============================================
-def cleanup_old_playlists():
-    """Remove expired playlists"""
-    playlist_dir = "saved_user_playlists"
-    if not os.path.exists(playlist_dir):
-        return
+    # Check if we should scroll to playlist
+    if st.session_state.get("scroll_to_playlist", False):
+        # Add JavaScript to scroll to the playlist section
+        st.markdown(
+            """
+            <script>
+            setTimeout(function() {
+                var element = document.getElementById('playlist-section');
+                var elementPosition = element.offsetTop;
+                var offsetPosition = elementPosition - 250; // Increased from 200 to 250
+                
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }, 100);
+            </script>
+            """,
+            unsafe_allow_html=True
+        )
+        # Clear the scroll flag
+        del st.session_state.scroll_to_playlist
     
+    for idx, song in enumerate(st.session_state.user_playlist):
+        col1, col2, col3 = st.columns([1, 3, 1])  # Third column for the button
+
+        with col1:
+            st.image(song["Image"], width=80)
+
+        with col2:
+            st.write(f"**{song['Name']}** by {song['Bard']}")
+            st.markdown(
+                f"**Tempo:** {song['Tempo (BPM)']} BPM &nbsp;&nbsp;&nbsp;&nbsp; | "
+                f"&nbsp;&nbsp;&nbsp;&nbsp; **Loudness:** {song['Loudness (dB)']} dB"
+            )
+
+        with col3:
+            st.markdown("<div style='margin-top: 1.5em;'></div>", unsafe_allow_html=True)
+            st.button("🧹 Remove", key=f"remove_{idx}", type="primary",
+                    on_click=remove_song, args=(idx,))
+
+
+# 🎼 Display Playlist Table Summary (also moved outside)
+if st.session_state.user_playlist:
+    playlist_summary_df = pd.DataFrame([{
+        "Bard": song.get("Bard", "Unknown"),
+        "Song Name": song.get("Name", "Unknown"),
+        "Tempo(BPM)": song.get("Tempo (BPM)", ""),
+        "Loudness(dB)": song.get("Loudness (dB)", ""),
+        "Creature": song.get("Creature", ""),
+        "Task Category": song.get("Task Category", ""),
+        "Task Selected": song.get("Task Selected", "")
+    } for idx, song in enumerate(st.session_state.user_playlist)])
+
+    st.markdown("### 📋 Playlist Table")
+    
+    # Inject CSS to widen the table only
+    st.markdown(
+        """
+        <style>
+        /* Target the most recent .stDataFrame rendered */
+        .element-container:has(.stDataFrame) {
+            max-width: 1400px !important;
+            width: 100% !important;
+        }
+        .stDataFrame table {
+            min-width: 1400px !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.dataframe(
+        playlist_summary_df.reset_index(drop=True),
+        use_container_width=True,
+        hide_index=True
+    )
+
+# 🎥 Embed YouTube playlist (also moved outside)
+if st.session_state.user_playlist:
+    st.subheader("🎧 Listen to your playlist on YouTube")
+    if "youtube_video_ids" not in st.session_state:
+        st.session_state.youtube_video_ids = []
+
+    new_video_ids = [song["YouTube Video ID"] for song in st.session_state.user_playlist if pd.notna(song["YouTube Video ID"])]
+    if set(new_video_ids) != set(st.session_state.youtube_video_ids):
+        st.session_state.youtube_video_ids = new_video_ids
+
+    if st.session_state.youtube_video_ids:
+        if len(st.session_state.youtube_video_ids) == 1:
+            youtube_embed_url = f"https://www.youtube.com/embed/{st.session_state.youtube_video_ids[0]}"
+        else:
+            first_video = st.session_state.youtube_video_ids[0]
+            playlist_videos = ",".join(st.session_state.youtube_video_ids)
+            youtube_embed_url = f"https://www.youtube.com/embed/{first_video}?playlist={playlist_videos}"
+
+        st.markdown(
+            f'<iframe width="100%" height="400" src="{youtube_embed_url}" frameborder="0" allowfullscreen></iframe>',
+            unsafe_allow_html=True
+        )
+
+
+# Ensure 'saved_user_playlists' directory exists
+playlist_dir = "saved_user_playlists"
+os.makedirs(playlist_dir, exist_ok=True)
+
+# Word list for playlist code generation
+word_choices = [
+    "Graph", "Tempo", "Volume", "Loud", "Soft", "Fast", "Slow", "Numeric", "Data",
+    "Creature", "Bard", "Village", "Journal", "Game", "Adventure", "Visualize",
+    "Activate", "Concert", "Music", "Band", "Quartet", "Trio"
+]
+
+# 📝 Save Playlist Section
+if st.session_state.user_playlist:
+    st.markdown("---")
+    st.subheader("📝 Save Your Playlist")
+
+    # Prompt user to enter a playlist name first
+    playlist_name = st.text_input("Enter a name for your playlist:")
+
+    if st.button("📝 Save Playlist", type="primary") and playlist_name:
+        # Generate a unique, lowercase one-word playlist code
+        base_word = random.choice(word_choices).lower()
+
+        # Get all existing codes (case-insensitive)
+        existing_codes = {
+            f.rsplit("_", 1)[-1].replace(".csv", "").lower()
+            for f in os.listdir(playlist_dir) if f.endswith(".csv")
+        }
+
+        # Initialize playlist code and ensure uniqueness
+        playlist_code = base_word
+        suffix = 1
+        while playlist_code in existing_codes:
+            playlist_code = f"{base_word}{suffix}"
+            suffix += 1
+
+        # Format the filename using the playlist name and unique code
+        filename = f"{playlist_name.replace(' ', '_')}_{playlist_code}.csv"
+        filepath = os.path.join(playlist_dir, filename)
+
+        # Convert playlist to a DataFrame
+        df_playlist = pd.DataFrame(st.session_state.user_playlist)
+        df_playlist.to_csv(filepath, index=False)
+
+        # Set expiration date (2 weeks from now)
+        expiration_date = datetime.now() + timedelta(weeks=2)
+        meta_filepath = os.path.join(playlist_dir, f"{filename}.meta")
+        with open(meta_filepath, "w") as meta_file:
+            meta_file.write(expiration_date.strftime("%Y-%m-%d %H:%M:%S"))
+
+        # 🎉 Confirm to the user that their playlist has been saved
+        st.success(f"📜 Playlist '{playlist_name}' has been inscribed in the archives.")
+        st.info(f"🪄 **Your Playlist Code:**\n\n### `{playlist_code}`\n\nUse this code to summon your playlist again. The magic holds for **two weeks**.")
+
+
+# 🗑️ Cleanup Function (Run Periodically)
+def cleanup_old_playlists():
     now = datetime.now()
     for file in os.listdir(playlist_dir):
         if file.endswith(".meta"):
             meta_filepath = os.path.join(playlist_dir, file)
-            try:
-                with open(meta_filepath, "r") as meta_file:
-                    expiration_str = meta_file.read().strip()
-                    expiration_date = datetime.strptime(expiration_str, "%Y-%m-%d %H:%M:%S")
-                    
-                    if now > expiration_date:
-                        playlist_csv = meta_filepath.replace(".meta", "")
-                        os.remove(meta_filepath)
-                        if os.path.exists(playlist_csv):
-                            os.remove(playlist_csv)
-            except:
-                continue
+            with open(meta_filepath, "r") as meta_file:
+                expiration_str = meta_file.read().strip()
+                expiration_date = datetime.strptime(expiration_str, "%Y-%m-%d %H:%M:%S")
 
-# Run cleanup
+                # If expired, delete the playlist and metadata
+                if now > expiration_date:
+                    playlist_csv = meta_filepath.replace(".meta", "")
+                    os.remove(meta_filepath)
+                    if os.path.exists(playlist_csv):
+                        os.remove(playlist_csv)
+
 cleanup_old_playlists()
+
+# Ensure session state for playlist tracking
+if "user_playlist" not in st.session_state:
+    st.session_state.user_playlist = []
+
+# # Display full playlist analysis button only if at least one song is added
+# if len(st.session_state.user_playlist) > 0:
+#     # st.markdown("✅ **You’ve added at least one song to your playlist!** Now, you can explore the full playlist analysis.")
+#     # Encourage users to keep matching and adding songs
+#     st.markdown(
+#         "**Keep matching and adding more songs to your playlist!** "
+#         "Once you're satisfied with your selections, explore the **full playlist analysis** below."
+#     )
+
+#     # Initialize session state variable to track visibility
+#     if "show_playlist_analysis" not in st.session_state:
+#         st.session_state.show_playlist_analysis = False
+
+#     # Button to toggle display of playlist analysis
+#     if st.button(
+#         "📊 View Full Playlist Analysis" if not st.session_state.show_playlist_analysis else "🔽 Hide Playlist Analysis"
+#     ):
+#         st.session_state.show_playlist_analysis = not st.session_state.show_playlist_analysis
+
+# def display_playlist_analysis():
+#     """Displays the full playlist insights and analysis."""
+    
+#     st.markdown("### **🔍 Playlist Insights & Analysis**")
+#     st.markdown("_Here's a deep dive into your playlist's characteristics, trends, and audio features._")
+
+#     # Extract data from session state playlist
+#     playlist_songs = st.session_state.user_playlist
+
+#     # Construct DataFrame
+#     data = {
+#         "Image": [song["Image"] for song in playlist_songs],
+#         "Name": [song["Name"] for song in playlist_songs],
+#         "Artist": [song["Artist"] for song in playlist_songs],
+#         "Genre": [song.get("Genre", "Unknown") for song in playlist_songs],
+#         "Release Date": [song["Release Date"] for song in playlist_songs],
+#         "Release Decade": [song["Decade"] for song in playlist_songs],
+#         "Popularity": [song["Popularity"] for song in playlist_songs],
+#         "Duration": [song["Duration"] for song in playlist_songs],
+#         "Acoustic": [song["Acousticness"] for song in playlist_songs],
+#         "Dance": [song["Danceability"] for song in playlist_songs],
+#         "Energy": [song["Energy"] for song in playlist_songs],
+#         "Happy": [song["Happiness"] for song in playlist_songs],
+#         "Instrumental": [song["Instrumentalness"] for song in playlist_songs],
+#         "Key": [song["Key"] for song in playlist_songs],
+#         "Live": [song["Liveness"] for song in playlist_songs],
+#         "Loud (Db)": [song["Loudness (dB)"] for song in playlist_songs],
+#         "Speech": [song["Speechiness"] for song in playlist_songs],
+#         "Tempo": [song["Tempo (BPM)"] for song in playlist_songs],
+#     }
+
+#     df = pd.DataFrame(data)
+#     df.index += 1  # Start index at 1
+#     num_total_tracks = len(df)
+
+#     # Inform users about table interactivity
+#     st.write(
+#         "📋 The table below is **scrollable** both horizontally and vertically. "
+#         "Click on column headers to **sort** and **hover** for explanations."
+#     )
+
+#     # Display the playlist analysis table with sorting and image preview
+#     st.data_editor(
+#         df,
+#         column_config={
+#             "Image": st.column_config.ImageColumn(
+#                 "Album Art", help="Click on the album cover to enlarge"
+#             ),
+#             "Name": st.column_config.TextColumn(
+#                 "Track Name", help="The name of the track"
+#             ),
+#             "Artist": st.column_config.TextColumn(
+#                 "Artist", help="The primary artist or band who performed the track"
+#             ),
+#             "Genre": st.column_config.TextColumn(
+#                 "Genre", help="Genres are based on the primary artist, as Spotify doesn't provide genre information at the album or track level."
+#             ),
+#             "Release Date": st.column_config.TextColumn(
+#                 "Release Date", help="The date when the track or album was released"
+#             ),
+#             "Release Decade": st.column_config.TextColumn(
+#                 "Release Decade", help="The decade when the track or album was released"
+#             ),
+#             "Popularity": st.column_config.NumberColumn(
+#                 "Popularity", help="The popularity score of the track (0 to 100)"
+#             ),
+#             "Duration": st.column_config.TextColumn(
+#                 "Duration", help="The duration of the track"
+#             ),
+#             "Acoustic": st.column_config.NumberColumn(
+#                 "Acousticness", help="A measure of the acoustic quality of the track (0 to 1)"
+#             ),
+#             "Dance": st.column_config.NumberColumn(
+#                 "Danceability", help="How suitable the track is for dancing (0 to 1)"
+#             ),
+#             "Energy": st.column_config.NumberColumn(
+#                 "Energy", help="The intensity and activity level of the track (0 to 1)"
+#             ),
+#             "Happy": st.column_config.NumberColumn(
+#                 "Valence", help="A measure of the musical positivity of the track (0 to 1)"
+#             ),
+#             "Instrumental": st.column_config.NumberColumn(
+#                 "Instrumental", help="The likelihood that the track is instrumental (0 to 1)"
+#             ),
+#             "Key": st.column_config.TextColumn(
+#                 "Key", help="The musical key the track is composed in (0 to 11)"
+#             ),
+#             "Live": st.column_config.NumberColumn(
+#                 "Liveness", help="The probability that the track was performed live (0 to 1)"
+#             ),
+#             "Loud (Db)": st.column_config.NumberColumn(
+#                 "Loudness", help="The average loudness of a track in decibels (dB), useful for comparing the relative loudness of tracks"
+#             ),
+#             "Speech": st.column_config.NumberColumn(
+#                 "Speechiness", help="The presence of spoken words in the track (0 to 1)"
+#             ),
+#             "Tempo": st.column_config.NumberColumn(
+#                 "Tempo", help="The tempo of the track in beats per minute (BPM)"
+#             )
+#         },
+#         disabled=True,
+#     )
+
+#     # 🎥 YouTube Dropdown for Playing Playlist Songs
+#     song_options = [song["Name"] for song in st.session_state.user_playlist]
+
+#     if song_options:
+#         selected_song = st.selectbox(
+#             "🎥 Choose a song from your playlist to play on YouTube:",
+#             options=song_options
+#         )
+
+#         # Attempt to find a corresponding YouTube video
+#         matched_video = None
+#         for video in videos:
+#             if selected_song.lower() in video["title"].lower():
+#                 matched_video = video
+#                 break  # Stop searching after first match
+
+#         if matched_video:
+#             selected_video_url = matched_video["url"]
+#             youtube_video_id = selected_video_url.split("v=")[-1].split("&")[0]
+
+#             # Embed the selected YouTube video
+#             youtube_embed_html = f"""
+#             <iframe width="100%" height="350" src="https://www.youtube.com/embed/{youtube_video_id}" 
+#             frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+#             allowfullscreen></iframe>
+#             """
+#             st.markdown(youtube_embed_html, unsafe_allow_html=True)
+#         else:
+#             st.write(f"⚠️ No YouTube video found for **{selected_song}**. Playing YouTube playlist instead.")
+
+#        # Add some spacing
+#     st.markdown("<br><br>", unsafe_allow_html=True)
+
+#     # 🎼 Features to choose from in the dropdown
+#     features = ["Popularity", "Duration", "Acoustic", "Dance", "Energy", "Happy", "Instrumental", "Key", "Live", "Loud (Db)", "Speech", "Tempo"]
+#     features_with_descriptions = [
+#         "Popularity: The popularity score of the track (0 to 100)",
+#         "Duration: The duration of the track",
+#         "Acoustic: A measure of the acoustic quality of the track (0 to 1)",
+#         "Dance: How suitable the track is for dancing (0 to 1)",
+#         "Energy: The intensity and activity level of the track (0 to 1)",
+#         "Happy: A measure of the musical positivity of the track (0 to 1)",
+#         "Instrumental: The likelihood that the track is instrumental (0 to 1)",
+#         "Key: The musical key the track is composed in (0 to 11)",
+#         "Live: The probability that the track was performed live (0 to 1)",
+#         "Loud (Db): The overall loudness of the track in decibels",
+#         "Speech: The presence of spoken words in the track (0 to 1)",
+#         "Tempo: The tempo of the track in beats per minute (BPM)"
+#     ]
+
+#     selected_feature_with_description = st.selectbox("🔢 Select an audio feature to rank tracks by:", features_with_descriptions)
+    
+#     # Extract the feature name from the selected option (before the colon)
+#     selected_feature = selected_feature_with_description.split(":")[0]
+
+#     # 🎚️ Number of tracks to display in ranking
+#     num_tracks = st.slider(f"🎼 How many tracks do you want to display?", min_value=1, max_value=num_total_tracks, value=3)
+
+#     # 🎵 Display Top & Lowest Tracks by Feature
+#     sorted_df = df.sort_values(by=selected_feature, ascending=False)
+#     st.write(f"### 🎖️ Top {num_tracks} Tracks by {selected_feature}")
+#     st.dataframe(sorted_df.head(num_tracks)[["Name", "Artist", selected_feature]], hide_index=True)
+
+#     sorted_df_ascending = df.sort_values(by=selected_feature, ascending=True)
+#     st.write(f"### 🛑 Lowest {num_tracks} Tracks by {selected_feature}")
+#     st.dataframe(sorted_df_ascending.head(num_tracks)[["Name", "Artist", selected_feature]], hide_index=True)
+
+#     # # 🎭 **Genre Distribution Analysis**
+#     # if "Genre" in df.columns:
+#     #     st.write("### 🎭 Main Genres of Songs in Your Playlist")
+
+#     #     # Convert genres to DataFrame
+#     #     df_genres = pd.DataFrame(df["Genre"], columns=["Genre"])
+
+#     #     # Count occurrences of each genre
+#     #     genre_counts = df_genres["Genre"].value_counts()
+
+#     #     # Calculate percentage of each genre
+#     #     genre_percentages = (genre_counts / genre_counts.sum()) * 100
+
+#     #     # Sort genres by percentage in descending order
+#     #     genre_percentages_sorted = genre_percentages.sort_values(ascending=False)
+
+#     #     # Calculate the cumulative sum and filter to include genres up to 80% of total
+#     #     cumulative_percentages = genre_percentages_sorted.cumsum()
+#     #     top_genres_80 = genre_percentages_sorted[cumulative_percentages <= 80]
+
+#     #     # **Fix: Convert Series to DataFrame explicitly**
+#     #     df_top_genres = pd.DataFrame({
+#     #         "Genre": top_genres_80.index,
+#     #         "Percentage": top_genres_80.values
+#     #     })
+
+#     #     # 🎨 Create a colorful horizontal bar chart using Plotly
+#     #     fig_genres = px.bar(
+#     #         df_top_genres,  # Use correctly formatted DataFrame
+#     #         x="Percentage",
+#     #         y="Genre",
+#     #         orientation="h",  # Horizontal bar chart
+#     #         labels={"Percentage": "Percentage of Songs (%)", "Genre": "Genres"},
+#     #         color="Genre",  # Use genre names for color categories
+#     #         color_discrete_sequence=px.colors.qualitative.Set3  # Use a qualitative color palette
+#     #     )
+
+#     #     # Customize hovertemplate to show only the percentage
+#     #     fig_genres.update_traces(hovertemplate='%{x:.1f}%<extra></extra>')
+
+#     #     # Customize the bar chart appearance
+#     #     fig_genres.update_layout(
+#     #         xaxis_title="Percentage of Songs (%)",
+#     #         yaxis_title="Genres",
+#     #         xaxis=dict(range=[0, 100]),  # Ensure range is 0-100%
+#     #         margin=dict(t=0),  # Remove top margin
+#     #         showlegend=False
+#     #     )
+
+#     #     # Display the bar chart in Streamlit
+#     #     st.plotly_chart(fig_genres)
+
+#     # Create DataFrame from the constructed 'data' dictionary
+#     df_playlist = pd.DataFrame(data)
+
+#     # Extract "Name" and "Release Decade" for decade analysis
+#     df_decades = df_playlist[['Name', 'Release Decade']].copy()
+
+#     # Calculate the percentage of songs in each decade
+#     decade_counts = df_decades['Release Decade'].value_counts(normalize=True) * 100
+
+#     # Sort decades in chronological order
+#     decade_counts = decade_counts.sort_index()
+
+#     # Create a DataFrame for visualization
+#     df_bins_decades = pd.DataFrame({
+#         'Decade': decade_counts.index,
+#         'Percentage': decade_counts.values
+#     })
+
+#     # Create a vertical bar chart using Plotly
+#     fig_decades = go.Figure(go.Bar(
+#         x=df_bins_decades['Decade'],  # The decade categories
+#         y=df_bins_decades['Percentage'],  # The percentages
+#         text=[f"{perc:.1f}%" for perc in df_bins_decades['Percentage']],  # Display percentages as text inside the bars
+#         textposition='auto',  # Position text inside bars
+#         marker=dict(
+#             color=px.colors.qualitative.Plotly  # Automatically assign colors
+#         )
+#     ))
+
+#     # Update layout for better visualization
+#     fig_decades.update_layout(
+#         title_text='Percentage of Songs by Decade',
+#         xaxis_title='Decade',
+#         yaxis_title='Percentage of Songs (%)',
+#         yaxis=dict(tickvals=[0, 20, 40, 60, 80, 100]),  # Custom y-axis ticks
+#         showlegend=False  # Hide legend
+#     )
+
+#     # Count occurrences of each genre
+#     genre_counts = df["Genre"].value_counts()
+
+#     # Calculate the percentage for each genre
+#     genre_percentages = (genre_counts / genre_counts.sum()) * 100
+
+#     # Sort genres by percentage in descending order
+#     genre_percentages_sorted = genre_percentages.sort_values(ascending=False)
+
+#     # If no genre data is available
+#     if genre_percentages_sorted.empty:
+#         st.warning("⚠️ No genre data available to display.")
+
+#     # If only one genre is in the playlist
+#     elif len(genre_percentages_sorted) == 1:
+#         st.write("### 🎶 Genre of the Song in Your Playlist")
+#         genre = genre_percentages_sorted.index[0]
+#         percent = genre_percentages_sorted.iloc[0]
+#         st.write(f"Your song is categorized as **{genre}**, which makes up **{percent:.2f}%** of your playlist.")
+
+#     # If multiple genres, show the top contributors to 80%
+#     else:
+#         cumulative_percentages = genre_percentages_sorted.cumsum()
+#         top_genres_80 = genre_percentages_sorted[cumulative_percentages <= 80]
+
+#     if len(top_genres_80) == 0:
+#         top_genres_80 = genre_percentages_sorted.head(5)
+
+#     # Create DataFrame for plotting
+#     df_top_genres = pd.DataFrame({
+#         "Genre": top_genres_80.index.tolist(),
+#         "Percentage": top_genres_80.values.tolist()
+#     })
+
+#     st.write("### 🎶 Main Genres of Songs in Your Playlist")
+
+#     fig = px.bar(
+#         df_top_genres,
+#         x="Percentage",
+#         y="Genre",
+#         orientation='h',
+#         labels={"Percentage": "Percentage of Songs (%)", "Genre": "Genres"},
+#     )
+
+#     fig.update_traces(hovertemplate='%{x:.2f}%<extra></extra>')
+#     fig.update_layout(
+#         xaxis_title="Percentage of Songs (%)",
+#         yaxis_title="Genres",
+#         xaxis=dict(range=[0, 100]),
+#         margin=dict(t=0)
+#     )
+
+#     st.plotly_chart(fig)
+
+# # 📌 Call the function **after** the button logic
+# if st.session_state.get("show_playlist_analysis", False):
+#     display_playlist_analysis() 
+
+
