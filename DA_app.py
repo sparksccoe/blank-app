@@ -786,7 +786,8 @@ if st.session_state.user_playlist:
 
         # Button to toggle display of data visualization
         if st.button(
-            "📊 View Data" if not st.session_state.show_data_visualization else "📽 Hide Data Visualization"
+            "📊 View Data" if not st.session_state.show_data_visualization else "📽 Hide Data Visualization",
+            type="primary"
         ):
             st.session_state.show_data_visualization = not st.session_state.show_data_visualization
 
@@ -808,22 +809,19 @@ if st.session_state.get("show_data_visualization", False) and len(st.session_sta
             "Loudness": [song["Loudness (dB)"] for song in st.session_state.user_playlist],
         })
     
-    # Create two columns for side-by-side charts
-    col1, col2 = st.columns(2)
+    # Full-width Tempo Bar Chart
+    st.write("#### Tempo Distribution (BPM)")
+    fig_tempo = px.bar(viz_df, x="Name", y="Tempo", color="Tempo")
+    fig_tempo.update_layout(xaxis_tickangle=45, margin=dict(t=0), showlegend=False)
+    fig_tempo.update_coloraxes(showscale=False)
+    st.plotly_chart(fig_tempo, use_container_width=True)
     
-    with col1:
-        # Simplified Tempo Bar Chart
-        st.write("#### Tempo Distribution (BPM)")
-        fig_tempo = px.bar(viz_df, x="Name", y="Tempo", color="Tempo")
-        fig_tempo.update_layout(xaxis_tickangle=45, margin=dict(t=0), showlegend=False)
-        st.plotly_chart(fig_tempo, use_container_width=True)
-    
-    with col2:
-        # Simplified Loudness Bar Chart  
-        st.write("#### Loudness Distribution (dB)")
-        fig_loudness = px.bar(viz_df, x="Name", y="Loudness", color="Loudness")
-        fig_loudness.update_layout(xaxis_tickangle=45, margin=dict(t=0), showlegend=False)
-        st.plotly_chart(fig_loudness, use_container_width=True)
+    # Full-width Loudness Bar Chart  
+    st.write("#### Loudness Distribution (dB)")
+    fig_loudness = px.bar(viz_df, x="Name", y="Loudness", color="Loudness")
+    fig_loudness.update_layout(xaxis_tickangle=45, margin=dict(t=0), showlegend=False)
+    fig_loudness.update_coloraxes(showscale=False)
+    st.plotly_chart(fig_loudness, use_container_width=True)
     
     # Simple scatter plot
     st.write("#### Tempo vs Loudness Relationship")
