@@ -752,6 +752,31 @@ if st.session_state.user_playlist:
             unsafe_allow_html=True
         )
 
+# After the playlist table display, add a message about graph availability
+if st.session_state.user_playlist:
+    # ... existing playlist table code ...
+    
+    st.dataframe(
+        playlist_summary_df.reset_index(drop=True),
+        use_container_width=True,
+        hide_index=True
+    )
+    
+    # NEW: Add message about data visualization availability
+    current_song_count = len(st.session_state.user_playlist)
+    
+    if current_song_count < 3:
+        songs_needed = 3 - current_song_count
+        st.info(
+            f"📊 **Data Visualization Unlock:** Add {songs_needed} more song{'s' if songs_needed > 1 else ''} "
+            f"to unlock graph and chart views of your playlist data! "
+            f"({current_song_count}/3 songs added)"
+        )
+    else:
+        st.success(
+            f"🎉 **Data Visualization Unlocked!** You have {current_song_count} songs in your playlist. "
+            "You can now view detailed graphs and charts of your playlist data!"
+        )
 
 # Ensure 'saved_user_playlists' directory exists
 playlist_dir = "saved_user_playlists"
