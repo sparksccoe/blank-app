@@ -786,7 +786,7 @@ if st.session_state.user_playlist:
 
         # Button to toggle display of data visualization
         if st.button(
-            "📊 View Data" if not st.session_state.show_data_visualization else "📽 Hide Data Visualization",
+            "📊 View Data" if not st.session_state.show_data_visualization else "🗺️ Hide Data Visualization",
             type="primary"
         ):
             st.session_state.show_data_visualization = not st.session_state.show_data_visualization
