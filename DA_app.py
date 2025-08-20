@@ -754,8 +754,6 @@ if st.session_state.user_playlist:
 
 # Add this code right after the playlist table section and before the YouTube embed section
 
-# Add this code right after the playlist table section and before the YouTube embed section
-
 # After the playlist table display, add a message about graph availability
 if st.session_state.user_playlist:
     # ... existing playlist table code ...
@@ -819,7 +817,7 @@ if st.session_state.get("show_data_visualization", False) and len(st.session_sta
         y="Tempo", 
         color="Name",
         labels={"Tempo": "Tempo (BPM)", "Name": "Songs"},
-        color_discrete_sequence=qualitative.Set3
+        color_discrete_sequence=["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
     )
     fig_tempo.update_layout(
         xaxis_title="Songs",
@@ -842,7 +840,7 @@ if st.session_state.get("show_data_visualization", False) and len(st.session_sta
         y="Loudness_Positive", 
         color="Name",
         labels={"Loudness_Positive": "Loudness (dB)", "Name": "Songs"},
-        color_discrete_sequence=qualitative.Set3
+        color_discrete_sequence=["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
     )
     fig_loudness.update_layout(
         xaxis_title="Songs",
@@ -863,7 +861,8 @@ if st.session_state.get("show_data_visualization", False) and len(st.session_sta
         color="Bard", 
         size_max=15,
         labels={"Tempo": "Tempo (BPM)", "Loudness": "Loudness (dB)"},
-        hover_data={"Name": True}
+        hover_data={"Name": True},
+        color_discrete_sequence=["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
     )
     fig_scatter.update_layout(
         xaxis_title="Tempo (BPM)",
@@ -888,53 +887,61 @@ if st.session_state.get("show_data_visualization", False) and len(st.session_sta
         if creature_task_data:
             df_creatures = pd.DataFrame(creature_task_data)
             
-            # Create two columns for side-by-side creature charts
-            col1, col2 = st.columns(2)
+            # Stacked bar chart of task categories by creature - full width
+            st.write("#### Creature Task Distribution")
+            creature_counts = df_creatures.groupby(['Task Category', 'Creature']).size().reset_index(name='Count')
             
-            with col1:
-                # Stacked bar chart of task categories by creature
-                st.write("#### Creature Task Distribution")
-                creature_counts = df_creatures.groupby(['Task Category', 'Creature']).size().reset_index(name='Count')
-                fig_creature_bar = px.bar(
-                    creature_counts,
-                    x="Task Category",
-                    y="Count",
-                    color="Creature",
-                    color_discrete_sequence=qualitative.Set3
-                )
-                fig_creature_bar.update_layout(
-                    xaxis_title="Task Category",
-                    yaxis_title="Count",
-                    margin=dict(t=0),
-                    legend_title="Motivated Creature"
-                )
-                st.plotly_chart(fig_creature_bar, use_container_width=True)
+            # Calculate y-axis range based on max count
+            max_count = creature_counts['Count'].max()
+            if max_count == 1:
+                y_range = [0, 4]  # Make it take up only a quarter of the axis
+            else:
+                y_range = [0, max_count + 0.5]  # Add small buffer above max
             
-            with col2:
-                # Scatter plot of creatures by task category
-                st.write("#### Creature Task Scatter")
-                # Add some jitter for better visualization
-                import random
-                df_creatures_scatter = df_creatures.copy()
-                df_creatures_scatter['jitter'] = [random.uniform(-0.2, 0.2) for _ in range(len(df_creatures_scatter))]
-                
-                fig_creature_scatter = px.scatter(
-                    df_creatures_scatter,
-                    x="Task Category", 
-                    y="jitter",
-                    color="Creature",
-                    color_discrete_sequence=qualitative.Set3,
-                    hover_data={"Song": True, "jitter": False}
-                )
-                fig_creature_scatter.update_layout(
-                    xaxis_title="Task Category",
-                    yaxis_title="",
-                    yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
-                    margin=dict(t=0),
-                    legend_title="Motivated Creature"
-                )
-                fig_creature_scatter.update_traces(hovertemplate='<b>%{customdata[0]}</b><br>%{fullData.name}<br>%{x}<extra></extra>')
-                st.plotly_chart(fig_creature_scatter, use_container_width=True)
+            fig_creature_bar = px.bar(
+                creature_counts,
+                x="Task Category",
+                y="Count",
+                color="Creature",
+                color_discrete_sequence=["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
+            )
+            fig_creature_bar.update_layout(
+                xaxis_title="Task Category",
+                yaxis_title="Count",
+                yaxis=dict(
+                    range=y_range,
+                    dtick=1,  # Force whole number ticks
+                    tickmode='linear'
+                ),
+                margin=dict(t=0),
+                legend_title="Motivated Creature"
+            )
+            st.plotly_chart(fig_creature_bar, use_container_width=True)
+            
+            # Scatter plot of creatures by task category - full width
+            st.write("#### Creature Task Scatter")
+            # Add some jitter for better visualization
+            import random
+            df_creatures_scatter = df_creatures.copy()
+            df_creatures_scatter['jitter'] = [random.uniform(-0.2, 0.2) for _ in range(len(df_creatures_scatter))]
+            
+            fig_creature_scatter = px.scatter(
+                df_creatures_scatter,
+                x="Task Category", 
+                y="jitter",
+                color="Creature",
+                color_discrete_sequence=["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"],
+                hover_data={"Song": True, "jitter": False}
+            )
+            fig_creature_scatter.update_layout(
+                xaxis_title="Task Category",
+                yaxis_title="",
+                yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+                margin=dict(t=0),
+                legend_title="Motivated Creature"
+            )
+            fig_creature_scatter.update_traces(hovertemplate='<b>%{customdata[0]}</b><br>%{fullData.name}<br>%{x}<extra></extra>')
+            st.plotly_chart(fig_creature_scatter, use_container_width=True)
     
     # Continue with existing YouTube embed section...
 
