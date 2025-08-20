@@ -811,26 +811,69 @@ if st.session_state.get("show_data_visualization", False) and len(st.session_sta
     
     # Full-width Tempo Bar Chart
     st.write("#### Tempo Distribution (BPM)")
-    fig_tempo = px.bar(viz_df, x="Name", y="Tempo", color="Tempo")
-    fig_tempo.update_layout(xaxis_tickangle=45, margin=dict(t=0), showlegend=False)
+    fig_tempo = px.bar(
+        viz_df, 
+        x="Name", 
+        y="Tempo", 
+        color="Tempo",
+        labels={"Tempo": "Tempo (BPM)", "Name": "Songs"},
+        color_continuous_scale="viridis"
+    )
+    fig_tempo.update_layout(
+        xaxis_title="Songs",
+        yaxis_title="Tempo (BPM)",
+        xaxis_tickangle=45, 
+        margin=dict(t=0), 
+        showlegend=False
+    )
     fig_tempo.update_coloraxes(showscale=False)
+    fig_tempo.update_traces(hovertemplate='<b>%{x}</b><br>Tempo: %{y} BPM<extra></extra>')
     st.plotly_chart(fig_tempo, use_container_width=True)
     
     # Full-width Loudness Bar Chart  
     st.write("#### Loudness Distribution (dB)")
-    fig_loudness = px.bar(viz_df, x="Name", y="Loudness", color="Loudness")
-    fig_loudness.update_layout(xaxis_tickangle=45, margin=dict(t=0), showlegend=False)
+    # Convert loudness to positive values for upward bars
+    viz_df_loudness = viz_df.copy()
+    viz_df_loudness["Loudness_Positive"] = viz_df_loudness["Loudness"] * -1
+    fig_loudness = px.bar(
+        viz_df_loudness, 
+        x="Name", 
+        y="Loudness_Positive", 
+        color="Loudness",
+        labels={"Loudness_Positive": "Loudness (dB)", "Name": "Songs"},
+        color_continuous_scale="plasma"
+    )
+    fig_loudness.update_layout(
+        xaxis_title="Songs",
+        yaxis_title="Loudness (dB)",
+        xaxis_tickangle=45, 
+        margin=dict(t=0), 
+        showlegend=False
+    )
     fig_loudness.update_coloraxes(showscale=False)
+    fig_loudness.update_traces(hovertemplate='<b>%{x}</b><br>Loudness: %{y} dB<extra></extra>')
     st.plotly_chart(fig_loudness, use_container_width=True)
     
     # Simple scatter plot
     st.write("#### Tempo vs Loudness Relationship")
-    fig_scatter = px.scatter(viz_df, x="Tempo", y="Loudness", color="Bard", hover_data=["Name"])
-    fig_scatter.update_layout(margin=dict(t=0))
+    fig_scatter = px.scatter(
+        viz_df, 
+        x="Tempo", 
+        y="Loudness", 
+        color="Bard", 
+        size_max=15,
+        labels={"Tempo": "Tempo (BPM)", "Loudness": "Loudness (dB)"},
+        hover_data={"Name": True}
+    )
+    fig_scatter.update_layout(
+        xaxis_title="Tempo (BPM)",
+        yaxis_title="Loudness (dB)",
+        margin=dict(t=0)
+    )
+    fig_scatter.update_traces(hovertemplate='<b>%{customdata[0]}</b><br>Tempo: %{x} BPM<br>Loudness: %{y} dB<extra></extra>')
     st.plotly_chart(fig_scatter, use_container_width=True)
     
     # Continue with existing YouTube embed section...
-# for sync
 
 # Ensure 'saved_user_playlists' directory exists
 playlist_dir = "saved_user_playlists"
