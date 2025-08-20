@@ -815,9 +815,9 @@ if st.session_state.get("show_data_visualization", False) and len(st.session_sta
         viz_df, 
         x="Name", 
         y="Tempo", 
-        color="Tempo",
+        color="Name",
         labels={"Tempo": "Tempo (BPM)", "Name": "Songs"},
-        color_continuous_scale="viridis"
+        color_discrete_sequence=qualitative.Set3
     )
     fig_tempo.update_layout(
         xaxis_title="Songs",
@@ -826,7 +826,6 @@ if st.session_state.get("show_data_visualization", False) and len(st.session_sta
         margin=dict(t=0), 
         showlegend=False
     )
-    fig_tempo.update_coloraxes(showscale=False)
     fig_tempo.update_traces(hovertemplate='<b>%{x}</b><br>Tempo: %{y} BPM<extra></extra>')
     st.plotly_chart(fig_tempo, use_container_width=True)
     
@@ -839,9 +838,9 @@ if st.session_state.get("show_data_visualization", False) and len(st.session_sta
         viz_df_loudness, 
         x="Name", 
         y="Loudness_Positive", 
-        color="Loudness",
+        color="Name",
         labels={"Loudness_Positive": "Loudness (dB)", "Name": "Songs"},
-        color_continuous_scale="plasma"
+        color_discrete_sequence=qualitative.Set3
     )
     fig_loudness.update_layout(
         xaxis_title="Songs",
@@ -850,7 +849,6 @@ if st.session_state.get("show_data_visualization", False) and len(st.session_sta
         margin=dict(t=0), 
         showlegend=False
     )
-    fig_loudness.update_coloraxes(showscale=False)
     fig_loudness.update_traces(hovertemplate='<b>%{x}</b><br>Loudness: %{y} dB<extra></extra>')
     st.plotly_chart(fig_loudness, use_container_width=True)
     
