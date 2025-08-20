@@ -777,6 +777,104 @@ if st.session_state.user_playlist:
             f"🎉 **Data Visualization Unlocked!** You have {current_song_count} songs in your playlist. "
             "You can now view detailed graphs and charts of your playlist data!"
         )
+        
+        # Initialize session state variable to track visibility of data visualization
+        if "show_data_visualization" not in st.session_state:
+            st.session_state.show_data_visualization = False
+
+        # Button to toggle display of data visualization
+        if st.button(
+            "📊 View Data" if not st.session_state.show_data_visualization else "📽 Hide Data Visualization"
+        ):
+            st.session_state.show_data_visualization = not st.session_state.show_data_visualization
+
+def display_playlist_data_visualization():
+    """Displays tempo and loudness graphs for the playlist."""
+    
+    st.markdown("### **📊 Playlist Data Visualization**")
+    st.markdown("_Here's a visual analysis of your playlist's tempo and loudness characteristics._")
+
+    # Extract data from session state playlist
+    playlist_songs = st.session_state.user_playlist
+
+    # Construct DataFrame focusing on tempo and loudness
+    data = {
+        "Name": [song["Name"] for song in playlist_songs],
+        "Artist": [song["Artist"] for song in playlist_songs],
+        "Bard": [song["Bard"] for song in playlist_songs],
+        "Tempo": [song["Tempo (BPM)"] for song in playlist_songs],
+        "Loudness": [song["Loudness (dB)"] for song in playlist_songs],
+    }
+
+    df = pd.DataFrame(data)
+    
+    # Create two columns for side-by-side charts
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Tempo Bar Chart
+        st.write("#### 🎵 Tempo Distribution (BPM)")
+        fig_tempo = px.bar(
+            df,
+            x="Name",
+            y="Tempo",
+            color="Tempo",
+            labels={"Tempo": "Tempo (BPM)", "Name": "Songs"},
+            color_continuous_scale="viridis"
+        )
+        fig_tempo.update_layout(
+            xaxis_title="Songs",
+            yaxis_title="Tempo (BPM)",
+            xaxis_tickangle=45,
+            margin=dict(t=0),
+            showlegend=False
+        )
+        fig_tempo.update_traces(hovertemplate='<b>%{x}</b><br>Tempo: %{y} BPM<extra></extra>')
+        st.plotly_chart(fig_tempo, use_container_width=True)
+    
+    with col2:
+        # Loudness Bar Chart
+        st.write("#### 🔊 Loudness Distribution (dB)")
+        fig_loudness = px.bar(
+            df,
+            x="Name",
+            y="Loudness",
+            color="Loudness",
+            labels={"Loudness": "Loudness (dB)", "Name": "Songs"},
+            color_continuous_scale="plasma"
+        )
+        fig_loudness.update_layout(
+            xaxis_title="Songs",
+            yaxis_title="Loudness (dB)",
+            xaxis_tickangle=45,
+            margin=dict(t=0),
+            showlegend=False
+        )
+        fig_loudness.update_traces(hovertemplate='<b>%{x}</b><br>Loudness: %{y} dB<extra></extra>')
+        st.plotly_chart(fig_loudness, use_container_width=True)
+    
+    # Scatter plot showing relationship between tempo and loudness
+    st.write("#### 🎯 Tempo vs Loudness Relationship")
+    fig_scatter = px.scatter(
+        df,
+        x="Tempo",
+        y="Loudness",
+        color="Bard",
+        size_max=15,
+        labels={"Tempo": "Tempo (BPM)", "Loudness": "Loudness (dB)"},
+        hover_data={"Name": True, "Artist": True}
+    )
+    fig_scatter.update_layout(
+        xaxis_title="Tempo (BPM)",
+        yaxis_title="Loudness (dB)",
+        margin=dict(t=0)
+    )
+    fig_scatter.update_traces(hovertemplate='<b>%{customdata[0]}</b><br>by %{customdata[1]}<br>Tempo: %{x} BPM<br>Loudness: %{y} dB<extra></extra>')
+    st.plotly_chart(fig_scatter, use_container_width=True)
+
+# Call the function if the button was pressed
+if st.session_state.get("show_data_visualization", False) and len(st.session_state.user_playlist) >= 3:
+    display_playlist_data_visualization()
 
 # Ensure 'saved_user_playlists' directory exists
 playlist_dir = "saved_user_playlists"
