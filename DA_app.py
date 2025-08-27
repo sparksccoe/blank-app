@@ -809,48 +809,48 @@ if st.session_state.get("show_data_visualization", False) and len(st.session_sta
             "Loudness": [song["Loudness (dB)"] for song in st.session_state.user_playlist],
         })
     
-    # Full-width Tempo Bar Chart
-    st.write("#### Tempo Distribution (BPM)")
-    fig_tempo = px.bar(
-        viz_df, 
-        x="Name", 
-        y="Tempo", 
-        color="Name",
-        labels={"Tempo": "Tempo (BPM)", "Name": "Songs"},
-        color_discrete_sequence=["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
-    )
-    fig_tempo.update_layout(
-        xaxis_title="Songs",
-        yaxis_title="Tempo (BPM)",
-        xaxis_tickangle=45, 
-        margin=dict(t=0), 
-        showlegend=False
-    )
-    fig_tempo.update_traces(hovertemplate='<b>%{x}</b><br>Tempo: %{y} BPM<extra></extra>')
-    st.plotly_chart(fig_tempo, use_container_width=True)
+    # # Full-width Tempo Bar Chart
+    # st.write("#### Tempo Distribution (BPM)")
+    # fig_tempo = px.bar(
+    #     viz_df, 
+    #     x="Name", 
+    #     y="Tempo", 
+    #     color="Name",
+    #     labels={"Tempo": "Tempo (BPM)", "Name": "Songs"},
+    #     color_discrete_sequence=["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
+    # )
+    # fig_tempo.update_layout(
+    #     xaxis_title="Songs",
+    #     yaxis_title="Tempo (BPM)",
+    #     xaxis_tickangle=45, 
+    #     margin=dict(t=0), 
+    #     showlegend=False
+    # )
+    # fig_tempo.update_traces(hovertemplate='<b>%{x}</b><br>Tempo: %{y} BPM<extra></extra>')
+    # st.plotly_chart(fig_tempo, use_container_width=True)
     
-    # Full-width Loudness Bar Chart  
-    st.write("#### Loudness Distribution (dB)")
-    # Convert loudness to positive values for upward bars
-    viz_df_loudness = viz_df.copy()
-    viz_df_loudness["Loudness_Positive"] = viz_df_loudness["Loudness"] * -1
-    fig_loudness = px.bar(
-        viz_df_loudness, 
-        x="Name", 
-        y="Loudness_Positive", 
-        color="Name",
-        labels={"Loudness_Positive": "Loudness (dB)", "Name": "Songs"},
-        color_discrete_sequence=["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
-    )
-    fig_loudness.update_layout(
-        xaxis_title="Songs",
-        yaxis_title="Loudness (dB)",
-        xaxis_tickangle=45, 
-        margin=dict(t=0), 
-        showlegend=False
-    )
-    fig_loudness.update_traces(hovertemplate='<b>%{x}</b><br>Loudness: %{y} dB<extra></extra>')
-    st.plotly_chart(fig_loudness, use_container_width=True)
+    # # Full-width Loudness Bar Chart  
+    # st.write("#### Loudness Distribution (dB)")
+    # # Convert loudness to positive values for upward bars
+    # viz_df_loudness = viz_df.copy()
+    # viz_df_loudness["Loudness_Positive"] = viz_df_loudness["Loudness"] * -1
+    # fig_loudness = px.bar(
+    #     viz_df_loudness, 
+    #     x="Name", 
+    #     y="Loudness_Positive", 
+    #     color="Name",
+    #     labels={"Loudness_Positive": "Loudness (dB)", "Name": "Songs"},
+    #     color_discrete_sequence=["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
+    # )
+    # fig_loudness.update_layout(
+    #     xaxis_title="Songs",
+    #     yaxis_title="Loudness (dB)",
+    #     xaxis_tickangle=45, 
+    #     margin=dict(t=0), 
+    #     showlegend=False
+    # )
+    # fig_loudness.update_traces(hovertemplate='<b>%{x}</b><br>Loudness: %{y} dB<extra></extra>')
+    # st.plotly_chart(fig_loudness, use_container_width=True)
     
     # Tempo Number Line Visualization
     st.write("#### Tempo Number Line (BPM)")
@@ -911,6 +911,66 @@ if st.session_state.get("show_data_visualization", False) and len(st.session_sta
     )
 
     st.plotly_chart(fig_tempo_line, use_container_width=True)
+
+    # Loudness Number Line Visualization
+    st.write("#### Loudness Number Line (dB)")
+    fig_loudness_line = go.Figure()
+
+    # Create the number line (background line)
+    fig_loudness_line.add_trace(go.Scatter(
+        x=[-60, 0], 
+        y=[0, 0], 
+        mode='lines',
+        line=dict(color='lightgray', width=3),
+        showlegend=False,
+        hoverinfo='skip'
+    ))
+
+    # Add loudness values as colored dots
+    colors = px.colors.qualitative.Plotly * 5  # Cycle colors if needed
+    for i, (_, song) in enumerate(viz_df.iterrows()):
+        fig_loudness_line.add_trace(go.Scatter(
+            x=[song['Loudness']], 
+            y=[0],
+            mode='markers',
+            marker=dict(
+                size=20,
+                color=colors[i % len(colors)],
+                line=dict(width=2, color='white')
+            ),
+            name=song['Name'],  # This will appear in the legend
+            text=f"<b>{song['Name']}</b><br>by {song['Bard']}<br>{song['Loudness']} dB",
+            hovertemplate='%{text}<extra></extra>',
+            showlegend=True  # Enable legend for song dots
+        ))
+
+    fig_loudness_line.update_layout(
+        xaxis=dict(
+            range=[-65, 5],
+            title="Loudness (dB)",
+            showgrid=True,
+            gridcolor='lightgray',
+            dtick=10  # Set grid lines every 10 dB
+        ),
+        yaxis=dict(
+            range=[-0.2, 0.2],
+            showticklabels=False,
+            showgrid=False,
+            zeroline=False
+        ),
+        height=200,
+        margin=dict(t=20, b=50, l=50, r=50),
+        plot_bgcolor='white',
+        legend=dict(
+            orientation="v",
+            yanchor="top",
+            y=1,
+            xanchor="left",
+            x=1.02
+        )
+    )
+
+    st.plotly_chart(fig_loudness_line, use_container_width=True)
 
     # Simple scatter plot
     st.write("#### Tempo vs Loudness Relationship")
