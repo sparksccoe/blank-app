@@ -878,24 +878,10 @@ if st.session_state.get("show_data_visualization", False) and len(st.session_sta
                 color=colors[i % len(colors)],
                 line=dict(width=2, color='white')
             ),
-            name=song['Name'],
+            name=song['Name'],  # This will appear in the legend
             text=f"<b>{song['Name']}</b><br>by {song['Bard']}<br>{song['Tempo']} BPM",
             hovertemplate='%{text}<extra></extra>',
-            showlegend=False
-        ))
-
-    # Add BPM markers every 20
-    bpm_markers = list(range(0, 201, 20))  # 0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200
-    for bmp in bpm_markers:
-        fig_tempo_line.add_trace(go.Scatter(
-            x=[bmp], 
-            y=[-0.05],
-            mode='markers+text',
-            marker=dict(size=8, color='black'),
-            text=str(bmp),
-            textposition='bottom center',
-            showlegend=False,
-            hoverinfo='skip'
+            showlegend=True  # Enable legend for song dots
         ))
 
     fig_tempo_line.update_layout(
@@ -903,7 +889,8 @@ if st.session_state.get("show_data_visualization", False) and len(st.session_sta
             range=[-10, 210],
             title="Beats Per Minute (BPM)",
             showgrid=True,
-            gridcolor='lightgray'
+            gridcolor='lightgray',
+            dtick=20  # Set grid lines every 20 BPM
         ),
         yaxis=dict(
             range=[-0.2, 0.2],
@@ -913,7 +900,14 @@ if st.session_state.get("show_data_visualization", False) and len(st.session_sta
         ),
         height=200,
         margin=dict(t=20, b=50, l=50, r=50),
-        plot_bgcolor='white'
+        plot_bgcolor='white',
+        legend=dict(
+            orientation="v",
+            yanchor="top",
+            y=1,
+            xanchor="left",
+            x=1.02
+        )
     )
 
     st.plotly_chart(fig_tempo_line, use_container_width=True)
