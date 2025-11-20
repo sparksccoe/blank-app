@@ -221,16 +221,16 @@ if playlist_id:
 
 # Load creature data
 if playlist_id:
-    creatures_csv = "DA Creatures.csv"
+    creatures_csv = "DA Creatures 2.csv"
     df_creatures_data = pd.read_csv(creatures_csv)
 
     # Extract individual creature attributes
-    creature_names = df_creatures_data["Name"].tolist()
+    creature_names = df_creatures_data["Creature name"].tolist()
     creature_tempo_preferences = df_creatures_data["Tempo Preference"].tolist()
     creature_loudness_preferences = df_creatures_data["Loudness Preference"].tolist()
-    creature_task_categories = df_creatures_data["Task Category"].tolist()
-    creature_task_specific_1 = df_creatures_data["Task Specific 1"].tolist()
-    creature_task_specific_2 = df_creatures_data["Task Specific 2"].tolist()
+    creature_task_categories = df_creatures_data["Specialization"].tolist()
+    creature_task_specific_1 = df_creatures_data["Tempo task"].tolist()
+    creature_task_specific_2 = df_creatures_data["Loudness task"].tolist()
 
 # Initialize user playlist in session state if it doesn’t exist
 if "user_playlist" not in st.session_state:
