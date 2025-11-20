@@ -561,7 +561,7 @@ if "best_match" in st.session_state:
     if matched_creatures:
         st.markdown("### This song activates the following creatures. Which one did you pair up in the game?")
 
-        creature_names = ["-- Select Creature --"] + [creature["Name"] for creature in matched_creatures]
+        creature_names = ["-- Select Creature --"] + [creature["Creature name"] for creature in matched_creatures]
 
         selected_creature_name = st.selectbox(
             "Select your paired creature:",
@@ -572,7 +572,7 @@ if "best_match" in st.session_state:
 
         if selected_creature_name != "-- Select Creature --":
             selected_creature_obj = next(
-                (creature for creature in matched_creatures if creature["Name"] == selected_creature_name),
+                (creature for creature in matched_creatures if creature["Creature name"] == selected_creature_name),
                 None
             )
 
