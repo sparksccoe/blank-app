@@ -112,6 +112,7 @@ if playlist_id:
     track_duration = df_audio_features["Time"].tolist()
     track_album = df_audio_features["Album"].tolist()
     track_image = df_audio_features["Image"].tolist()
+    track_bard_image = df_audio_features["Bard Image"].tolist()
     track_release_date = df_audio_features["Album Date"].tolist()
     track_danceability = df_audio_features["Dance"].tolist()
     track_duration = df_audio_features["Time"].tolist()
@@ -202,6 +203,7 @@ if playlist_id:
         "Release Date": track_release_date,
         "Decade": track_decade,
         "Image": track_image,
+        "Bard Image": track_bard_image,
         "Danceability": track_danceability,
         "Energy": track_energy,
         "Loudness (dB)": track_loudness,
@@ -303,7 +305,7 @@ with st.expander("**🗝️ Treasure Hunt: Tap to Find Your Saved Playlist**", e
                 for song in st.session_state.user_playlist:
                     col1, col2 = st.columns([1, 3])
                     with col1:
-                        st.image(song["Image"], width=80)
+                        st.image(song["Bard Image"], width=80)
                     with col2:
                         st.write(f"**{song['Name']}** by {song['Artist']}")
                         st.markdown(f"**Tempo:** {song['Tempo (BPM)']} BPM &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; **Loudness:** {song['Loudness (dB)']} dB")
@@ -538,7 +540,7 @@ if "best_match" in st.session_state:
     col1, spacer, col2 = st.columns([1, 0.5, 1])
 
     with col1:
-        st.image(best_match["Image"], caption=best_match["Name"], width=250)
+        st.image(best_match["Bard Image"], caption=best_match["Name"], width=250)
 
     with col2:
         st.write(f"🎚️ **BPM:** {best_match['Tempo (BPM)']}")
@@ -677,7 +679,7 @@ if st.session_state.user_playlist:
         col1, col2, col3 = st.columns([1, 3, 1])  # Third column for the button
 
         with col1:
-            st.image(song["Image"], width=80)
+            st.image(song["Bard Image"], width=80)
 
         with col2:
             st.write(f"**{song['Name']}** by {song['Bard']}")
