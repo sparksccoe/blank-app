@@ -230,7 +230,7 @@ if playlist_id:
     creature_names = df_creatures_data["Creature name"].tolist()
     creature_tempo_preferences = df_creatures_data["Tempo Preference"].tolist()
     creature_loudness_preferences = df_creatures_data["Loudness Preference"].tolist()
-    creature_task_categories = df_creatures_data["Specialization"].tolist()
+    creature_task_categories = df_creatures_data["Task Category"].tolist()
     creature_task_specific_1 = df_creatures_data["Task Specific 1"].tolist()
     creature_task_specific_2 = df_creatures_data["Task Specific 2"].tolist()
 
