@@ -229,8 +229,8 @@ if playlist_id:
     creature_tempo_preferences = df_creatures_data["Tempo Preference"].tolist()
     creature_loudness_preferences = df_creatures_data["Loudness Preference"].tolist()
     creature_task_categories = df_creatures_data["Specialization"].tolist()
-    creature_task_specific_1 = df_creatures_data["Tempo task"].tolist()
-    creature_task_specific_2 = df_creatures_data["Loudness task"].tolist()
+    creature_task_specific_1 = df_creatures_data["Task Specific 1"].tolist()
+    creature_task_specific_2 = df_creatures_data["Task Specific 2"].tolist()
 
 # Initialize user playlist in session state if it doesn’t exist
 if "user_playlist" not in st.session_state:
@@ -577,7 +577,7 @@ if "best_match" in st.session_state:
             )
 
             if selected_creature_obj is not None:
-                st.markdown(f"### Which music task would you like {selected_creature_obj['Name']} to complete?")
+                st.markdown(f"### Which music task would you like {selected_creature_obj['Creature name']} to complete?")
 
                 music_tasks = [
                     "-- Select Task --",
@@ -609,7 +609,7 @@ if "best_match" in st.session_state:
 
             # Add task category if available
             selected_creature_obj = next(
-                (creature for creature in matched_creatures if creature["Name"] == selected_creature_name),
+                (creature for creature in matched_creatures if creature["Creature name"] == selected_creature_name),
                 None
             )
             if selected_creature_obj is not None:
