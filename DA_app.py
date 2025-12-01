@@ -540,7 +540,7 @@ if "best_match" in st.session_state:
     col1, spacer, col2 = st.columns([1, 0.5, 1])
 
     with col1:
-        st.image(best_match["Bard Image"], caption=best_match["Name"], width=250)
+        st.image(best_match["Bard Image"], caption=best_match["Bard"], width=250)
 
     with col2:
         st.write(f"🎚️ **BPM:** {best_match['Tempo (BPM)']}")
