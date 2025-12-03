@@ -16,6 +16,52 @@ st.set_page_config(
     initial_sidebar_state="auto",  # Optional: "expanded", "collapsed", or "auto"
 )
 
+import uuid
+import json
+
+# --- SESSION PERSISTENCE SETUP ---
+# Create a folder to store temporary session files
+SESSION_DIR = "temp_user_sessions"
+os.makedirs(SESSION_DIR, exist_ok=True)
+
+# 1. Get Session ID from URL or Generate New One
+if "session_id" not in st.query_params:
+    # Generate a unique ID
+    new_id = str(uuid.uuid4())
+    st.query_params["session_id"] = new_id
+    session_id = new_id
+else:
+    session_id = st.query_params["session_id"]
+
+# Define the file path for this specific user
+session_file_path = os.path.join(SESSION_DIR, f"{session_id}.json")
+
+# 2. Define Helper Functions for Auto-Saving/Loading
+def auto_save_session():
+    """Saves the current playlist to a JSON file linked to the session ID."""
+    state_data = {
+        "user_playlist": st.session_state.get("user_playlist", []),
+        "saved_playlist_name": st.session_state.get("saved_playlist_name", "")
+    }
+    with open(session_file_path, "w") as f:
+        json.dump(state_data, f)
+
+def auto_load_session():
+    """Loads the playlist from file if session_state is empty but file exists."""
+    if os.path.exists(session_file_path) and not st.session_state.get("user_playlist"):
+        try:
+            with open(session_file_path, "r") as f:
+                data = json.load(f)
+                st.session_state.user_playlist = data.get("user_playlist", [])
+                st.session_state.saved_playlist_name = data.get("saved_playlist_name", "")
+        except:
+            pass # If file is corrupt, just start fresh
+
+# 3. Trigger Load on App Startup
+if "user_playlist" not in st.session_state:
+    st.session_state.user_playlist = []
+auto_load_session()
+
 # Inject custom CSS to adjust the max-width of the main content area
 st.markdown(
     """
@@ -88,6 +134,7 @@ import sounddevice as sd
 def remove_song(idx):
     if "user_playlist" in st.session_state and idx < len(st.session_state.user_playlist):
         st.session_state.user_playlist.pop(idx)
+        auto_save_session()  # <--- Add this line
 
 # Initialize playlist_id as None or hardcoded here (Spotify)
 playlist_id = "3BGJRi9zQrIjLDtBbRYy5n"
@@ -292,6 +339,8 @@ with st.expander("**🗝️ Treasure Hunt: Tap to Find Your Saved Playlist**", e
 
             # Store in session state
             st.session_state.saved_playlist_name = playlist_base_name
+
+            auto_save_session()
 
             st.success(f"🪄 Your playlist was summoned! Let's keep building your playlist.")
 
@@ -624,6 +673,8 @@ if "best_match" in st.session_state:
             if best_match["Track ID"] not in track_ids:
                 st.session_state.user_playlist.append(song_with_context)
                 
+                auto_save_session()
+
                 # Increment reset counter to create new widget keys
                 st.session_state.reset_counter = st.session_state.get("reset_counter", 0) + 1
                 
