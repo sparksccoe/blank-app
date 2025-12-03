@@ -608,20 +608,43 @@ if "best_match" in st.session_state:
         best_match["Tempo (BPM)"], best_match["Loudness (dB)"], df_creatures_data
     )
 
-    # 🧠 Creature selection dropdown
+    # 🧠 Creature selection logic
     selected_creature_name = "-- Select Creature --"
+
+    # Initialize selection in session state if not present
+    if "creature_pair_selection" not in st.session_state:
+        st.session_state.creature_pair_selection = "-- Select Creature --"
+
     if matched_creatures:
         st.markdown("### This song activates the following creatures. Which one did you pair up in the game?")
+        
+        # --- NEW: Visual Selection Grid ---
+        # Create columns dynamically based on how many creatures matched
+        cols = st.columns(len(matched_creatures))
+        
+        for idx, (col, creature) in enumerate(zip(cols, matched_creatures)):
+            with col:
+                # 1. Display the creature image
+                # Ensure your CSV has valid image paths/URLs in "Creature Image"
+                try:
+                    st.image(creature["Creature Image"], width=150)
+                except:
+                    st.warning("No Image")
+                
+                # 2. Display a button to select this creature
+                # If this specific creature is already selected, highlight the button or change text
+                is_selected = st.session_state.creature_pair_selection == creature["Creature name"]
+                button_type = "primary" if is_selected else "secondary"
+                button_text = "✅ Selected" if is_selected else f"Select {creature['Creature name']}"
+                
+                if st.button(button_text, key=f"btn_creature_{idx}", type=button_type):
+                    st.session_state.creature_pair_selection = creature["Creature name"]
+                    st.rerun() # Reload to update the UI and show Task options
 
-        creature_names = ["-- Select Creature --"] + [creature["Creature name"] for creature in matched_creatures]
+        # Update the local variable to match session state for the logic below
+        selected_creature_name = st.session_state.creature_pair_selection
 
-        selected_creature_name = st.selectbox(
-            "Select your paired creature:",
-            creature_names,
-            index=0,
-            key="creature_pair_selection"
-        )
-
+        # --- Show Task Selection only after a creature is picked ---
         if selected_creature_name != "-- Select Creature --":
             selected_creature_obj = next(
                 (creature for creature in matched_creatures if creature["Creature name"] == selected_creature_name),
@@ -629,21 +652,28 @@ if "best_match" in st.session_state:
             )
 
             if selected_creature_obj is not None:
-                st.markdown(f"### Which music task would you like {selected_creature_obj['Creature name']} to complete?")
+                st.markdown(f"### Which music task would you like **{selected_creature_obj['Creature name']}** to complete?")
 
                 music_tasks = [
                     "-- Select Task --",
                     selected_creature_obj["Task Specific 1"],
                     selected_creature_obj["Task Specific 2"]
                 ]
+                
+                # Use session state for task selection as well to keep it sticky
+                if "music_task_selection" not in st.session_state:
+                    st.session_state.music_task_selection = "-- Select Task --"
 
                 selected_task = st.selectbox(
                     "Choose a music task:",
                     music_tasks,
-                    index=0,
-                    key="music_task_selection"
+                    index=music_tasks.index(st.session_state.music_task_selection) if st.session_state.music_task_selection in music_tasks else 0,
+                    key="music_task_dropdown" 
                 )
-
+                
+                # Sync the dropdown widget key to the session state variable used in "Add to Playlist"
+                st.session_state.music_task_selection = selected_task
+                
     # ➕ Add Song to Playlist Button
     if "user_playlist" not in st.session_state:
         st.session_state.user_playlist = []
