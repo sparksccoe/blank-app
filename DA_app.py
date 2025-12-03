@@ -647,7 +647,7 @@ if "best_match" in st.session_state:
                 None
             )
 
-            if selected_creature_obj:
+            if selected_creature_obj is not None:
                 # Create a compact summary banner
                 st.info(f"✅ You have selected **{selected_creature_name}**")
                 
