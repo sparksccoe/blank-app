@@ -618,30 +618,47 @@ if "best_match" in st.session_state:
     if matched_creatures:
         st.markdown("### This song activates the following creatures. Which one did you pair up in the game?")
         
-        # --- NEW: Visual Selection Grid ---
-        # Create columns dynamically based on how many creatures matched
-        cols = st.columns(len(matched_creatures))
+        # --- NEW: Fixed-Width Grid Layout ---
+        # Define how many creatures per row (3 keeps images large)
+        cols_per_row = 3
         
-        for idx, (col, creature) in enumerate(zip(cols, matched_creatures)):
-            with col:
-                # 1. Display the creature image
-                # Ensure your CSV has valid image paths/URLs in "Creature Image"
-                try:
-                    st.image(creature["Creature Image"], width=150)
-                except:
-                    st.warning("No Image")
-                
-                # 2. Display a button to select this creature
-                # If this specific creature is already selected, highlight the button or change text
-                is_selected = st.session_state.creature_pair_selection == creature["Creature name"]
-                button_type = "primary" if is_selected else "secondary"
-                button_text = "✅ Selected" if is_selected else f"Select {creature['Creature name']}"
-                
-                if st.button(button_text, key=f"btn_creature_{idx}", type=button_type):
-                    st.session_state.creature_pair_selection = creature["Creature name"]
-                    st.rerun() # Reload to update the UI and show Task options
+        # Loop through the creatures in chunks of 3
+        for i in range(0, len(matched_creatures), cols_per_row):
+            # Create a new row of columns
+            cols = st.columns(cols_per_row)
+            
+            # Get the batch of creatures for this row
+            batch = matched_creatures[i:i + cols_per_row]
+            
+            # Zip the columns and the creatures together
+            for col, creature in zip(cols, batch):
+                with col:
+                    # 1. Creature Name (Centered)
+                    st.markdown(f"**{creature['Creature name']}**")
+                    
+                    # 2. Creature Image
+                    try:
+                        # Use_column_width ensures it fills the grid cell nicely
+                        st.image(creature["Creature Image"], use_container_width=True)
+                    except:
+                        st.warning("No Image")
+                    
+                    # 3. Selection Button
+                    is_selected = st.session_state.creature_pair_selection == creature["Creature name"]
+                    
+                    # Visual feedback for selection
+                    btn_type = "primary" if is_selected else "secondary"
+                    btn_label = "✅ Selected" if is_selected else "Select"
+                    
+                    # use_container_width=True forces all buttons to be the exact same size
+                    if st.button(btn_label, key=f"btn_{creature['Creature name']}", type=btn_type, use_container_width=True):
+                        st.session_state.creature_pair_selection = creature["Creature name"]
+                        st.rerun()
 
-        # Update the local variable to match session state for the logic below
+            # Add a small vertical spacer between rows
+            st.markdown("<br>", unsafe_allow_html=True)
+
+        # Update local variable
         selected_creature_name = st.session_state.creature_pair_selection
 
         # --- Show Task Selection only after a creature is picked ---
@@ -660,7 +677,6 @@ if "best_match" in st.session_state:
                     selected_creature_obj["Task Specific 2"]
                 ]
                 
-                # Use session state for task selection as well to keep it sticky
                 if "music_task_selection" not in st.session_state:
                     st.session_state.music_task_selection = "-- Select Task --"
 
@@ -671,9 +687,8 @@ if "best_match" in st.session_state:
                     key="music_task_dropdown" 
                 )
                 
-                # Sync the dropdown widget key to the session state variable used in "Add to Playlist"
                 st.session_state.music_task_selection = selected_task
-                
+
     # ➕ Add Song to Playlist Button
     if "user_playlist" not in st.session_state:
         st.session_state.user_playlist = []
