@@ -609,66 +609,64 @@ if "best_match" in st.session_state:
     )
 
     # 🧠 Creature selection logic
-    selected_creature_name = "-- Select Creature --"
-
     # Initialize selection in session state if not present
     if "creature_pair_selection" not in st.session_state:
         st.session_state.creature_pair_selection = "-- Select Creature --"
 
     if matched_creatures:
-        st.markdown("### This song activates the following creatures. Which one did you pair up in the game?")
-        
-        # --- NEW: Fixed-Width Grid Layout ---
-        # Define how many creatures per row (3 keeps images large)
-        cols_per_row = 3
-        
-        # Loop through the creatures in chunks of 3
-        for i in range(0, len(matched_creatures), cols_per_row):
-            # Create a new row of columns
-            cols = st.columns(cols_per_row)
+        # Check if a selection has already been made
+        if st.session_state.creature_pair_selection == "-- Select Creature --":
+            # --- VIEW 1: SELECTION GRID (Visible when nothing is selected) ---
+            st.markdown("### This song activates the following creatures. Which one did you pair up in the game?")
             
-            # Get the batch of creatures for this row
-            batch = matched_creatures[i:i + cols_per_row]
-            
-            # Zip the columns and the creatures together
-            for col, creature in zip(cols, batch):
-                with col:
-                    # 1. Creature Name (Centered)
-                    st.markdown(f"**{creature['Creature name']}**")
-                    
-                    # 2. Creature Image
-                    try:
-                        # Use_column_width ensures it fills the grid cell nicely
-                        st.image(creature["Creature Image"], use_container_width=True)
-                    except:
-                        st.warning("No Image")
-                    
-                    # 3. Selection Button
-                    is_selected = st.session_state.creature_pair_selection == creature["Creature name"]
-                    
-                    # Visual feedback for selection
-                    btn_type = "primary" if is_selected else "secondary"
-                    btn_label = "✅ Selected" if is_selected else "Select"
-                    
-                    # use_container_width=True forces all buttons to be the exact same size
-                    if st.button(btn_label, key=f"btn_{creature['Creature name']}", type=btn_type, use_container_width=True):
-                        st.session_state.creature_pair_selection = creature["Creature name"]
-                        st.rerun()
+            cols_per_row = 3
+            for i in range(0, len(matched_creatures), cols_per_row):
+                cols = st.columns(cols_per_row)
+                batch = matched_creatures[i:i + cols_per_row]
+                
+                for col, creature in zip(cols, batch):
+                    with col:
+                        st.markdown(f"**{creature['Creature name']}**")
+                        try:
+                            st.image(creature["Creature Image"], use_container_width=True)
+                        except:
+                            st.warning("No Image")
+                        
+                        # Selection Button
+                        if st.button("Select", key=f"btn_{creature['Creature name']}", type="secondary", use_container_width=True):
+                            st.session_state.creature_pair_selection = creature["Creature name"]
+                            st.rerun() # Rerun to collapse the grid
+                st.markdown("<br>", unsafe_allow_html=True)
 
-            # Add a small vertical spacer between rows
-            st.markdown("<br>", unsafe_allow_html=True)
-
-        # Update local variable
-        selected_creature_name = st.session_state.creature_pair_selection
-
-        # --- Show Task Selection only after a creature is picked ---
-        if selected_creature_name != "-- Select Creature --":
+        else:
+            # --- VIEW 2: SUMMARY VIEW (Visible after selection) ---
+            # Find the selected object
+            selected_creature_name = st.session_state.creature_pair_selection
             selected_creature_obj = next(
                 (creature for creature in matched_creatures if creature["Creature name"] == selected_creature_name),
                 None
             )
 
-            if selected_creature_obj is not None:
+            if selected_creature_obj:
+                # Create a compact summary banner
+                st.info(f"✅ You have selected **{selected_creature_name}**")
+                
+                col1, col2 = st.columns([1, 4])
+                with col1:
+                    try:
+                        st.image(selected_creature_obj["Creature Image"], use_container_width=True)
+                    except:
+                        st.write("No Image")
+                with col2:
+                    # "Change Selection" Button
+                    if st.button("🔄 Change Creature", type="secondary"):
+                        # Reset selection to bring back the grid
+                        st.session_state.creature_pair_selection = "-- Select Creature --"
+                        st.session_state.music_task_selection = "-- Select Task --" # Reset task too
+                        st.rerun()
+
+                # --- SHOW TASK SELECTION (Only visible in Summary View) ---
+                st.markdown("---")
                 st.markdown(f"### Which music task would you like **{selected_creature_obj['Creature name']}** to complete?")
 
                 music_tasks = [
@@ -680,10 +678,14 @@ if "best_match" in st.session_state:
                 if "music_task_selection" not in st.session_state:
                     st.session_state.music_task_selection = "-- Select Task --"
 
+                # Ensure index is valid (in case task list changed)
+                current_task = st.session_state.music_task_selection
+                idx = music_tasks.index(current_task) if current_task in music_tasks else 0
+
                 selected_task = st.selectbox(
                     "Choose a music task:",
                     music_tasks,
-                    index=music_tasks.index(st.session_state.music_task_selection) if st.session_state.music_task_selection in music_tasks else 0,
+                    index=idx,
                     key="music_task_dropdown" 
                 )
                 
