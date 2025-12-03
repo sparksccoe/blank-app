@@ -280,6 +280,7 @@ if playlist_id:
     creature_task_categories = df_creatures_data["Task Category"].tolist()
     creature_task_specific_1 = df_creatures_data["Task Specific 1"].tolist()
     creature_task_specific_2 = df_creatures_data["Task Specific 2"].tolist()
+    creature_image = df_creatures_data["Creature Image"].tolist()
 
 # Initialize user playlist in session state if it doesn’t exist
 if "user_playlist" not in st.session_state:
