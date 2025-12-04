@@ -855,7 +855,14 @@ if st.session_state.user_playlist:
     st.dataframe(
         playlist_summary_df.reset_index(drop=True),
         use_container_width=True,
-        hide_index=True
+        hide_index=True,
+        column_config={
+            "Bard Symbol": st.column_config.ImageColumn(
+                "Bard Symbol",
+                help="The bard's symbol",
+                width="small"
+            )
+        }
     )
 
 # 🎥 Embed YouTube playlist (also moved outside)
