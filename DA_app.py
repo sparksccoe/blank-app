@@ -62,6 +62,16 @@ if "user_playlist" not in st.session_state:
     st.session_state.user_playlist = []
 auto_load_session()
 
+def get_img_base64(img_path):
+    """Encodes a local image file to base64 for Plotly."""
+    if os.path.exists(img_path):
+        with open(img_path, "rb") as f:
+            data = f.read()
+            encoded = base64.b64encode(data).decode()
+        ext = os.path.splitext(img_path)[1].replace(".", "")
+        return f"data:image/{ext};base64,{encoded}"
+    return None
+
 # Inject custom CSS to adjust the max-width of the main content area
 st.markdown(
     """
@@ -802,6 +812,7 @@ if st.session_state.user_playlist:
         "Song Name": song.get("Name", "Unknown"),
         "Tempo(BPM)": song.get("Tempo (BPM)", ""),
         "Loudness(dB)": song.get("Loudness (dB)", ""),
+        "Bard Symbol": song.get("Bard Symbol", ""),
         "Creature": song.get("Creature", ""),
         "Task Category": song.get("Task Category", ""),
         "Task Selected": song.get("Task Selected", "")
@@ -901,8 +912,8 @@ if st.session_state.get("show_data_visualization", False) and len(st.session_sta
 
     # Use existing playlist_summary_df if available, otherwise create minimal DataFrame
     if 'playlist_summary_df' in locals():
-        viz_df = playlist_summary_df[["Song Name", "Bard", "Tempo(BPM)", "Loudness(dB)"]].copy()
-        viz_df.columns = ["Name", "Bard", "Tempo", "Loudness"]
+        viz_df = playlist_summary_df[["Song Name", "Bard", "Tempo(BPM)", "Loudness(dB)", "Bard Symbol"]].copy()
+        viz_df.columns = ["Name", "Bard", "Tempo", "Loudness", "Symbol"]
     else:
         # Fallback: create minimal DataFrame
         viz_df = pd.DataFrame({
@@ -910,6 +921,7 @@ if st.session_state.get("show_data_visualization", False) and len(st.session_sta
             "Bard": [song["Bard"] for song in st.session_state.user_playlist],
             "Tempo": [song["Tempo (BPM)"] for song in st.session_state.user_playlist],
             "Loudness": [song["Loudness (dB)"] for song in st.session_state.user_playlist],
+            "Symbol": [song.get("Bard Symbol", "") for song in st.session_state.user_playlist],
         })
     
     # # Full-width Tempo Bar Chart
@@ -955,124 +967,100 @@ if st.session_state.get("show_data_visualization", False) and len(st.session_sta
     # fig_loudness.update_traces(hovertemplate='<b>%{x}</b><br>Loudness: %{y} dB<extra></extra>')
     # st.plotly_chart(fig_loudness, use_container_width=True)
     
-    # Tempo Number Line Visualization
+    # --- TEMPO NUMBER LINE WITH IMAGES ---
     st.write("#### Tempo Number Line (BPM)")
     fig_tempo_line = go.Figure()
 
-    # Create the number line (background line)
+    # 1. The Line
     fig_tempo_line.add_trace(go.Scatter(
-        x=[0, 200], 
-        y=[0, 0], 
+        x=[0, 200], y=[0, 0], 
         mode='lines',
         line=dict(color='lightgray', width=3),
-        showlegend=False,
-        hoverinfo='skip'
+        showlegend=False, hoverinfo='skip'
     ))
 
-    # Add tempo values as colored dots
-    colors = px.colors.qualitative.Plotly * 5  # Cycle colors if needed
-    for i, (_, song) in enumerate(viz_df.iterrows()):
-        fig_tempo_line.add_trace(go.Scatter(
-            x=[song['Tempo']], 
-            y=[0],
-            mode='markers',
-            marker=dict(
-                size=20,
-                color=colors[i % len(colors)],
-                line=dict(width=2, color='white')
-            ),
-            name=song['Name'],  # This will appear in the legend
-            text=f"<b>{song['Name']}</b><br>by {song['Bard']}<br>{song['Tempo']} BPM",
-            hovertemplate='%{text}<extra></extra>',
-            showlegend=True  # Enable legend for song dots
-        ))
+    # 2. Invisible markers for Hover Data
+    fig_tempo_line.add_trace(go.Scatter(
+        x=viz_df['Tempo'], 
+        y=[0] * len(viz_df),
+        mode='markers',
+        marker=dict(size=20, opacity=0), # Invisible markers to catch hover events
+        name="Songs",
+        text=[f"<b>{row['Name']}</b><br>{row['Bard']}<br>{row['Tempo']} BPM" for _, row in viz_df.iterrows()],
+        hovertemplate='%{text}<extra></extra>',
+        showlegend=False
+    ))
+
+    # 3. Add Images as Layout Elements
+    tempo_images = []
+    for _, row in viz_df.iterrows():
+        img_b64 = get_img_base64(row['Symbol'])
+        if img_b64:
+            tempo_images.append(dict(
+                source=img_b64,
+                xref="x", yref="y",
+                x=row['Tempo'], y=0,
+                sizex=15, sizey=0.3, # Adjust these values to scale the icons
+                xanchor="center", yanchor="middle",
+                layer="above"
+            ))
 
     fig_tempo_line.update_layout(
-        xaxis=dict(
-            range=[-10, 210],
-            title="Beats Per Minute (BPM)",
-            showgrid=True,
-            gridcolor='lightgray',
-            dtick=20  # Set grid lines every 20 BPM
-        ),
-        yaxis=dict(
-            range=[-0.2, 0.2],
-            showticklabels=False,
-            showgrid=False,
-            zeroline=False
-        ),
+        xaxis=dict(range=[-10, 210], title="Beats Per Minute (BPM)", showgrid=True, dtick=20),
+        yaxis=dict(range=[-0.2, 0.2], showticklabels=False, showgrid=False, zeroline=False),
         height=200,
+        images=tempo_images, # <--- Attach images here
         margin=dict(t=20, b=50, l=50, r=50),
-        plot_bgcolor='white',
-        legend=dict(
-            orientation="v",
-            yanchor="top",
-            y=1,
-            xanchor="left",
-            x=1.02
-        )
+        plot_bgcolor='white'
     )
-
     st.plotly_chart(fig_tempo_line, use_container_width=True)
 
-    # Loudness Number Line Visualization
+    # --- LOUDNESS NUMBER LINE WITH IMAGES ---
     st.write("#### Loudness Number Line (dB)")
     fig_loudness_line = go.Figure()
 
-    # Create the number line (background line)
+    # 1. The Line
     fig_loudness_line.add_trace(go.Scatter(
-        x=[-60, 0], 
-        y=[0, 0], 
+        x=[-60, 0], y=[0, 0], 
         mode='lines',
         line=dict(color='lightgray', width=3),
-        showlegend=False,
-        hoverinfo='skip'
+        showlegend=False, hoverinfo='skip'
     ))
 
-    # Add loudness values as colored dots
-    colors = px.colors.qualitative.Plotly * 5  # Cycle colors if needed
-    for i, (_, song) in enumerate(viz_df.iterrows()):
-        fig_loudness_line.add_trace(go.Scatter(
-            x=[song['Loudness']], 
-            y=[0],
-            mode='markers',
-            marker=dict(
-                size=20,
-                color=colors[i % len(colors)],
-                line=dict(width=2, color='white')
-            ),
-            name=song['Name'],  # This will appear in the legend
-            text=f"<b>{song['Name']}</b><br>by {song['Bard']}<br>{song['Loudness']} dB",
-            hovertemplate='%{text}<extra></extra>',
-            showlegend=True  # Enable legend for song dots
-        ))
+    # 2. Invisible markers for Hover Data
+    fig_loudness_line.add_trace(go.Scatter(
+        x=viz_df['Loudness'], 
+        y=[0] * len(viz_df),
+        mode='markers',
+        marker=dict(size=20, opacity=0),
+        name="Songs",
+        text=[f"<b>{row['Name']}</b><br>{row['Bard']}<br>{row['Loudness']} dB" for _, row in viz_df.iterrows()],
+        hovertemplate='%{text}<extra></extra>',
+        showlegend=False
+    ))
+
+    # 3. Add Images as Layout Elements
+    loudness_images = []
+    for _, row in viz_df.iterrows():
+        img_b64 = get_img_base64(row['Symbol'])
+        if img_b64:
+            loudness_images.append(dict(
+                source=img_b64,
+                xref="x", yref="y",
+                x=row['Loudness'], y=0,
+                sizex=4, sizey=0.3, # Note: sizex is smaller here because dB range is smaller (-60 to 0)
+                xanchor="center", yanchor="middle",
+                layer="above"
+            ))
 
     fig_loudness_line.update_layout(
-        xaxis=dict(
-            range=[-65, 5],
-            title="Loudness (dB)",
-            showgrid=True,
-            gridcolor='lightgray',
-            dtick=10  # Set grid lines every 10 dB
-        ),
-        yaxis=dict(
-            range=[-0.2, 0.2],
-            showticklabels=False,
-            showgrid=False,
-            zeroline=False
-        ),
+        xaxis=dict(range=[-65, 5], title="Loudness (dB)", showgrid=True, dtick=10),
+        yaxis=dict(range=[-0.2, 0.2], showticklabels=False, showgrid=False, zeroline=False),
         height=200,
+        images=loudness_images, # <--- Attach images here
         margin=dict(t=20, b=50, l=50, r=50),
-        plot_bgcolor='white',
-        legend=dict(
-            orientation="v",
-            yanchor="top",
-            y=1,
-            xanchor="left",
-            x=1.02
-        )
+        plot_bgcolor='white'
     )
-
     st.plotly_chart(fig_loudness_line, use_container_width=True)
 
     # Simple scatter plot
