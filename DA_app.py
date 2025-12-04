@@ -160,6 +160,7 @@ if playlist_id:
     track_album = df_audio_features["Album"].tolist()
     track_image = df_audio_features["Image"].tolist()
     track_bard_image = df_audio_features["Bard Image"].tolist()
+    track_bard_symbol = df_audio_features["Bard Symbol"].tolist()
     track_release_date = df_audio_features["Album Date"].tolist()
     track_danceability = df_audio_features["Dance"].tolist()
     track_duration = df_audio_features["Time"].tolist()
