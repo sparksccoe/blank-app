@@ -70,16 +70,22 @@ def get_img_base64(img_path):
             response = requests.get(img_path, timeout=5)
             if response.status_code == 200:
                 encoded = base64.b64encode(response.content).decode()
+                # Determine extension from URL
                 ext = img_path.split('.')[-1].lower()
                 if ext not in ['png', 'jpg', 'jpeg', 'gif', 'webp']:
-                    ext = 'png'
+                    ext = 'png'  # Default to png
                 return f"data:image/{ext};base64,{encoded}"
         except Exception as e:
-            pass
+            pass  # Fall through to return None
         return None
     # Otherwise, check for local file
     elif img_path and os.path.exists(img_path):
-        # ... existing local file logic
+        with open(img_path, "rb") as f:
+            data = f.read()
+            encoded = base64.b64encode(data).decode()
+        ext = os.path.splitext(img_path)[1].replace(".", "")
+        return f"data:image/{ext};base64,{encoded}"
+    return None
 
 # Inject custom CSS to adjust the max-width of the main content area
 st.markdown(
