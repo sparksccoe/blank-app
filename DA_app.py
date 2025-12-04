@@ -63,14 +63,23 @@ if "user_playlist" not in st.session_state:
 auto_load_session()
 
 def get_img_base64(img_path):
-    """Encodes a local image file to base64 for Plotly."""
-    if os.path.exists(img_path):
-        with open(img_path, "rb") as f:
-            data = f.read()
-            encoded = base64.b64encode(data).decode()
-        ext = os.path.splitext(img_path)[1].replace(".", "")
-        return f"data:image/{ext};base64,{encoded}"
-    return None
+    """Encodes a local image file or remote URL to base64 for Plotly."""
+    # Check if it's a URL
+    if img_path and img_path.startswith(('http://', 'https://')):
+        try:
+            response = requests.get(img_path, timeout=5)
+            if response.status_code == 200:
+                encoded = base64.b64encode(response.content).decode()
+                ext = img_path.split('.')[-1].lower()
+                if ext not in ['png', 'jpg', 'jpeg', 'gif', 'webp']:
+                    ext = 'png'
+                return f"data:image/{ext};base64,{encoded}"
+        except Exception as e:
+            pass
+        return None
+    # Otherwise, check for local file
+    elif img_path and os.path.exists(img_path):
+        # ... existing local file logic
 
 # Inject custom CSS to adjust the max-width of the main content area
 st.markdown(
