@@ -251,6 +251,7 @@ if playlist_id:
         "Decade": track_decade,
         "Image": track_image,
         "Bard Image": track_bard_image,
+        "Bard Symbol": track_bard_symbol,
         "Danceability": track_danceability,
         "Energy": track_energy,
         "Loudness (dB)": track_loudness,
