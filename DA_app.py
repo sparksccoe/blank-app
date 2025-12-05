@@ -1195,7 +1195,16 @@ if st.session_state.user_playlist:
     # Prompt user to enter a playlist name first
     playlist_name = st.text_input("Enter a name for your playlist:")
 
-    if st.button("📝 Save Playlist", type="primary") and playlist_name:
+    # Define invalid characters for filenames
+    invalid_chars = ['/', '\\', ':', '*', '?', '"', '<', '>', '|', '#', '%', '&', '{', '}', '$', '!', "'", '`', '@']
+    
+    # Check for invalid characters
+    found_invalid = [char for char in invalid_chars if char in playlist_name]
+    
+    if found_invalid and playlist_name:
+        st.error(f"❌ Oops! Your playlist name has a character we can't use yet: {' '.join(found_invalid)}")
+        st.caption("These characters are not allowed: / \\ : * ? \" < > | # % & { } $ ! ' ` @")
+    elif st.button("📝 Save Playlist", type="primary") and playlist_name:
         # Generate a unique, lowercase one-word playlist code
         base_word = random.choice(word_choices).lower()
 
@@ -1229,7 +1238,6 @@ if st.session_state.user_playlist:
         # 🎉 Confirm to the user that their playlist has been saved
         st.success(f"📜 Playlist '{playlist_name}' has been inscribed in the archives.")
         st.info(f"🪄 **Your Playlist Code:**\n\n### `{playlist_code}`\n\nUse this code to summon your playlist again. The magic holds for **two weeks**.")
-
 
 # 🗑️ Cleanup Function (Run Periodically)
 def cleanup_old_playlists():
