@@ -695,28 +695,57 @@ if "best_match" in st.session_state:
                 # --- SHOW TASK SELECTION (Only visible in Summary View) ---
                 st.markdown("---")
                 st.markdown(f"### Which music task would you like **{selected_creature_obj['Creature name']}** to complete?")
-
-                music_tasks = [
-                    "-- Select Task --",
-                    selected_creature_obj["Task Specific 1"],
-                    selected_creature_obj["Task Specific 2"]
-                ]
                 
                 if "music_task_selection" not in st.session_state:
                     st.session_state.music_task_selection = "-- Select Task --"
-
-                # Ensure index is valid (in case task list changed)
-                current_task = st.session_state.music_task_selection
-                idx = music_tasks.index(current_task) if current_task in music_tasks else 0
-
-                selected_task = st.selectbox(
-                    "Choose a music task:",
-                    music_tasks,
-                    index=idx,
-                    key="music_task_dropdown" 
-                )
                 
-                st.session_state.music_task_selection = selected_task
+                if st.session_state.music_task_selection == "-- Select Task --":
+                    # Task Selection Grid
+                    col1, col2 = st.columns(2)
+                    
+                    # Task 1
+                    with col1:
+                        st.markdown(f"**{selected_creature_obj['Task Specific 1']}**")
+                        try:
+                            st.image(selected_creature_obj['Task 1 Image'], use_container_width=True)
+                        except:
+                            st.warning("No Image")
+                        if st.button("Select", key="btn_task_1", type="secondary", use_container_width=True):
+                            st.session_state.music_task_selection = selected_creature_obj["Task Specific 1"]
+                            st.rerun()
+
+                    # Task 2
+                    with col2:
+                        st.markdown(f"**{selected_creature_obj['Task Specific 2']}**")
+                        try:
+                            st.image(selected_creature_obj['Task 2 Image'], use_container_width=True)
+                        except:
+                            st.warning("No Image")
+                        if st.button("Select", key="btn_task_2", type="secondary", use_container_width=True):
+                            st.session_state.music_task_selection = selected_creature_obj["Task Specific 2"]
+                            st.rerun()
+
+                else:
+                    # Selected Task Summary
+                    st.info(f"✅ You have selected **{st.session_state.music_task_selection}**")
+                    
+                    # Determine which task was selected to show correct image
+                    selected_task_name = st.session_state.music_task_selection
+                    if selected_task_name == selected_creature_obj["Task Specific 1"]:
+                         task_img = selected_creature_obj["Task 1 Image"]
+                    else:
+                         task_img = selected_creature_obj["Task 2 Image"]
+                    
+                    col1, col2 = st.columns([1, 4])
+                    with col1:
+                         try:
+                            st.image(task_img, use_container_width=True)
+                         except:
+                            st.write("No Image")
+                    with col2:
+                         if st.button("🔄 Change Task", type="secondary"):
+                             st.session_state.music_task_selection = "-- Select Task --"
+                             st.rerun()
 
     # ➕ Add Song to Playlist Button
     if "user_playlist" not in st.session_state:
@@ -1034,54 +1063,6 @@ if st.session_state.get("show_data_visualization", False) and len(st.session_sta
         plot_bgcolor='white'
     )
     st.plotly_chart(fig_tempo_line, use_container_width=True)
-
-    # --- LOUDNESS NUMBER LINE WITH IMAGES ---
-    st.write("#### Loudness Number Line (dB)")
-    fig_loudness_line = go.Figure()
-
-    # 1. The Line
-    fig_loudness_line.add_trace(go.Scatter(
-        x=[-60, 0], y=[0, 0], 
-        mode='lines',
-        line=dict(color='lightgray', width=3),
-        showlegend=False, hoverinfo='skip'
-    ))
-
-    # 2. Invisible markers for Hover Data
-    fig_loudness_line.add_trace(go.Scatter(
-        x=viz_df['Loudness'], 
-        y=[0] * len(viz_df),
-        mode='markers',
-        marker=dict(size=20, opacity=0),
-        name="Songs",
-        text=[f"<b>{row['Name']}</b><br>{row['Bard']}<br>{row['Loudness']} dB" for _, row in viz_df.iterrows()],
-        hovertemplate='%{text}<extra></extra>',
-        showlegend=False
-    ))
-
-    # 3. Add Images as Layout Elements
-    loudness_images = []
-    for _, row in viz_df.iterrows():
-        img_b64 = get_img_base64(row['Symbol'])
-        if img_b64:
-            loudness_images.append(dict(
-                source=img_b64,
-                xref="x", yref="y",
-                x=row['Loudness'], y=0,
-                sizex=4, sizey=0.3, # Note: sizex is smaller here because dB range is smaller (-60 to 0)
-                xanchor="center", yanchor="middle",
-                layer="above"
-            ))
-
-    fig_loudness_line.update_layout(
-        xaxis=dict(range=[-65, 5], title="Loudness (dB)", showgrid=True, dtick=10),
-        yaxis=dict(range=[-0.2, 0.2], showticklabels=False, showgrid=False, zeroline=False),
-        height=200,
-        images=loudness_images, # <--- Attach images here
-        margin=dict(t=20, b=50, l=50, r=50),
-        plot_bgcolor='white'
-    )
-    st.plotly_chart(fig_loudness_line, use_container_width=True)
 
     # # Simple scatter plot
     # st.write("#### Tempo vs Loudness Relationship")
