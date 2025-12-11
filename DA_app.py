@@ -559,16 +559,20 @@ with col2:
 
 # 🎼 Show relatable response only after the user enters loudness
 if loudness is not None:
-    if loudness < -40:
-        st.write("This is **super quiet**, like the peaceful piano in *Clair de Lune* or the soft intro of *Lofi Girl* study beats.")
-    elif loudness < -25:
-        st.write("This is a **soft, gentle track**, like *Golden Hour* by JVKE or the calm melodies in *Somewhere Over the Rainbow* by Israel Kamakawiwo'ole.")
-    elif loudness < -15:
-        st.write("A **moderate loudness level**, like *Watermelon Sugar* by Harry Styles or *Sunroof* by Nicky Youre—smooth but with some energy!")
+    if loudness < -50:
+        st.write("This is **super quiet**! Like a ghost whispering or leaves rustling in the wind.")
+    elif loudness < -40:
+        st.write("This is **very quiet**. Like studying in a library or whispering to a friend.")
+    elif loudness < -30:
+        st.write("This is **quiet**. Chill vibes, like background music while you do homework.")
+    elif loudness < -20:
+        st.write("This is **medium volume**. Like a normal conversation or a singer with an acoustic guitar.")
+    elif loudness < -10:
+        st.write("This is **loud**! Like a busy cafeteria or your favorite pop song on the radio.")
     elif loudness < -5:
-        st.write("This is **fairly loud**, like *Uptown Funk* by Bruno Mars or *Industry Baby* by Lil Nas X—big, dynamic, and exciting!")
+        st.write("This is **really loud**! Like a school assembly or a marching band passing by.")
     else:
-        st.write("**Max loudness!** This is like *Blinding Lights* by The Weeknd or *Sicko Mode* by Travis Scott—high-energy, booming, and club-ready!")
+        st.write("**Max volume!** Like a rock concert or a firework show—super intense!")
 
 
 # 🟢 Ensure both BPM & Loudness are entered before proceeding
