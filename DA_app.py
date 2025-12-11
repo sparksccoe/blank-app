@@ -666,11 +666,37 @@ if "best_match" in st.session_state:
                         # Selection Button
                         if st.button("Select", key=f"btn_{creature['Creature name']}", type="secondary", use_container_width=True):
                             st.session_state.creature_pair_selection = creature["Creature name"]
+                            st.session_state.scroll_to_summary = True
                             st.rerun() # Rerun to collapse the grid
                 st.markdown("<br>", unsafe_allow_html=True)
 
         else:
             # --- VIEW 2: SUMMARY VIEW (Visible after selection) ---
+            # Anchor point for scrolling
+            st.markdown('<div id="summary-section"></div>', unsafe_allow_html=True)
+
+            # Check if we need to scroll
+            if st.session_state.get("scroll_to_summary", False):
+                 st.markdown(
+                    """
+                    <script>
+                    setTimeout(function() {
+                        var element = document.getElementById('summary-section');
+                        if (element) {
+                            var elementPosition = element.offsetTop;
+                            var offsetPosition = elementPosition - 150; // Adjust offset as needed
+                            window.scrollTo({
+                                top: offsetPosition,
+                                behavior: 'smooth'
+                            });
+                        }
+                    }, 100);
+                    </script>
+                    """,
+                    unsafe_allow_html=True
+                )
+                 del st.session_state.scroll_to_summary
+
             # Find the selected object
             selected_creature_name = st.session_state.creature_pair_selection
             selected_creature_obj = next(
