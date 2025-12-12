@@ -679,21 +679,21 @@ if "best_match" in st.session_state:
         avg_loudness = best_match["Loudness (dB)"]
         avg_y = avg_loudness + 60
         
-        fig_wave.add_trace(go.Scatter(
-            x=[0, duration_sec],
-            y=[avg_y, avg_y],
-            mode='lines',
-            line=dict(color='#FF5F1F', width=3), # Neon Orange
-            name="Average Loudness",
-            hoverinfo="name+text",
-            text=[f"{avg_loudness} dB"]*2
-        ))
-        
         fig_wave.update_layout(
             xaxis=dict(title="Duration (s)", showgrid=False, zeroline=True, showticklabels=True),
-            yaxis=dict(showgrid=False, showticklabels=False, range=[0, 65]),
-            height=200, # Compact height
-            margin=dict(l=10, r=10, t=10, b=10), # Tight margins
+            yaxis=dict(
+                title="Loudness",
+                showgrid=True,
+                gridcolor='rgba(0,0,0,0.1)',
+                zeroline=False,
+                showticklabels=True,
+                range=[0, 65],
+                tickmode='array',
+                tickvals=[0, 15, 30, 45, 60],
+                ticktext=['-60 dB', '-45 dB', '-30 dB', '-15 dB', '0 dB']
+            ),
+            height=250, # Slightly taller to accommodate labels
+            margin=dict(l=60, r=20, t=20, b=40), # Increased left margin for Y labels
             plot_bgcolor='white',
             showlegend=False
         )
