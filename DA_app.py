@@ -1094,6 +1094,54 @@ if st.session_state.get("show_data_visualization", False) and len(st.session_sta
     )
     st.plotly_chart(fig_tempo_line, use_container_width=True)
 
+    # --- LOUDNESS NUMBER LINE WITH IMAGES ---
+    st.write("#### Loudness Number Line (dB)")
+    fig_loudness_line = go.Figure()
+
+    # 1. The Line
+    fig_loudness_line.add_trace(go.Scatter(
+        x=[-60, 0], y=[0, 0], 
+        mode='lines',
+        line=dict(color='lightgray', width=3),
+        showlegend=False, hoverinfo='skip'
+    ))
+
+    # 2. Invisible markers for Hover Data
+    fig_loudness_line.add_trace(go.Scatter(
+        x=viz_df['Loudness'], 
+        y=[0] * len(viz_df),
+        mode='markers',
+        marker=dict(size=20, opacity=0),
+        name="Songs",
+        text=[f"<b>{row['Name']}</b><br>{row['Bard']}<br>{row['Loudness']} dB" for _, row in viz_df.iterrows()],
+        hovertemplate='%{text}<extra></extra>',
+        showlegend=False
+    ))
+
+    # 3. Add Images as Layout Elements
+    loudness_images = []
+    for _, row in viz_df.iterrows():
+        img_b64 = get_img_base64(row['Symbol'])
+        if img_b64:
+            loudness_images.append(dict(
+                source=img_b64,
+                xref="x", yref="y",
+                x=row['Loudness'], y=0,
+                sizex=4, sizey=0.3, # Note: sizex is smaller here because dB range is smaller (-60 to 0)
+                xanchor="center", yanchor="middle",
+                layer="above"
+            ))
+
+    fig_loudness_line.update_layout(
+        xaxis=dict(range=[-65, 5], title="Loudness (dB)", showgrid=True, dtick=10),
+        yaxis=dict(range=[-0.2, 0.2], showticklabels=False, showgrid=False, zeroline=False),
+        height=200,
+        images=loudness_images, # <--- Attach images here
+        margin=dict(t=20, b=50, l=50, r=50),
+        plot_bgcolor='white'
+    )
+    st.plotly_chart(fig_loudness_line, use_container_width=True)
+
     # # Simple scatter plot
     # st.write("#### Tempo vs Loudness Relationship")
     # fig_scatter = px.scatter(
