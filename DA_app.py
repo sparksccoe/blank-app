@@ -643,7 +643,18 @@ if "best_match" in st.session_state:
         st.markdown("#### 🌊 Audio Waveform")
         
         # Calculate visual parameters
-        duration_sec = best_match.get("Duration", 0) / 1000
+        raw_dur = best_match.get("Duration", 0)
+        try:
+            # Handle "MM:SS" format (e.g., "2:45")
+            if isinstance(raw_dur, str) and ":" in raw_dur:
+                parts = raw_dur.split(":")
+                duration_sec = int(parts[0]) * 60 + int(parts[1])
+            # Handle milliseconds (numeric)
+            else:
+                duration_sec = float(raw_dur) / 1000
+        except:
+            duration_sec = 0
+
         x_axis = np.linspace(0, duration_sec, len(db_values))
         
         # Rectified Waveform (0 to 1 scale)
