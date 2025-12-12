@@ -627,6 +627,72 @@ if "best_match" in st.session_state:
         st.write(f"🎚️ **BPM:** {best_match['Tempo (BPM)']}")
         st.write(f"🔊 **Loudness:** {best_match['Loudness (dB)']} dB")
 
+    # --- Single Song Waveform Visualization ---
+
+    # Load Waveform Data (Global load, usually done once but fine here for safety)
+    waveform_db = {}
+    if os.path.exists("song_waveforms.json"):
+        with open("song_waveforms.json", "r") as f:
+            waveform_db = json.load(f)
+            
+    # Check if we have data for THIS song
+    song_name = best_match["Name"]
+    db_values = waveform_db.get(song_name)
+    
+    if db_values:
+        st.markdown("#### 🌊 Audio Waveform")
+        
+        # Calculate visual parameters
+        duration_sec = best_match.get("Duration", 0) / 1000
+        x_axis = np.linspace(0, duration_sec, len(db_values))
+        
+        # Rectified Waveform (0 to 1 scale)
+        y_values = [max(0, db + 60) for db in db_values]
+        
+        fig_wave = go.Figure()
+        
+        # The Waveform
+        fig_wave.add_trace(go.Scatter(
+            x=x_axis,
+            y=y_values,
+            fill='tozeroy',
+            fillcolor='#AD98B0', # Lavender
+            line=dict(color='#AD98B0', width=1.5),
+            opacity=0.9,
+            name=song_name,
+            hoverinfo="x+text",
+            text=[f"{db} dB" for db in db_values]
+        ))
+        
+        # Average Loudness Line
+        avg_loudness = best_match["Loudness (dB)"]
+        avg_y = avg_loudness + 60
+        
+        fig_wave.add_trace(go.Scatter(
+            x=[0, duration_sec],
+            y=[avg_y, avg_y],
+            mode='lines',
+            line=dict(color='#FF5F1F', width=3), # Neon Orange
+            name="Average Loudness",
+            hoverinfo="name+text",
+            text=[f"{avg_loudness} dB"]*2
+        ))
+        
+        fig_wave.update_layout(
+            xaxis=dict(title="Duration (s)", showgrid=False, zeroline=True, showticklabels=True),
+            yaxis=dict(showgrid=False, showticklabels=False, range=[0, 65]),
+            height=200, # Compact height
+            margin=dict(l=10, r=10, t=10, b=10), # Tight margins
+            plot_bgcolor='white',
+            showlegend=False
+        )
+        st.plotly_chart(fig_wave, use_container_width=True)
+        
+    else:
+        # Optional: Message if no data exists
+        # st.caption("Waveform data not available for this track.")
+        pass
+
     # 🎥 Embed YouTube video if available
     if pd.notna(best_match["YouTube Video ID"]):
         youtube_embed_url = f"https://www.youtube.com/embed/{best_match['YouTube Video ID']}"
