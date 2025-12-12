@@ -699,7 +699,7 @@ if "best_match" in st.session_state:
         )
         
         fig_wave.update_layout(
-            xaxis=dict(title="Duration (s)", showgrid=False, zeroline=True, showticklabels=True),
+            xaxis=dict(title="Duration (seconds)", showgrid=False, zeroline=True, showticklabels=True),
             yaxis=dict(
                 title="Loudness",
                 showgrid=True,
