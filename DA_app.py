@@ -691,7 +691,7 @@ if "best_match" in st.session_state:
         fig_wave.add_annotation(
             x=duration_sec * 0.02, # Near the start
             y=avg_y - 5,           # Slightly above the line
-            text=f"<b>Average: {avg_loudness} dB</b>",
+            text=f"Average: {avg_loudness} dB",
             showarrow=False,
             font=dict(color='#FF5F1F', size=18, family="Arial Black"),
             xanchor="left",
