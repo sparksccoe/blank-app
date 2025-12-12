@@ -693,7 +693,7 @@ if "best_match" in st.session_state:
             y=avg_y + 3,           # Slightly above the line
             text=f"Average: {avg_loudness} dB",
             showarrow=False,
-            font=dict(color='#FF5F1F', size=12, family="Arial Black"),
+            font=dict(color='#FF5F1F', size=16, family="Arial Black"),
             xanchor="left"
         )
         
