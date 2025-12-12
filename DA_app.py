@@ -640,16 +640,14 @@ if "best_match" in st.session_state:
     db_values = waveform_db.get(song_name)
     
     if db_values:
-        st.markdown("#### 🌊 Audio Waveform")
+        st.markdown("#### Loudness Visualization")
         
         # Calculate visual parameters
         raw_dur = best_match.get("Duration", 0)
         try:
-            # Handle "MM:SS" format (e.g., "2:45")
             if isinstance(raw_dur, str) and ":" in raw_dur:
                 parts = raw_dur.split(":")
                 duration_sec = int(parts[0]) * 60 + int(parts[1])
-            # Handle milliseconds (numeric)
             else:
                 duration_sec = float(raw_dur) / 1000
         except:
@@ -662,12 +660,12 @@ if "best_match" in st.session_state:
         
         fig_wave = go.Figure()
         
-        # The Waveform
+        # 1. The Waveform (Lavender)
         fig_wave.add_trace(go.Scatter(
             x=x_axis,
             y=y_values,
             fill='tozeroy',
-            fillcolor='#AD98B0', # Lavender
+            fillcolor='#AD98B0',
             line=dict(color='#AD98B0', width=1.5),
             opacity=0.9,
             name=song_name,
@@ -675,9 +673,29 @@ if "best_match" in st.session_state:
             text=[f"{db} dB" for db in db_values]
         ))
         
-        # Average Loudness Line
-        avg_loudness = best_match["Loudness (dB)"]
+        # 2. Average Loudness Line (Neon Orange)
+        avg_loudness = best_match.get("Loudness (dB)", -60)
         avg_y = avg_loudness + 60
+        
+        fig_wave.add_trace(go.Scatter(
+            x=[0, duration_sec],
+            y=[avg_y, avg_y],
+            mode='lines',
+            line=dict(color='#FF5F1F', width=4), # Thicker line
+            name="Avg Loudness",
+            hoverinfo="text",
+            text=[f"Average: {avg_loudness} dB"]*2
+        ))
+
+        # 3. Explicit Text Label for the Line
+        fig_wave.add_annotation(
+            x=duration_sec * 0.02, # Near the start
+            y=avg_y + 3,           # Slightly above the line
+            text=f"Average: {avg_loudness} dB",
+            showarrow=False,
+            font=dict(color='#FF5F1F', size=12, family="Arial Black"),
+            xanchor="left"
+        )
         
         fig_wave.update_layout(
             xaxis=dict(title="Duration (s)", showgrid=False, zeroline=True, showticklabels=True),
@@ -692,17 +710,12 @@ if "best_match" in st.session_state:
                 tickvals=[0, 15, 30, 45, 60],
                 ticktext=['-60 dB', '-45 dB', '-30 dB', '-15 dB', '0 dB']
             ),
-            height=250, # Slightly taller to accommodate labels
-            margin=dict(l=60, r=20, t=20, b=40), # Increased left margin for Y labels
+            height=250, 
+            margin=dict(l=60, r=20, t=20, b=40),
             plot_bgcolor='white',
             showlegend=False
         )
         st.plotly_chart(fig_wave, use_container_width=True)
-        
-    else:
-        # Optional: Message if no data exists
-        # st.caption("Waveform data not available for this track.")
-        pass
 
     # 🎥 Embed YouTube video if available
     if pd.notna(best_match["YouTube Video ID"]):
