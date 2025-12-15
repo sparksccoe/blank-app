@@ -1750,35 +1750,64 @@ if "user_playlist" not in st.session_state:
 #     display_playlist_analysis() 
 
 
-# --- 🔐 ADMIN: SAVED PLAYLIST MANAGER ---
-# (Optional: Add a password check here if you want to hide this)
-with st.expander("🔐 Admin: Manage Saved Playlists"):
-    if os.path.exists(playlist_dir):
-        files = [f for f in os.listdir(playlist_dir) if f.endswith(".csv")]
+# --- 🔐 ADMIN: SAVED PLAYLIST MANAGER (PROTECTED) ---
+import os
+
+# Initialize session state for admin login
+if "is_admin" not in st.session_state:
+    st.session_state.is_admin = False
+
+# Use an Expander to keep it visually hidden/collapsed
+with st.expander("🔐 Admin Access"):
+    # 1. Show Login Form if not authenticated
+    if not st.session_state.is_admin:
+        password = st.text_input("Enter Admin Password:", type="password")
         
-        if not files:
-            st.info("No playlists saved yet.")
-        else:
-            st.write(f"**Found {len(files)} saved playlists:**")
+        # Check password (CHANGE "secret123" TO YOUR DESIRED PASSWORD)
+        # For better security, use: os.environ.get("ADMIN_PASSWORD")
+        CORRECT_PASSWORD = os.environ.get("ADMIN_PASSWORD", "secret123") 
+        
+        if password:
+            if password == CORRECT_PASSWORD:
+                st.session_state.is_admin = True
+                st.rerun() # Refresh to show content
+            else:
+                st.error("❌ Access Denied")
+
+    # 2. Show Admin Tools if authenticated
+    if st.session_state.is_admin:
+        st.success("✅ Logged in as Admin")
+        
+        if os.path.exists(playlist_dir):
+            files = [f for f in os.listdir(playlist_dir) if f.endswith(".csv")]
             
-            for filename in files:
-                filepath = os.path.join(playlist_dir, filename)
+            if not files:
+                st.info("No playlists saved yet.")
+            else:
+                st.write(f"**Found {len(files)} saved playlists:**")
                 
-                # Create a row for each file
-                col1, col2 = st.columns([3, 1])
-                
-                with col1:
-                    st.text(filename) # Show filename
+                for filename in files:
+                    filepath = os.path.join(playlist_dir, filename)
                     
-                with col2:
-                    # Create Download Button
-                    with open(filepath, "r") as f:
-                        st.download_button(
-                            label="⬇️ Download",
-                            data=f,
-                            file_name=filename,
-                            mime="text/csv",
-                            key=f"dl_{filename}"
-                        )
-    else:
-        st.error(f"Directory {playlist_dir} not found.")
+                    # Layout: Filename on left, Button on right
+                    col1, col2 = st.columns([3, 1])
+                    
+                    with col1:
+                        st.text(filename)
+                        
+                    with col2:
+                        with open(filepath, "r") as f:
+                            st.download_button(
+                                label="⬇️ Download",
+                                data=f,
+                                file_name=filename,
+                                mime="text/csv",
+                                key=f"dl_{filename}"
+                            )
+        else:
+            st.error(f"Directory {playlist_dir} not found.")
+
+        # Logout Button
+        if st.button("🔒 Log Out"):
+            st.session_state.is_admin = False
+            st.rerun()
