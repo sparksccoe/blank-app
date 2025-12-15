@@ -1750,3 +1750,35 @@ if "user_playlist" not in st.session_state:
 #     display_playlist_analysis() 
 
 
+# --- 🔐 ADMIN: SAVED PLAYLIST MANAGER ---
+# (Optional: Add a password check here if you want to hide this)
+with st.expander("🔐 Admin: Manage Saved Playlists"):
+    if os.path.exists(playlist_dir):
+        files = [f for f in os.listdir(playlist_dir) if f.endswith(".csv")]
+        
+        if not files:
+            st.info("No playlists saved yet.")
+        else:
+            st.write(f"**Found {len(files)} saved playlists:**")
+            
+            for filename in files:
+                filepath = os.path.join(playlist_dir, filename)
+                
+                # Create a row for each file
+                col1, col2 = st.columns([3, 1])
+                
+                with col1:
+                    st.text(filename) # Show filename
+                    
+                with col2:
+                    # Create Download Button
+                    with open(filepath, "r") as f:
+                        st.download_button(
+                            label="⬇️ Download",
+                            data=f,
+                            file_name=filename,
+                            mime="text/csv",
+                            key=f"dl_{filename}"
+                        )
+    else:
+        st.error(f"Directory {playlist_dir} not found.")
