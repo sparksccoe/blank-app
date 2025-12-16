@@ -17,18 +17,27 @@ st.set_page_config(
 )
 
 def enlarge_table_controls():
-    """Injects CSS to make the dataframe toolbar and fullscreen button larger and on top."""
+    """Injects CSS to make the dataframe toolbar larger and sit OUTSIDE the table headers."""
     st.markdown("""
         <style>
-        /* Target the toolbar container */
-        [data-testid="stElementToolbar"] {
-            transform: scale(2.0);
-            transform-origin: top right;
-            z-index: 99999 !important; /* 👈 Force it to stay on top of everything */
-            right: 5px; /* Adjust margin so it doesn't clip off-screen */
-            top: 5px;
+        /* 1. Make room above the table for the toolbar */
+        [data-testid="stDataFrame"] {
+            margin-top: 35px !important; /* Push the table down */
+            overflow: visible !important; /* Allow the toolbar to sit outside the box */
         }
-        /* Target the fullscreen button specifically */
+
+        /* 2. Style the toolbar */
+        [data-testid="stElementToolbar"] {
+            transform: scale(2.0);       /* Make it 2x bigger */
+            transform-origin: top right; /* Grow from the top right */
+            z-index: 99999 !important;   /* Force it on top */
+            
+            /* 3. Position it UP into the margin we created */
+            top: -30px !important;       
+            right: 0px !important;
+        }
+
+        /* Target the fullscreen button icon specifically */
         [data-testid="stElementToolbarButton"] svg {
             width: 24px !important;
             height: 24px !important;
