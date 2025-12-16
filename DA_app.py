@@ -17,15 +17,18 @@ st.set_page_config(
 )
 
 def enlarge_table_controls():
-    """Injects CSS to make the dataframe toolbar and fullscreen button larger."""
+    """Injects CSS to make the dataframe toolbar and fullscreen button larger and on top."""
     st.markdown("""
         <style>
         /* Target the toolbar container */
         [data-testid="stElementToolbar"] {
-            transform: scale(2.0); /* Make it 100% bigger */
-            transform-origin: right top; /* Keep it anchored to the right */
+            transform: scale(2.0);
+            transform-origin: top right;
+            z-index: 99999 !important; /* 👈 Force it to stay on top of everything */
+            right: 5px; /* Adjust margin so it doesn't clip off-screen */
+            top: 5px;
         }
-        /* Target the fullscreen button specifically icon size */
+        /* Target the fullscreen button specifically */
         [data-testid="stElementToolbarButton"] svg {
             width: 24px !important;
             height: 24px !important;
@@ -356,15 +359,21 @@ with st.expander("**🗝️ Treasure Hunt: Tap to Find Your Saved Playlist**", e
     # Full-width label
     st.write("Enter your 1-word Playlist Code to load your saved playlist:")
 
-    # Narrow input field only
-    col1, col2, col3 = st.columns([1, 2, 1])  # Adjust to control width
+    # Narrow input field
+    col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        entered_code = st.text_input(label=" ", label_visibility="collapsed").strip().lower()
+        entered_code = st.text_input(label=" ", label_visibility="collapsed", key="playlist_code_input").strip().lower()
+        
+    # 🔘 Add a Button to Trigger the Load (Fixes the Overwrite Bug)
+    col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
+    with col_btn2:
+        summon_clicked = st.button("Summon Playlist", type="primary")
 
     # Define the directory where playlists are saved
     playlist_dir = "saved_user_playlists"
 
-    if entered_code:
+    # --- LOGIC: Only Load When Button is Clicked ---
+    if summon_clicked and entered_code:
         # Case-insensitive match
         matching_files = [
             f for f in os.listdir(playlist_dir)
@@ -377,6 +386,8 @@ with st.expander("**🗝️ Treasure Hunt: Tap to Find Your Saved Playlist**", e
 
             # Load the playlist into session state
             retrieved_df = pd.read_csv(filepath)
+            
+            # ✅ Convert directly to list of dicts
             st.session_state.user_playlist = retrieved_df.to_dict(orient="records")
 
             # Extract playlist name from filename
@@ -386,58 +397,58 @@ with st.expander("**🗝️ Treasure Hunt: Tap to Find Your Saved Playlist**", e
             st.session_state.saved_playlist_name = playlist_base_name
 
             auto_save_session()
-
             st.success(f"🪄 Your playlist was summoned! Let's keep building your playlist.")
-
-            # 🎶 Display Playlist
-            if "saved_playlist_name" in st.session_state:
-                st.markdown(f"#### 🎶 Your Playlist: **{st.session_state.saved_playlist_name}**")
-            else:
-                st.subheader("🎶 Your Playlist")
-
-            if st.session_state.user_playlist:
-                for song in st.session_state.user_playlist:
-                    col1, col2 = st.columns([1, 3])
-                    with col1:
-                        st.image(song["Bard Image"], width=80)
-                    with col2:
-                        st.write(f"**{song['Name']}** by {song['Artist']}")
-                        st.markdown(f"**Tempo:** {song['Tempo (BPM)']} BPM &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; **Loudness:** {song['Loudness (dB)']} dB")
-
-                # 🎥 Toggle YouTube Embed Section
-                show_youtube = st.checkbox("📺 Show YouTube Playlist", value=False)
-
-                if show_youtube:
-                    st.subheader("🎧 Listen to your playlist on YouTube")
-
-                    if "youtube_video_ids" not in st.session_state:
-                        st.session_state.youtube_video_ids = []
-
-                    new_video_ids = [
-                        song["YouTube Video ID"]
-                        for song in st.session_state.user_playlist
-                        if pd.notna(song.get("YouTube Video ID"))
-                    ]
-
-                    if set(new_video_ids) != set(st.session_state.youtube_video_ids):
-                        st.session_state.youtube_video_ids = new_video_ids
-
-                    if st.session_state.youtube_video_ids:
-                        if len(st.session_state.youtube_video_ids) == 1:
-                            youtube_embed_url = f"https://www.youtube.com/embed/{st.session_state.youtube_video_ids[0]}"
-                        else:
-                            first_video = st.session_state.youtube_video_ids[0]
-                            playlist_videos = ",".join(st.session_state.youtube_video_ids)
-                            youtube_embed_url = f"https://www.youtube.com/embed/{first_video}?playlist={playlist_videos}"
-
-                        st.markdown(
-                            f'<iframe width="100%" height="400" src="{youtube_embed_url}" frameborder="0" allowfullscreen></iframe>',
-                            unsafe_allow_html=True
-                        )
-                    else:
-                        st.write("⚠️ No YouTube videos available for your playlist.")
+            
         else:
             st.error("❌ No playlist found with that code. Please double-check and try again.")
+
+    # --- DISPLAY: Show Playlist (Persistent) ---
+    # We check if a playlist name exists so this stays visible even after the button click resets
+    if "saved_playlist_name" in st.session_state and st.session_state.user_playlist:
+        st.markdown(f"#### 🎶 Your Playlist: **{st.session_state.saved_playlist_name}**")
+        
+        for song in st.session_state.user_playlist:
+            col1, col2 = st.columns([1, 3])
+            with col1:
+                # Handle missing images gracefully
+                if "Bard Image" in song and pd.notna(song["Bard Image"]):
+                    st.image(song["Bard Image"], width=80)
+            with col2:
+                st.write(f"**{song.get('Name', 'Unknown')}** by {song.get('Artist', 'Unknown')}")
+                st.markdown(f"**Tempo:** {song.get('Tempo (BPM)', 0)} BPM &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; **Loudness:** {song.get('Loudness (dB)', 0)} dB")
+
+        # 🎥 Toggle YouTube Embed Section
+        show_youtube = st.checkbox("📺 Show YouTube Playlist", value=False)
+
+        if show_youtube:
+            st.subheader("🎧 Listen to your playlist on YouTube")
+
+            if "youtube_video_ids" not in st.session_state:
+                st.session_state.youtube_video_ids = []
+
+            new_video_ids = [
+                song["YouTube Video ID"]
+                for song in st.session_state.user_playlist
+                if pd.notna(song.get("YouTube Video ID"))
+            ]
+
+            if set(new_video_ids) != set(st.session_state.youtube_video_ids):
+                st.session_state.youtube_video_ids = new_video_ids
+
+            if st.session_state.youtube_video_ids:
+                if len(st.session_state.youtube_video_ids) == 1:
+                    youtube_embed_url = f"https://www.youtube.com/embed/{st.session_state.youtube_video_ids[0]}"
+                else:
+                    first_video = st.session_state.youtube_video_ids[0]
+                    playlist_videos = ",".join(st.session_state.youtube_video_ids)
+                    youtube_embed_url = f"https://www.youtube.com/embed/{first_video}?playlist={playlist_videos}"
+
+                st.markdown(
+                    f'<iframe width="100%" height="400" src="{youtube_embed_url}" frameborder="0" allowfullscreen></iframe>',
+                    unsafe_allow_html=True
+                )
+            else:
+                st.write("⚠️ No YouTube videos available for your playlist.")
 
 st.header("🎚️ Metronome Master")
 # 🎼 Show relatable response only after the user enters BPM
