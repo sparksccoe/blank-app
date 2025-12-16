@@ -16,6 +16,23 @@ st.set_page_config(
     initial_sidebar_state="auto",  # Optional: "expanded", "collapsed", or "auto"
 )
 
+def enlarge_table_controls():
+    """Injects CSS to make the dataframe toolbar and fullscreen button larger."""
+    st.markdown("""
+        <style>
+        /* Target the toolbar container */
+        [data-testid="stElementToolbar"] {
+            transform: scale(2.0); /* Make it 100% bigger */
+            transform-origin: right top; /* Keep it anchored to the right */
+        }
+        /* Target the fullscreen button specifically icon size */
+        [data-testid="stElementToolbarButton"] svg {
+            width: 24px !important;
+            height: 24px !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
 import uuid
 import json
 
@@ -984,6 +1001,9 @@ if st.session_state.user_playlist:
     } for idx, song in enumerate(st.session_state.user_playlist)])
 
     st.markdown("### 📋 Playlist Table")
+
+    # --- ENLARGE CONTROLS HERE ---
+    enlarge_table_controls()
     
     # Inject CSS to widen the table only
     st.markdown(
