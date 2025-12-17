@@ -17,27 +17,28 @@ st.set_page_config(
 )
 
 def enlarge_table_controls():
-    """Injects CSS to make the dataframe toolbar larger and sit OUTSIDE the table headers."""
+    """Injects CSS to enlarge the toolbar and show it ONLY on hover."""
     st.markdown("""
         <style>
-        /* 1. Make room above the table for the toolbar */
-        [data-testid="stDataFrame"] {
-            margin-top: 35px !important; /* Push the table down */
-            overflow: visible !important; /* Allow the toolbar to sit outside the box */
-        }
-
-        /* 2. Style the toolbar */
+        /* 1. Target the toolbar: Enlarge it, but Hide it by default */
         [data-testid="stElementToolbar"] {
-            transform: scale(2.0);       /* Make it 2x bigger */
-            transform-origin: top right; /* Grow from the top right */
-            z-index: 99999 !important;   /* Force it on top */
+            transform: scale(2.0);       /* Keep it big */
+            transform-origin: top right; /* Grow from top-right corner */
             
-            /* 3. Position it UP into the margin we created */
-            top: -30px !important;       
-            right: 0px !important;
+            opacity: 0;                  /* Invisible by default */
+            transition: opacity 0.3s ease-in-out; /* Smooth fade effect */
+            
+            z-index: 99999 !important;
+            right: 5px !important;       /* Small buffer from edge */
+            top: 5px !important;
         }
 
-        /* Target the fullscreen button icon specifically */
+        /* 2. When hovering over the TABLE, show the TOOLBAR */
+        [data-testid="stDataFrame"]:hover [data-testid="stElementToolbar"] {
+            opacity: 1;                  /* Make visible */
+        }
+
+        /* 3. Keep the icon size large */
         [data-testid="stElementToolbarButton"] svg {
             width: 24px !important;
             height: 24px !important;
