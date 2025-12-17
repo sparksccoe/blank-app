@@ -737,17 +737,19 @@ if "best_match" in st.session_state:
         )
         
         fig_wave.update_layout(
-            xaxis=dict(title="Duration (seconds)", showgrid=False, zeroline=True, showticklabels=True),
+            xaxis=dict(title="Duration (s)", showgrid=False, zeroline=True, showticklabels=True),
             yaxis=dict(
                 title="Loudness",
                 showgrid=True,
                 gridcolor='rgba(0,0,0,0.1)',
                 zeroline=False,
                 showticklabels=True,
-                range=[0, 65],
+                # ZOOMED RANGE: 30 (-30dB) to 65 (+5dB headroom)
+                range=[30, 65],
                 tickmode='array',
-                tickvals=[0, 15, 30, 45, 60],
-                ticktext=['-60 dB', '-45 dB', '-30 dB', '-15 dB', '0 dB']
+                # Ticks every 10dB within the new view
+                tickvals=[30, 40, 50, 60],
+                ticktext=['-30 dB', '-20 dB', '-10 dB', '0 dB']
             ),
             height=250, 
             margin=dict(l=60, r=20, t=20, b=40),
@@ -755,7 +757,7 @@ if "best_match" in st.session_state:
             showlegend=False
         )
         st.plotly_chart(fig_wave, use_container_width=True)
-
+        
     # 🎥 Embed YouTube video if available
     if pd.notna(best_match["YouTube Video ID"]):
         youtube_embed_url = f"https://www.youtube.com/embed/{best_match['YouTube Video ID']}"
