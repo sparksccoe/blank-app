@@ -215,7 +215,7 @@ if playlist_id:
     track_album = df_audio_features["Album"].tolist()
     track_image = df_audio_features["Image"].tolist()
     track_bard_image = df_audio_features["Bard Image"].tolist()
-    track_bard_symbol = df_audio_features["Bard Symbol"].tolist()
+    track_song_symbol = df_audio_features["Song Symbol"].tolist()
     track_release_date = df_audio_features["Album Date"].tolist()
     track_danceability = df_audio_features["Dance"].tolist()
     track_duration = df_audio_features["Time"].tolist()
@@ -307,7 +307,7 @@ if playlist_id:
         "Decade": track_decade,
         "Image": track_image,
         "Bard Image": track_bard_image,
-        "Bard Symbol": track_bard_symbol,
+        "Song Symbol": track_song_symbol,
         "Danceability": track_danceability,
         "Energy": track_energy,
         "Loudness (dB)": track_loudness,
@@ -1017,7 +1017,7 @@ if st.session_state.user_playlist:
         "Song Name": song.get("Name", "Unknown"),
         "Tempo(BPM)": song.get("Tempo (BPM)", ""),
         "Loudness(dB)": song.get("Loudness (dB)", ""),
-        "Bard Symbol": song.get("Bard Symbol", ""),
+        "Song Symbol": song.get("Song Symbol", ""),
         "Creature": song.get("Creature", ""),
         "Task Category": song.get("Task Category", ""),
         "Task Selected": song.get("Task Selected", "")
@@ -1050,9 +1050,9 @@ if st.session_state.user_playlist:
         use_container_width=True,
         hide_index=True,
         column_config={
-            "Bard Symbol": st.column_config.ImageColumn(
-                "Bard Symbol",
-                help="The bard's symbol",
+            "Song Symbol": st.column_config.ImageColumn(
+                "Song Symbol",
+                help="The song's symbol",
                 width="small"
             )
         }
@@ -1125,7 +1125,7 @@ if st.session_state.get("show_data_visualization", False) and len(st.session_sta
 
     # Use existing playlist_summary_df if available, otherwise create minimal DataFrame
     if 'playlist_summary_df' in locals():
-        viz_df = playlist_summary_df[["Song Name", "Bard", "Tempo(BPM)", "Loudness(dB)", "Bard Symbol"]].copy()
+        viz_df = playlist_summary_df[["Song Name", "Bard", "Tempo(BPM)", "Loudness(dB)", "Song Symbol"]].copy()
         viz_df.columns = ["Name", "Bard", "Tempo", "Loudness", "Symbol"]
     else:
         # Fallback: create minimal DataFrame
@@ -1134,7 +1134,7 @@ if st.session_state.get("show_data_visualization", False) and len(st.session_sta
             "Bard": [song["Bard"] for song in st.session_state.user_playlist],
             "Tempo": [song["Tempo (BPM)"] for song in st.session_state.user_playlist],
             "Loudness": [song["Loudness (dB)"] for song in st.session_state.user_playlist],
-            "Symbol": [song.get("Bard Symbol", "") for song in st.session_state.user_playlist],
+            "Symbol": [song.get("Song Symbol", "") for song in st.session_state.user_playlist],
         })
     
     # # Full-width Tempo Bar Chart
