@@ -463,7 +463,7 @@ with st.expander("**🗝️ Treasure Hunt: Tap to Find Your Saved Playlist**", e
             else:
                 st.write("⚠️ No YouTube videos available for your playlist.")
 
-st.header("🎚️ Metronome Master")
+st.header("🎚️ Tempo (BPM)")
 # 🎼 Show relatable response only after the user enters BPM
 
 # 🎵 Ask for BPM input (default None)
@@ -571,7 +571,7 @@ if bpm is not None:
 
 
 # 🔊 Section: Loudness Analysis
-st.header("🔊 Volume Virtuoso")
+st.header("🔊 Loudnessn (dB)")
 
 # 🎧 Ask for Loudness input (default None)
 
