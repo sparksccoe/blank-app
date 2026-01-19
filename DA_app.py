@@ -856,7 +856,6 @@ if "best_match" in st.session_state:
                         st.rerun()
 
                 # --- SHOW REVISED TASK (Direct Display) ---
-                st.markdown("---")
                 st.markdown(f"### Task for **{selected_creature_obj['Creature name']}**")
                 
                 # Retrieve the Revised Task and Photo
@@ -867,7 +866,7 @@ if "best_match" in st.session_state:
                 # Automatically set the selection so the "Add to Playlist" button works
                 st.session_state.music_task_selection = revised_task
 
-                col_t1, col_t2 = st.columns([1, 4])
+                col_t1, col_t2 = st.columns([2, 4])
                 with col_t1:
                      try:
                         if revised_task_photo and pd.notna(revised_task_photo):
