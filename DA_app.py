@@ -337,6 +337,9 @@ if playlist_id:
     creature_task_categories = df_creatures_data["Task Category"].tolist()
     creature_task_specific_1 = df_creatures_data["Task Specific 1"].tolist()
     creature_task_specific_2 = df_creatures_data["Task Specific 2"].tolist()
+    revised_task = df_creatures_data["Revised Task"].tolist()
+    revised_task_photo = df_creatures_data["Revised Task Image"].tolist()
+    creature_loot = df_creatures_data["Loot"].tolist()
     creature_image = df_creatures_data["Creature Image"].tolist()
 
 # Initialize user playlist in session state if it doesn’t exist
@@ -850,88 +853,61 @@ if "best_match" in st.session_state:
                     if st.button("🔄 Change Creature", type="secondary"):
                         # Reset selection to bring back the grid
                         st.session_state.creature_pair_selection = "-- Select Creature --"
-                        st.session_state.music_task_selection = "-- Select Task --" # Reset task too
                         st.rerun()
 
-                # --- SHOW TASK SELECTION (Only visible in Summary View) ---
+                # --- SHOW REVISED TASK (Direct Display) ---
                 st.markdown("---")
-                st.markdown(f"### Which music task would you like **{selected_creature_obj['Creature name']}** to complete?")
+                st.markdown(f"### Task for **{selected_creature_obj['Creature name']}**")
                 
-                if "music_task_selection" not in st.session_state:
-                    st.session_state.music_task_selection = "-- Select Task --"
-                
-                if st.session_state.music_task_selection == "-- Select Task --":
-                    # Task Selection Grid
-                    col1, col2 = st.columns(2)
-                    
-                    # Task 1
-                    with col1:
-                        st.markdown(f"**{selected_creature_obj['Task Specific 1']}**")
-                        try:
-                            st.image(selected_creature_obj['Task 1 Image'], use_container_width=True)
-                        except:
-                            st.warning("No Image")
-                        if st.button("Select", key="btn_task_1", type="secondary", use_container_width=True):
-                            st.session_state.music_task_selection = selected_creature_obj["Task Specific 1"]
-                            st.rerun()
+                # Retrieve the Revised Task and Photo
+                # Using .get() ensures it doesn't crash if the column is missing (defaults to placeholders)
+                revised_task = selected_creature_obj.get("Revised Task", None)
+                revised_task_photo = selected_creature_obj.get("Revised Task Image", None)
 
-                    # Task 2
-                    with col2:
-                        st.markdown(f"**{selected_creature_obj['Task Specific 2']}**")
-                        try:
-                            st.image(selected_creature_obj['Task 2 Image'], use_container_width=True)
-                        except:
-                            st.warning("No Image")
-                        if st.button("Select", key="btn_task_2", type="secondary", use_container_width=True):
-                            st.session_state.music_task_selection = selected_creature_obj["Task Specific 2"]
-                            st.rerun()
+                # Automatically set the selection so the "Add to Playlist" button works
+                st.session_state.music_task_selection = revised_task
 
-                else:
-                    # Selected Task Summary
-                    st.info(f"✅ You have selected **{st.session_state.music_task_selection}**")
-                    
-                    # Determine which task was selected to show correct image
-                    selected_task_name = st.session_state.music_task_selection
-                    if selected_task_name == selected_creature_obj["Task Specific 1"]:
-                         task_img = selected_creature_obj["Task 1 Image"]
-                    else:
-                         task_img = selected_creature_obj["Task 2 Image"]
-                    
-                    col1, col2 = st.columns([1, 4])
-                    with col1:
-                         try:
-                            st.image(task_img, use_container_width=True)
-                         except:
-                            st.write("No Image")
-                    with col2:
-                         if st.button("🔄 Change Task", type="secondary"):
-                             st.session_state.music_task_selection = "-- Select Task --"
-                             st.rerun()
+                col_t1, col_t2 = st.columns([1, 4])
+                with col_t1:
+                     try:
+                        if revised_task_photo and pd.notna(revised_task_photo):
+                            st.image(revised_task_photo, use_container_width=True)
+                        else:
+                            st.write("📷") # Placeholder icon if no image
+                     except:
+                        st.write("Image Error")
+                with col_t2:
+                     st.markdown(f"**{revised_task}**")
 
     # ➕ Add Song to Playlist Button
     if "user_playlist" not in st.session_state:
         st.session_state.user_playlist = []
 
     selected_creature_name = st.session_state.get("creature_pair_selection", "-- Select Creature --")
-    selected_task = st.session_state.get("music_task_selection", "-- Select Task --")
 
-    # ✅ Only show button *after* a task has been selected
-    if selected_creature_name != "-- Select Creature --" and selected_task != "-- Select Task --":
+    # ✅ Only show button *after* a CREATURE has been selected (Task is now automatic)
+    if selected_creature_name != "-- Select Creature --":
         if st.button("✨ Add to Playlist", key=f"add_{best_match['Track ID']}", type="primary"):        
-            # Build song object with context
-            song_with_context = best_match.copy()
-            song_with_context["Creature"] = selected_creature_name if selected_creature_name != "-- Select Creature --" else ""
-            song_with_context["Task Selected"] = selected_task if selected_task != "-- Select Task --" else ""
-
-            # Add task category if available
+            
+            # Find the creature object first to get the task details
             selected_creature_obj = next(
                 (creature for creature in matched_creatures if creature["Creature name"] == selected_creature_name),
                 None
             )
+
+            # Build song object with context
+            song_with_context = best_match.copy()
+            song_with_context["Creature"] = selected_creature_name
+            
+            # Automatically assign the Revised Task, Category, and Loot
             if selected_creature_obj is not None:
-                song_with_context["Task Category"] = selected_creature_obj["Task Category"]
+                song_with_context["Task Selected"] = selected_creature_obj.get("Revised Task", "")
+                song_with_context["Task Category"] = selected_creature_obj.get("Task Category", "")
+                song_with_context["Loot"] = selected_creature_obj.get("Loot", 1)
             else:
+                song_with_context["Task Selected"] = ""
                 song_with_context["Task Category"] = ""
+                song_with_context["Loot"] = 1
 
             # Avoid duplicates
             track_ids = [song["Track ID"] for song in st.session_state.user_playlist]
@@ -943,9 +919,11 @@ if "best_match" in st.session_state:
                 # Increment reset counter to create new widget keys
                 st.session_state.reset_counter = st.session_state.get("reset_counter", 0) + 1
                 
-                # Clear creature and task selections for next song
+                # Clear creature selection for next song
                 if "creature_pair_selection" in st.session_state:
                     del st.session_state.creature_pair_selection
+                
+                # Clean up legacy task selection state if it exists
                 if "music_task_selection" in st.session_state:
                     del st.session_state.music_task_selection
                 
@@ -1019,8 +997,8 @@ if st.session_state.user_playlist:
         "Loudness(dB)": song.get("Loudness (dB)", ""),
         "Song Symbol": song.get("Song Symbol", ""),
         "Creature": song.get("Creature", ""),
-        "Task Category": song.get("Task Category", ""),
-        "Task Selected": song.get("Task Selected", "")
+        "Task": song.get("Revised Task", ""),
+        "Loot": song.get("Loot", "")
     } for idx, song in enumerate(st.session_state.user_playlist)])
 
     st.markdown("### 📋 Playlist Table")
