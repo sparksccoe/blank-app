@@ -424,10 +424,10 @@ with st.expander("**🗝️ Treasure Hunt: Tap to Find Your Saved Playlist**", e
             col1, col2 = st.columns([1, 3])
             with col1:
                 # Handle missing images gracefully
-                if "Bard Image" in song and pd.notna(song["Bard Image"]):
-                    st.image(song["Bard Image"], width=80)
+                if "Image" in song and pd.notna(song["Image"]):
+                    st.image(song["Image"], width=80)
             with col2:
-                st.write(f"**{song.get('Name', 'Unknown')}** by {song.get('Artist', 'Unknown')}")
+                st.write(f"**{song.get('Name', 'Unknown')}**")
                 st.markdown(f"**Tempo:** {song.get('Tempo (BPM)', 0)} BPM &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; **Loudness:** {song.get('Loudness (dB)', 0)} dB")
 
         # 🎥 Toggle YouTube Embed Section
@@ -991,8 +991,7 @@ if st.session_state.user_playlist:
 # 🎼 Display Playlist Table Summary (also moved outside)
 if st.session_state.user_playlist:
     playlist_summary_df = pd.DataFrame([{
-        "Bard": song.get("Bard", "Unknown"),
-        "Song Name": song.get("Name", "Unknown"),
+        "Song": song.get("Name", "Unknown"),
         "Tempo(BPM)": song.get("Tempo (BPM)", ""),
         "Loudness(dB)": song.get("Loudness (dB)", ""),
         "Song Symbol": song.get("Song Symbol", ""),
