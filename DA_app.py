@@ -368,7 +368,7 @@ st.markdown(
 st.markdown("<br>", unsafe_allow_html=True)
 
 # 📂 Retrieve Saved Playlist Section
-with st.expander("**🗝️ Treasure Hunt: Tap to Find Your Saved Playlist**", expanded=False):
+with st.expander(""**🗝️ Have a Saved Playlist? Tap Here to Load**"", expanded=False):
     # Full-width label
     st.write("Enter your 1-word Playlist Code to load your saved playlist:")
 
@@ -973,10 +973,10 @@ if st.session_state.user_playlist:
         col1, col2, col3 = st.columns([1, 3, 1])  # Third column for the button
 
         with col1:
-            st.image(song["Bard Image"], width=80)
+            st.image(song["Image"], width=80)
 
         with col2:
-            st.write(f"**{song['Name']}** by {song['Bard']}")
+            st.write(f"**{song['Name']}**")
             st.markdown(
                 f"**Tempo:** {song['Tempo (BPM)']} BPM &nbsp;&nbsp;&nbsp;&nbsp; | "
                 f"&nbsp;&nbsp;&nbsp;&nbsp; **Loudness:** {song['Loudness (dB)']} dB"
