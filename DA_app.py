@@ -368,7 +368,7 @@ st.markdown(
 st.markdown("<br>", unsafe_allow_html=True)
 
 # 📂 Retrieve Saved Playlist Section
-with st.expander(""**🗝️ Have a Saved Playlist? Tap Here to Load**"", expanded=False):
+with st.expander("**🗝️ Have a Saved Playlist? Tap Here to Load**", expanded=False):
     # Full-width label
     st.write("Enter your 1-word Playlist Code to load your saved playlist:")
 
