@@ -592,8 +592,22 @@ def main_app():
             else:
                 # SUMMARY VIEW
                 st.markdown('<div id="summary-section"></div>', unsafe_allow_html=True)
+                
                 if st.session_state.get("scroll_to_summary", False):
-                    st.markdown("""<script>setTimeout(function() {var element = document.getElementById('summary-section'); if(element){window.scrollTo({top: element.offsetTop - 150, behavior: 'smooth'});}}, 100);</script>""", unsafe_allow_html=True)
+                    # Scrolls the element to the center of the viewport
+                    st.markdown(
+                        """
+                        <script>
+                        setTimeout(function() {
+                            var element = document.getElementById('summary-section');
+                            if(element){
+                                element.scrollIntoView({behavior: 'smooth', block: 'center'});
+                            }
+                        }, 100);
+                        </script>
+                        """, 
+                        unsafe_allow_html=True
+                    )
                     del st.session_state.scroll_to_summary
 
                 selected_creature_name = st.session_state.creature_pair_selection
