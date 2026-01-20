@@ -544,9 +544,9 @@ def main_app():
             "Song": song.get("Name", "Unknown"),
             "Tempo(BPM)": song.get("Tempo (BPM)", ""),
             "Loudness(dB)": song.get("Loudness (dB)", ""),
-            "Song Symbol": song.get("Song Symbol", ""),
+            "Symbol": song.get("Song Symbol", ""),
             "Creature": song.get("Creature", ""),
-            "Task": song.get("Task Selected", ""), # Fixed: Changed from Revised Task to Task Selected
+            "Task": song.get("Task Selected", ""), 
             "Loot": song.get("Loot", "")
         } for idx, song in enumerate(st.session_state.user_playlist)])
 
@@ -554,7 +554,14 @@ def main_app():
         enlarge_table_controls()
         st.markdown("""<style>.element-container:has(.stDataFrame) {max-width: 1400px !important; width: 100% !important;} .stDataFrame table {min-width: 1400px !important;}</style>""", unsafe_allow_html=True)
         
-        st.dataframe(playlist_summary_df.reset_index(drop=True), use_container_width=True, hide_index=True, column_config={"Song Symbol": st.column_config.ImageColumn("Song Symbol", width="small")})
+        st.dataframe(
+            playlist_summary_df.reset_index(drop=True), 
+            use_container_width=True, 
+            hide_index=True, 
+            column_config={
+                "Symbol": st.column_config.ImageColumn("Symbol", width="small")
+            }
+        )
 
         # YOUTUBE PLAYLIST EMBED
         st.subheader("🎧 Listen to your playlist on YouTube")
