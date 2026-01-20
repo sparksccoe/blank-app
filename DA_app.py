@@ -690,17 +690,6 @@ def main_app():
         fig_loudness_line.update_layout(xaxis=dict(range=[-65, 5], title="Loudness (dB)"), yaxis=dict(showticklabels=False, showgrid=False, zeroline=False), height=200, images=loudness_images, margin=dict(t=20, b=50, l=50, r=50), plot_bgcolor='white')
         st.plotly_chart(fig_loudness_line, use_container_width=True)
 
-        # Task Distribution
-        if len(st.session_state.user_playlist) > 0:
-            creature_task_data = [{"Creature": s["Creature"], "Task Category": s["Task Category"]} for s in st.session_state.user_playlist if s.get("Creature") and s.get("Task Category")]
-            if creature_task_data:
-                df_creatures = pd.DataFrame(creature_task_data)
-                st.write("#### Creature Task Distribution")
-                creature_counts = df_creatures.groupby(['Task Category', 'Creature']).size().reset_index(name='Count')
-                fig_creature_bar = px.bar(creature_counts, x="Task Category", y="Count", color="Creature", color_discrete_sequence=px.colors.qualitative.Plotly)
-                fig_creature_bar.update_layout(yaxis=dict(dtick=1), margin=dict(t=0))
-                st.plotly_chart(fig_creature_bar, use_container_width=True)
-
     # --- SAVE PLAYLIST ---
     if st.session_state.user_playlist:
         st.markdown("---")
