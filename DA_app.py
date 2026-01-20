@@ -994,7 +994,7 @@ if st.session_state.user_playlist:
         "Loudness(dB)": song.get("Loudness (dB)", ""),
         "Song Symbol": song.get("Song Symbol", ""),
         "Creature": song.get("Creature", ""),
-        "Task": song.get("Revised Task", ""),
+        "Task": song.get("Task Selected", ""),
         "Loot": song.get("Loot", "")
     } for idx, song in enumerate(st.session_state.user_playlist)])
 
