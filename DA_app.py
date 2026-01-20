@@ -500,6 +500,10 @@ def main_app():
             if st.session_state.creature_pair_selection == "-- Select Creature --":
                 # GRID VIEW
                 st.markdown("### This song activates the following creatures. Which one did you pair up in the game?")
+                
+                # Get list of creatures already in the playlist
+                used_creatures = [song.get("Creature") for song in st.session_state.user_playlist]
+
                 cols_per_row = 3
                 for i in range(0, len(matched_creatures), cols_per_row):
                     cols = st.columns(cols_per_row)
@@ -509,11 +513,16 @@ def main_app():
                             st.markdown(f"**{creature['Creature name']}**")
                             try: st.image(creature["Creature Image"], use_container_width=True)
                             except: st.warning("No Image")
-                            if st.button("Select", key=f"btn_{creature['Creature name']}", type="secondary", use_container_width=True):
-                                st.session_state.creature_pair_selection = creature["Creature name"]
-                                st.session_state.scroll_to_summary = True
-                                st.rerun()
-                    st.markdown("<br>", unsafe_allow_html=True)
+                            
+                            # Check if this creature is already used
+                            if creature["Creature name"] in used_creatures:
+                                st.button("🚫 Already Added", key=f"btn_{creature['Creature name']}", disabled=True, use_container_width=True)
+                            else:
+                                if st.button("Select", key=f"btn_{creature['Creature name']}", type="secondary", use_container_width=True):
+                                    st.session_state.creature_pair_selection = creature["Creature name"]
+                                    st.session_state.scroll_to_summary = True
+                                    st.rerun()
+                st.markdown("<br>", unsafe_allow_html=True)
             else:
                 # SUMMARY VIEW
                 st.markdown('<div id="summary-section"></div>', unsafe_allow_html=True)
@@ -559,22 +568,30 @@ def main_app():
         if selected_creature_name != "-- Select Creature --":
             if st.button("✨ Add to Playlist", key=f"add_{best_match['Track ID']}", type="primary"):        
                 
-                selected_creature_obj = next((creature for creature in matched_creatures if creature["Creature name"] == selected_creature_name), None)
-
-                song_with_context = best_match.copy()
-                song_with_context["Creature"] = selected_creature_name
-                
-                if selected_creature_obj is not None:
-                    song_with_context["Task Selected"] = selected_creature_obj.get("Revised Task", "")
-                    song_with_context["Task Category"] = selected_creature_obj.get("Task Category", "")
-                    song_with_context["Loot"] = selected_creature_obj.get("Loot", 1)
-                else:
-                    song_with_context["Task Selected"] = ""
-                    song_with_context["Task Category"] = ""
-                    song_with_context["Loot"] = 1
-
+                # 🟢 NEW: Safety check for duplicates
+                used_creatures = [song.get("Creature") for song in st.session_state.user_playlist]
                 track_ids = [song["Track ID"] for song in st.session_state.user_playlist]
-                if best_match["Track ID"] not in track_ids:
+
+                if selected_creature_name in used_creatures:
+                     st.error(f"⚠️ **{selected_creature_name}** is already in your party! Please select a different creature.")
+                elif best_match["Track ID"] in track_ids:
+                    st.warning("⚠️ This song is already in your playlist!")
+                else:
+                    # Proceed to Add
+                    selected_creature_obj = next((creature for creature in matched_creatures if creature["Creature name"] == selected_creature_name), None)
+
+                    song_with_context = best_match.copy()
+                    song_with_context["Creature"] = selected_creature_name
+                    
+                    if selected_creature_obj is not None:
+                        song_with_context["Task Selected"] = selected_creature_obj.get("Revised Task", "")
+                        song_with_context["Task Category"] = selected_creature_obj.get("Task Category", "")
+                        song_with_context["Loot"] = selected_creature_obj.get("Loot", 1)
+                    else:
+                        song_with_context["Task Selected"] = ""
+                        song_with_context["Task Category"] = ""
+                        song_with_context["Loot"] = 1
+
                     st.session_state.user_playlist.append(song_with_context)
                     auto_save_session()
                     st.session_state.reset_counter = st.session_state.get("reset_counter", 0) + 1
@@ -582,8 +599,6 @@ def main_app():
                     if "best_match" in st.session_state: del st.session_state.best_match
                     st.session_state.scroll_to_playlist = True
                     st.rerun()
-                else:
-                    st.warning("⚠️ This song is already in your playlist!")
 
     # --- PLAYLIST DISPLAY (MAIN) ---
     if st.session_state.user_playlist:
