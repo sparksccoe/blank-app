@@ -861,7 +861,7 @@ def main_app():
         
         # Check if the playlist is already linked to a file
         if st.session_state.get("current_playlist_filename"):
-            # STATE: Playlist is saved. Show status.
+            # 🟢 STATE: Playlist is saved. Show status.
             filename = st.session_state.current_playlist_filename
             try:
                 # Parse filename "Name_Code.csv"
@@ -870,11 +870,11 @@ def main_app():
                 
                 st.subheader(f"🔮 Enchantment Active: {clean_name}")
                 st.success(f"🎶 Playlist linked to code: **{code}**")
-                st.info(f"ℹ🕯️ **Remember:** Your code is **{code}**. Make sure you have it written down to reload this playlist next time!")
+                st.info(f"🕯️ **Remember:** Your code is **{code}**. Make sure you have it written down to reload this playlist next time!")
             except:
                 st.subheader("🔮 Enchantment Active")
         else:
-            # STATE: Not saved yet. Suggest saving.
+            # 🟢 STATE: Not saved yet. Suggest saving.
             st.subheader("📜 Chronicle Your Concerto")
             
             st.markdown("✨ **Magic Tip:** Save your playlist to enable **Autosave**. Any changes will be updated automatically.")
@@ -905,8 +905,12 @@ def main_app():
                 # Set the filename in session state
                 st.session_state.current_playlist_filename = filename
                 
+                # Update the playlist name in session state immediately
+                st.session_state.saved_playlist_name = playlist_name
+                
                 # Trigger the save
                 save_updates_to_file()
+                auto_save_session() # Update the temp session file too
 
                 st.success("✅ Concerto Inscribed Successfully!")
                 
