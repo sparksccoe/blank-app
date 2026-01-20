@@ -804,23 +804,26 @@ def main_app():
         
         # Check if the playlist is already linked to a file
         if st.session_state.get("current_playlist_filename"):
-            # STATE: Playlist is saved. Show status.
+            # 🟢 STATE: Playlist is saved. Show status.
             filename = st.session_state.current_playlist_filename
             try:
                 # Parse filename "Name_Code.csv"
                 clean_name = filename.rsplit("_", 1)[0].replace("_", " ")
                 code = filename.rsplit("_", 1)[-1].replace(".csv", "")
                 
-                st.subheader(f"💾 Autosave Active: {clean_name}")
+                # 🟢 CHANGED: 💾 -> 🔮
+                st.subheader(f"🔮 Enchantment Active: {clean_name}")
                 st.success(f"✅ Playlist linked to code: **{code}**")
                 st.info(f"ℹ️ **Remember:** Your code is **{code}**. Make sure you have it written down to reload this playlist next time!")
             except:
-                st.subheader("💾 Autosave Active")
+                st.subheader("🔮 Enchantment Active")
         else:
-            # STATE: Not saved yet. Suggest saving.
-            st.subheader("📝 Save Your Playlist")
+            # 🟢 STATE: Not saved yet. Suggest saving.
+            # 🟢 CHANGED: 📝 -> 📜
+            st.subheader("📜 Chronicle Your Concerto")
             
-            st.markdown("💡 **Tip:** Save your playlist to enable **Autosave**. Any changes will be updated automatically.")
+            # 🟢 CHANGED: 💡 -> ✨
+            st.markdown("✨ **Magic Tip:** Save your playlist to enable **Autosave**. Any changes will be updated automatically.")
             
             playlist_name = st.text_input("Enter a name for your playlist:")
             invalid_chars = ['/', '\\', ':', '*', '?', '"', '<', '>', '|', '#', '%', '&', '{', '}', '$', '!', "'", '`', '@']
@@ -828,7 +831,9 @@ def main_app():
             
             if found_invalid and playlist_name:
                 st.error(f"❌ Invalid characters: {' '.join(found_invalid)}")
-            elif st.button("📝 Save Playlist", type="primary") and playlist_name:
+            
+            # 🟢 CHANGED: 📝 -> 🖋️
+            elif st.button("🖋️ Inscribe to Archives", type="primary") and playlist_name:
                 playlist_dir = "saved_user_playlists"
                 if not os.path.exists(playlist_dir): os.makedirs(playlist_dir)
                 
@@ -850,13 +855,11 @@ def main_app():
                 # Trigger the save
                 save_updates_to_file()
 
-                # High visibility success message
-                st.success("✅ Playlist Saved Successfully!")
+                st.success("✅ Concerto Inscribed Successfully!")
                 
-                # Big bold code display
-                st.markdown(f"## 🔑 CODE: `{playlist_code}`")
+                # 🟢 CHANGED: 🔑 -> 🗝️ (Matches the 'Summon' key icon)
+                st.markdown(f"## 🗝️ CODE: `{playlist_code}`")
                 
-                # Explicit instruction to write it down
                 st.warning("⚠️ **IMPORTANT:** Write this code down now! You will need to enter this code to bring up your playlist next time.")
                 
                 st.rerun()
