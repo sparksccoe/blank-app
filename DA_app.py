@@ -155,10 +155,29 @@ def get_img_base64(img_path):
         return f"data:image/{ext};base64,{encoded}"
     return None
 
+# Helper to update the permanent file if one is selected
+def save_updates_to_file():
+    if st.session_state.get("current_playlist_filename"):
+        playlist_dir = "saved_user_playlists"
+        if not os.path.exists(playlist_dir):
+            os.makedirs(playlist_dir)
+            
+        filepath = os.path.join(playlist_dir, st.session_state.current_playlist_filename)
+        
+        # Save CSV
+        pd.DataFrame(st.session_state.user_playlist).to_csv(filepath, index=False)
+        
+        # Update Meta Timestamp (expires in 2 weeks)
+        meta_path = filepath.replace(".csv", ".meta")
+        with open(meta_path, "w") as meta_file:
+            meta_file.write((datetime.now() + timedelta(weeks=2)).strftime("%Y-%m-%d %H:%M:%S"))
+
+# Remove song now triggers the file update
 def remove_song(idx):
     if "user_playlist" in st.session_state and idx < len(st.session_state.user_playlist):
         st.session_state.user_playlist.pop(idx)
-        auto_save_session()
+        auto_save_session()    # Save to temporary session
+        save_updates_to_file() # Save to permanent file (if linked)
 
 # --- DATA LOADING ---
 client_id = '922604ee2b934fbd9d1223f4ec023fba'
@@ -278,8 +297,12 @@ def main_app():
                 retrieved_df = pd.read_csv(filepath)
                 st.session_state.user_playlist = retrieved_df.to_dict(orient="records")
                 st.session_state.saved_playlist_name = playlist_file.rsplit("_", 1)[0].replace("_", " ")
+                
+                # Link this session to the file for autosave
+                st.session_state.current_playlist_filename = playlist_file 
+                
                 auto_save_session()
-                st.success(f"🪄 Playlist summoned! Scroll down to see your songs.")
+                st.success(f"🪄 Playlist summoned! Changes will now autosave to code: **{entered_code}**")
             else:
                 st.error("❌ No playlist found with that code.")
 
@@ -569,7 +592,7 @@ def main_app():
         if selected_creature_name != "-- Select Creature --":
             if st.button("✨ Add to Playlist", key=f"add_{best_match['Track ID']}", type="primary"):        
                 
-                # 🟢 NEW: Safety check for duplicates
+                # Safety check for duplicates
                 used_creatures = [song.get("Creature") for song in st.session_state.user_playlist]
                 track_ids = [song["Track ID"] for song in st.session_state.user_playlist]
 
@@ -594,7 +617,10 @@ def main_app():
                         song_with_context["Loot"] = 1
 
                     st.session_state.user_playlist.append(song_with_context)
-                    auto_save_session()
+                    
+                    auto_save_session()    # Save to temp session
+                    save_updates_to_file() # Save to permanent file (if linked)
+                    
                     st.session_state.reset_counter = st.session_state.get("reset_counter", 0) + 1
                     if "creature_pair_selection" in st.session_state: del st.session_state.creature_pair_selection
                     if "best_match" in st.session_state: del st.session_state.best_match
@@ -772,36 +798,59 @@ def main_app():
         )
         st.plotly_chart(fig_loudness_line, use_container_width=True)
 
-    # --- SAVE PLAYLIST ---
+    # --- SAVE / AUTOSAVE SECTION ---
     if st.session_state.user_playlist:
         st.markdown("---")
-        st.subheader("📝 Save Your Playlist")
-        playlist_name = st.text_input("Enter a name for your playlist:")
-        invalid_chars = ['/', '\\', ':', '*', '?', '"', '<', '>', '|', '#', '%', '&', '{', '}', '$', '!', "'", '`', '@']
-        found_invalid = [char for char in invalid_chars if char in playlist_name]
         
-        if found_invalid and playlist_name:
-            st.error(f"❌ Invalid characters: {' '.join(found_invalid)}")
-        elif st.button("📝 Save Playlist", type="primary") and playlist_name:
-            playlist_dir = "saved_user_playlists" # Ensure dir definition in scope
-            word_choices = ["Graph", "Tempo", "Volume", "Loud", "Soft", "Fast", "Slow", "Numeric", "Data", "Creature", "Bard", "Adventure"]
-            base_word = random.choice(word_choices).lower()
-            existing_codes = {f.rsplit("_", 1)[-1].replace(".csv", "").lower() for f in os.listdir(playlist_dir) if f.endswith(".csv")}
+        # Check if the playlist is already linked to a file
+        if st.session_state.get("current_playlist_filename"):
+            # 🟢 STATE: Playlist is saved. Show status.
+            filename = st.session_state.current_playlist_filename
+            try:
+                # Parse filename "Name_Code.csv"
+                clean_name = filename.rsplit("_", 1)[0].replace("_", " ")
+                code = filename.rsplit("_", 1)[-1].replace(".csv", "")
+                
+                st.subheader(f"💾 Autosave Active: {clean_name}")
+                st.success(f"✅ Your playlist is linked to code: **{code}**")
+                st.info("Any changes you make (adding or removing songs) are automatically saved to this file.")
+            except:
+                st.subheader("💾 Autosave Active")
+        else:
+            # 🟢 STATE: Not saved yet. Suggest saving.
+            st.subheader("📝 Save Your Playlist")
+            st.markdown("💡 **Tip:** Save your playlist now! Once saved, any songs you add or remove will **automatically update** the saved file.")
             
-            playlist_code = base_word
-            suffix = 1
-            while playlist_code in existing_codes:
-                playlist_code = f"{base_word}{suffix}"
-                suffix += 1
-
-            filename = f"{playlist_name.replace(' ', '_')}_{playlist_code}.csv"
-            filepath = os.path.join(playlist_dir, filename)
-            pd.DataFrame(st.session_state.user_playlist).to_csv(filepath, index=False)
+            playlist_name = st.text_input("Enter a name for your playlist:")
+            invalid_chars = ['/', '\\', ':', '*', '?', '"', '<', '>', '|', '#', '%', '&', '{', '}', '$', '!', "'", '`', '@']
+            found_invalid = [char for char in invalid_chars if char in playlist_name]
             
-            with open(os.path.join(playlist_dir, f"{filename}.meta"), "w") as meta_file:
-                meta_file.write((datetime.now() + timedelta(weeks=2)).strftime("%Y-%m-%d %H:%M:%S"))
+            if found_invalid and playlist_name:
+                st.error(f"❌ Invalid characters: {' '.join(found_invalid)}")
+            elif st.button("📝 Save & Enable Autosave", type="primary") and playlist_name:
+                playlist_dir = "saved_user_playlists"
+                if not os.path.exists(playlist_dir): os.makedirs(playlist_dir)
+                
+                word_choices = ["Graph", "Tempo", "Volume", "Loud", "Soft", "Fast", "Slow", "Numeric", "Data", "Creature", "Bard", "Adventure"]
+                base_word = random.choice(word_choices).lower()
+                existing_codes = {f.rsplit("_", 1)[-1].replace(".csv", "").lower() for f in os.listdir(playlist_dir) if f.endswith(".csv")}
+                
+                playlist_code = base_word
+                suffix = 1
+                while playlist_code in existing_codes:
+                    playlist_code = f"{base_word}{suffix}"
+                    suffix += 1
 
-            st.success(f"📜 Playlist saved! Code: **{playlist_code}**")
+                filename = f"{playlist_name.replace(' ', '_')}_{playlist_code}.csv"
+                
+                # 🟢 NEW: Set the filename in session state
+                st.session_state.current_playlist_filename = filename
+                
+                # Trigger the save
+                save_updates_to_file()
+
+                st.success(f"📜 Playlist saved! Code: **{playlist_code}**")
+                st.rerun()
 
 def cleanup_old_playlists():
     playlist_dir = "saved_user_playlists"
