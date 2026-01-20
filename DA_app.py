@@ -804,7 +804,7 @@ def main_app():
         
         # Check if the playlist is already linked to a file
         if st.session_state.get("current_playlist_filename"):
-            # 🟢 STATE: Playlist is saved. Show status.
+            # STATE: Playlist is saved. Show status.
             filename = st.session_state.current_playlist_filename
             try:
                 # Parse filename "Name_Code.csv"
@@ -812,14 +812,15 @@ def main_app():
                 code = filename.rsplit("_", 1)[-1].replace(".csv", "")
                 
                 st.subheader(f"💾 Autosave Active: {clean_name}")
-                st.success(f"✅ Your playlist is linked to code: **{code}**")
-                st.info("Any changes you make (adding or removing songs) are automatically saved to this file.")
+                st.success(f"✅ Playlist linked to code: **{code}**")
+                st.info(f"ℹ️ **Remember:** Your code is **{code}**. Make sure you have it written down to reload this playlist next time!")
             except:
                 st.subheader("💾 Autosave Active")
         else:
-            # 🟢 STATE: Not saved yet. Suggest saving.
+            # STATE: Not saved yet. Suggest saving.
             st.subheader("📝 Save Your Playlist")
-            st.markdown("💡 **Tip:** Save your playlist now! Once saved, any songs you add or remove will **automatically update** the saved file.")
+            
+            st.markdown("💡 **Tip:** Save your playlist to enable **Autosave**. Any changes will be updated automatically.")
             
             playlist_name = st.text_input("Enter a name for your playlist:")
             invalid_chars = ['/', '\\', ':', '*', '?', '"', '<', '>', '|', '#', '%', '&', '{', '}', '$', '!', "'", '`', '@']
@@ -827,7 +828,7 @@ def main_app():
             
             if found_invalid and playlist_name:
                 st.error(f"❌ Invalid characters: {' '.join(found_invalid)}")
-            elif st.button("📝 Save & Enable Autosave", type="primary") and playlist_name:
+            elif st.button("📝 Save Playlist", type="primary") and playlist_name:
                 playlist_dir = "saved_user_playlists"
                 if not os.path.exists(playlist_dir): os.makedirs(playlist_dir)
                 
@@ -843,13 +844,21 @@ def main_app():
 
                 filename = f"{playlist_name.replace(' ', '_')}_{playlist_code}.csv"
                 
-                # 🟢 NEW: Set the filename in session state
+                # Set the filename in session state
                 st.session_state.current_playlist_filename = filename
                 
                 # Trigger the save
                 save_updates_to_file()
 
-                st.success(f"📜 Playlist saved! Code: **{playlist_code}**")
+                # High visibility success message
+                st.success("✅ Playlist Saved Successfully!")
+                
+                # Big bold code display
+                st.markdown(f"## 🔑 CODE: `{playlist_code}`")
+                
+                # Explicit instruction to write it down
+                st.warning("⚠️ **IMPORTANT:** Write this code down now! You will need to enter this code to bring up your playlist next time.")
+                
                 st.rerun()
 
 def cleanup_old_playlists():
