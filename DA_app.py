@@ -314,7 +314,7 @@ def main_app():
 
     st.markdown(
         "<div style='text-align: center; font-size: 24px; font-weight: normal;'>"
-        "Welcome to Symphonia! Let's start our Creature Concerto."
+        "Welcome to Symphonia! Let's create our Music Festival."
         "</div><br>", 
         unsafe_allow_html=True
     )
