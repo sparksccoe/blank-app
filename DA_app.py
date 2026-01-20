@@ -98,10 +98,32 @@ try:
 except FileNotFoundError:
     pass
 
-# --- SESSION & FILE HELPERS ---
+# --- SESSION PERSISTENCE IMPROVED ---
 SESSION_DIR = "temp_user_sessions"
 os.makedirs(SESSION_DIR, exist_ok=True)
 
+# 1. Cleanup Stale Sessions (Garbage Collection)
+def cleanup_old_sessions(max_age_hours=24):
+    """Deletes temporary session files older than max_age_hours to prevent disk bloat."""
+    now = datetime.now()
+    cutoff = now - timedelta(hours=max_age_hours)
+    
+    if os.path.exists(SESSION_DIR):
+        for filename in os.listdir(SESSION_DIR):
+            if filename.endswith(".json"):
+                filepath = os.path.join(SESSION_DIR, filename)
+                try:
+                    # Check file modification time
+                    file_mod_time = datetime.fromtimestamp(os.path.getmtime(filepath))
+                    if file_mod_time < cutoff:
+                        os.remove(filepath)
+                except Exception:
+                    pass
+
+# Run cleanup once on script load
+cleanup_old_sessions()
+
+# 2. Get Session ID from URL or Generate New One
 if "session_id" not in st.query_params:
     new_id = str(uuid.uuid4())
     st.query_params["session_id"] = new_id
@@ -109,30 +131,51 @@ if "session_id" not in st.query_params:
 else:
     session_id = st.query_params["session_id"]
 
+# Define the file path for this specific user
 session_file_path = os.path.join(SESSION_DIR, f"{session_id}.json")
 
+# 3. Define Helper Functions for Auto-Saving/Loading
 def auto_save_session():
-    """Saves the current playlist to a JSON file linked to the session ID."""
-    state_data = {
-        "user_playlist": st.session_state.get("user_playlist", []),
-        "saved_playlist_name": st.session_state.get("saved_playlist_name", "")
-    }
-    with open(session_file_path, "w") as f:
-        json.dump(state_data, f)
+    """Saves the current playlist and context to a JSON file linked to the session ID."""
+    try:
+        state_data = {
+            "user_playlist": st.session_state.get("user_playlist", []),
+            "saved_playlist_name": st.session_state.get("saved_playlist_name", ""),
+            # 🟢 IMPROVEMENT: Persist the filename link so autosave works after refresh
+            "current_playlist_filename": st.session_state.get("current_playlist_filename", None),
+            "youtube_video_ids": st.session_state.get("youtube_video_ids", []),
+            "last_active": datetime.now().isoformat()
+        }
+        with open(session_file_path, "w") as f:
+            json.dump(state_data, f)
+    except Exception as e:
+        print(f"Session Save Error: {e}")
 
 def auto_load_session():
     """Loads the playlist from file if session_state is empty but file exists."""
+    # Only load if we haven't already loaded data into session_state
     if os.path.exists(session_file_path) and not st.session_state.get("user_playlist"):
         try:
             with open(session_file_path, "r") as f:
                 data = json.load(f)
-                st.session_state.user_playlist = data.get("user_playlist", [])
-                st.session_state.saved_playlist_name = data.get("saved_playlist_name", "")
-        except:
-            pass 
+                
+            # Restore state variables
+            st.session_state.user_playlist = data.get("user_playlist", [])
+            st.session_state.saved_playlist_name = data.get("saved_playlist_name", "")
+            # 🟢 IMPROVEMENT: Restore the filename link
+            st.session_state.current_playlist_filename = data.get("current_playlist_filename", None)
+            st.session_state.youtube_video_ids = data.get("youtube_video_ids", [])
+            
+            # Touch the file to update modification time (prevents cleanup while active)
+            os.utime(session_file_path, None)
+            
+        except Exception:
+            pass # If file is corrupt, just start fresh
 
+# 4. Trigger Load on App Startup
 if "user_playlist" not in st.session_state:
     st.session_state.user_playlist = []
+    
 auto_load_session()
 
 def get_img_base64(img_path):
