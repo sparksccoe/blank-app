@@ -865,7 +865,7 @@ if "best_match" in st.session_state:
                 # Automatically set the selection so the "Add to Playlist" button works
                 st.session_state.music_task_selection = revised_task
 
-                col_t1, col_t2 = st.columns([2, 4])
+                col_t1, col_t2 = st.columns([3, 4])
                 with col_t1:
                      try:
                         if revised_task_photo and pd.notna(revised_task_photo):
