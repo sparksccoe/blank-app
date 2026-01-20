@@ -899,15 +899,79 @@ def admin_page():
     
     if st.session_state.is_admin:
         st.success("✅ Logged in")
+        
         if os.path.exists(playlist_dir):
             files = [f for f in os.listdir(playlist_dir) if f.endswith(".csv")]
-            st.write(f"**Found {len(files)} saved playlists:**")
+            
+            # --- GROUPING LOGIC ---
+            grouped_playlists = {}
+            
             for filename in files:
-                col1, col2 = st.columns([3, 1])
-                with col1: st.text(filename)
-                with col2:
-                    with open(os.path.join(playlist_dir, filename), "r") as f:
-                        st.download_button("⬇️", f, filename, "text/csv", key=f"dl_{filename}")
+                try:
+                    # Parse Filename: "My_Cool_Song_tempo1.csv"
+                    # Split by the last underscore to separate Name from Code
+                    parts = filename.rsplit("_", 1)
+                    
+                    if len(parts) == 2:
+                        raw_name = parts[0]
+                        clean_name = raw_name.replace("_", " ") # "My Cool Song"
+                        code = parts[1].replace(".csv", "")     # "tempo1"
+                    else:
+                        clean_name = "Uncategorized"
+                        code = filename
+
+                    filepath = os.path.join(playlist_dir, filename)
+                    mod_time = os.path.getmtime(filepath)
+                    time_str = datetime.fromtimestamp(mod_time).strftime('%Y-%m-%d %I:%M %p')
+
+                    # Add to dictionary
+                    if clean_name not in grouped_playlists:
+                        grouped_playlists[clean_name] = []
+                    
+                    grouped_playlists[clean_name].append({
+                        "filename": filename,
+                        "code": code,
+                        "time_val": mod_time,
+                        "time_str": time_str,
+                        "path": filepath
+                    })
+                except:
+                    continue
+
+            # --- DISPLAY LOGIC ---
+            if not grouped_playlists:
+                st.warning("No saved playlists found.")
+            else:
+                st.write(f"**Found {len(files)} saved files across {len(grouped_playlists)} unique playlists:**")
+                st.markdown("---")
+
+                # Sort groups alphabetically by Name
+                for group_name in sorted(grouped_playlists.keys()):
+                    versions = grouped_playlists[group_name]
+                    
+                    # Sort versions by Time (Newest First)
+                    versions.sort(key=lambda x: x['time_val'], reverse=True)
+                    
+                    latest_time = versions[0]['time_str']
+                    
+                    # Create an Expander for the Group
+                    with st.expander(f"📂 **{group_name}** ({len(versions)} versions) — Last update: {latest_time}"):
+                        
+                        # Table Headers inside the expander
+                        h1, h2, h3 = st.columns([1, 2, 1])
+                        with h1: st.caption("Code")
+                        with h2: st.caption("Saved Time")
+                        with h3: st.caption("Download")
+                        
+                        for v in versions:
+                            c1, c2, c3 = st.columns([1, 2, 1])
+                            with c1: 
+                                st.markdown(f"**`{v['code']}`**")
+                            with c2: 
+                                st.text(v['time_str'])
+                            with c3:
+                                with open(v['path'], "r") as f:
+                                    st.download_button("⬇️", f, v['filename'], "text/csv", key=f"dl_{v['filename']}")
         else:
             st.warning("No saved playlists directory found.")
 
