@@ -179,7 +179,6 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from sklearn.preprocessing import MinMaxScaler
 from datetime import datetime
 from plotly.colors import qualitative
 import numpy as np
@@ -571,7 +570,7 @@ if bpm is not None:
 
 
 # 🔊 Section: Loudness Analysis
-st.header("🔊 Loudnessn (dB)")
+st.header("🔊 Loudness (dB)")
 
 # 🎧 Ask for Loudness input (default None)
 
