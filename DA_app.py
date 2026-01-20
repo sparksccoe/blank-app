@@ -386,9 +386,10 @@ def main_app():
         interval = 60 / bpm
         num_beats = int(duration / interval)
         audio = np.zeros(int(sample_rate * duration))
-        kick = generate_drum_sound("kick")
-        snare = generate_drum_sound("snare")
-        hihat = generate_drum_sound("hihat")
+        # Pass the sample_rate first, THEN the drum type
+        kick = generate_drum_sound(sample_rate, "kick")
+        snare = generate_drum_sound(sample_rate, "snare")
+        hihat = generate_drum_sound(sample_rate, "hihat")
 
         for i in range(num_beats):
             start = int(i * interval * sample_rate)
