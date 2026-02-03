@@ -426,13 +426,54 @@ def main_app():
 
     # --- MATCHING LOGIC ---
     if bpm is not None and loudness is not None:
+        
+        # 1. Logic to calculate scores (Do this outside the button so we can use it in the tie-breaker)
+        if not df_tracks.empty:
+            df_tracks["Tempo Difference"] = abs(df_tracks["Tempo (BPM)"] - bpm)
+            df_tracks["Loudness Difference"] = abs(df_tracks["Loudness (dB)"] - loudness)
+            df_tracks["Match Score"] = df_tracks["Tempo Difference"] + df_tracks["Loudness Difference"]
+
+        # 2. The Reveal Button
         if st.button("🔮 Reveal the Musical Match", type="primary"):
-            if not df_tracks.empty:
-                df_tracks["Tempo Difference"] = abs(df_tracks["Tempo (BPM)"] - bpm)
-                df_tracks["Loudness Difference"] = abs(df_tracks["Loudness (dB)"] - loudness)
-                df_tracks["Match Score"] = df_tracks["Tempo Difference"] + df_tracks["Loudness Difference"]
+            # Check for the specific Mamari/Goojnana collision (108 BPM, -12 dB)
+            # We allow a tiny margin of error (Score < 1) just in case, or strict check
+            if bpm == 108 and loudness == -12:
+                st.session_state.tie_breaker_active = True
+                # Clear any previous match so we don't show the wrong one yet
+                if "best_match" in st.session_state:
+                    del st.session_state.best_match
+            else:
+                # Standard Behavior
+                st.session_state.tie_breaker_active = False
                 best_match = df_tracks.loc[df_tracks["Match Score"].idxmin()]
                 st.session_state.best_match = best_match.to_dict()
+
+    # --- TIE BREAKER UI (Only shows if the specific values were entered) ---
+    if st.session_state.get("tie_breaker_active", False):
+        st.info("✨ A musical convergence! Two songs resonate with this exact frequency.")
+        st.markdown("### Which vibe calls to you?")
+
+        # Filter the two specific songs
+        song_mamari = df_tracks[df_tracks["Name"] == "Mamari"].iloc[0]
+        song_goojnana = df_tracks[df_tracks["Name"] == "Goojnana"].iloc[0]
+
+        col_tie1, col_tie2 = st.columns(2)
+
+        # Option 1: Mamari
+        with col_tie1:
+            st.image(song_mamari["Image"], width=200)
+            if st.button("Choose: Mamari", use_container_width=True):
+                st.session_state.best_match = song_mamari.to_dict()
+                st.session_state.tie_breaker_active = False
+                st.rerun()
+
+        # Option 2: Goojnana
+        with col_tie2:
+            st.image(song_goojnana["Image"], width=200)
+            if st.button("Choose: Goojnana", use_container_width=True):
+                st.session_state.best_match = song_goojnana.to_dict()
+                st.session_state.tie_breaker_active = False
+                st.rerun()
 
     def find_matching_creatures_either(tempo, loudness, df):
         matched = []
