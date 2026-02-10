@@ -925,39 +925,45 @@ def main_app():
                 clean_name = filename.replace(".csv", "").replace("_", " ")
                 
                 st.subheader(f"🔮 Enchantment Active: {clean_name}")
-                st.success(f"🎶 Playlist code: **{clean_name}**")
-                st.info(f"🕯️ **Remember:** Your code is your playlist name: **{clean_name}** (not case sensitive)")
+                st.success(f"🎶 Autosave is ON — your playlist is being protected!")
+                st.info(f"🕯️ **Your code is your playlist name:** **{clean_name}** — just type it in next time to summon it back! (not case sensitive)")
             except:
                 st.subheader("🔮 Enchantment Active")
         else:
             # 🟢 STATE: Not saved yet. Suggest saving.
             st.subheader("📜 Chronicle Your Concerto")
             
-            st.markdown("✨ **Magic Tip:** Save your playlist to enable **Autosave**. Any changes will be updated automatically.")
+            st.markdown("✨ **Magic Tip:** Name your playlist to lock in **Autosave**. Your name is also your secret code to summon it back later!")
             
-            playlist_name = st.text_input("Enter a name for your playlist:")
+            playlist_name = st.text_input("🏷️ Give your playlist a name:")
             playlist_name = normalize_playlist_name(playlist_name)
             invalid_chars = ['/', '\\', ':', '*', '?', '"', '<', '>', '|', '#', '%', '&', '{', '}', '$', '!', "'", '`', '@']
             found_invalid = [char for char in invalid_chars if char in playlist_name]
             
+            # Pre-check: load existing names for live duplicate detection
+            playlist_dir = "saved_user_playlists"
+            if not os.path.exists(playlist_dir): os.makedirs(playlist_dir)
+            existing_names = {f.replace(".csv", "").replace("_", " ").lower() for f in os.listdir(playlist_dir) if f.endswith(".csv")}
+            
+            # Live feedback as user types
+            name_is_valid = False
             if not playlist_name:
-                pass  # No input yet, do nothing
-            
+                pass  # No input yet
             elif found_invalid:
-                st.error(f"❌ Invalid characters: {' '.join(found_invalid)}")
+                st.error(f"🚫 Whoa, these characters aren't allowed: **{' '.join(found_invalid)}**")
+                st.caption("✏️ Stick to **letters**, **numbers**, **spaces**, and **hyphens**. No special symbols like @, #, $, !, etc.")
+            elif playlist_name.lower() in existing_names:
+                st.warning(f"⚠️ The name **{playlist_name}** is already taken! Try a different name to make it yours.")
+            else:
+                name_is_valid = True
+                st.success(f"✅ **{playlist_name}** is available! Hit the button to inscribe it.")
             
-            elif st.button("🖋️ Inscribe to Archives", type="primary") and playlist_name:
-                playlist_dir = "saved_user_playlists"
-                if not os.path.exists(playlist_dir): os.makedirs(playlist_dir)
-                
-                # The playlist code IS the playlist name (case-insensitive)
-                playlist_code = playlist_name
-                
-                # Check if a playlist with this name already exists (case-insensitive)
-                existing_names = {f.replace(".csv", "").replace("_", " ").lower() for f in os.listdir(playlist_dir) if f.endswith(".csv")}
-                
-                if playlist_code.lower() in existing_names:
-                    st.error(f"❌ A playlist named **{playlist_code}** already exists. Please choose a different name.")
+            # Button is always visible
+            if st.button("🖋️ Inscribe to Archives", type="primary"):
+                if not playlist_name:
+                    st.error("✏️ You need to write a name first!")
+                elif not name_is_valid:
+                    st.error("🛑 Fix the issue above before inscribing.")
                 else:
                     # Use lowercase filename for filesystem consistency
                     filename = f"{playlist_name.lower().replace(' ', '_')}.csv"
@@ -972,11 +978,11 @@ def main_app():
                     save_updates_to_file()
                     auto_save_session() # Update the temp session file too
 
-                    st.success("✅ Concerto Inscribed Successfully!")
+                    st.success("🎉 Concerto Inscribed! Your playlist is now protected by autosave magic.")
                     
-                    st.markdown(f"## 🗝️ CODE: `{playlist_code}`")
+                    st.markdown(f"## 🗝️ Your Code: `{playlist_name}`")
                     
-                    st.info("💡 **Your code is your playlist name!** Just type it in to reload next time.")
+                    st.info("💡 **Your code is just your playlist name!** Type it in next time to summon your playlist back. It's not case sensitive, so don't worry about capitals!")
                     
                     st.rerun()
 
