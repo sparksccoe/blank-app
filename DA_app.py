@@ -222,6 +222,13 @@ def remove_song(idx):
         auto_save_session()    # Save to temporary session
         save_updates_to_file() # Save to permanent file (if linked)
 
+def normalize_playlist_name(name):
+    """Normalize a playlist name: strip, collapse multiple spaces, lowercase for comparison."""
+    import re
+    name = name.strip()
+    name = re.sub(r'\s+', ' ', name)  # Collapse multiple spaces to one
+    return name
+
 # --- DATA LOADING ---
 client_id = '922604ee2b934fbd9d1223f4ec023fba'
 client_secret = '1bdf88cb16d64e54ba30220a8f126997'
@@ -321,10 +328,10 @@ def main_app():
 
     # --- LOAD SAVED PLAYLIST ---
     with st.expander("**🗝️ Have a Saved Playlist? Tap Here to Load**", expanded=False):
-        st.write("Enter your 1-word Playlist Code to load your saved playlist:")
+        st.write("Enter your Playlist Name to load your saved playlist:")
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            entered_code = st.text_input(label=" ", label_visibility="collapsed", key="playlist_code_input").strip().lower()
+            entered_code = normalize_playlist_name(st.text_input(label=" ", label_visibility="collapsed", key="playlist_code_input"))
             
         col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
         with col_btn2:
@@ -332,20 +339,28 @@ def main_app():
 
         playlist_dir = "saved_user_playlists"
 
-        if summon_clicked and entered_code:
-            matching_files = [f for f in os.listdir(playlist_dir) if f.lower().endswith(f"{entered_code}.csv")]
+        invalid_chars = ['/', '\\', ':', '*', '?', '"', '<', '>', '|', '#', '%', '&', '{', '}', '$', '!', "'", '`', '@']
+        found_invalid = [char for char in invalid_chars if char in entered_code]
+
+        if summon_clicked and entered_code and found_invalid:
+            st.error(f"❌ Invalid characters: {' '.join(found_invalid)}")
+
+        elif summon_clicked and entered_code:
+            # Match by playlist name (case-insensitive): filename is "Name.csv"
+            entered_normalized = entered_code.lower().replace(" ", "_")
+            matching_files = [f for f in os.listdir(playlist_dir) if f.lower().replace(".csv", "") == entered_normalized]
             if matching_files:
                 playlist_file = matching_files[0]
                 filepath = os.path.join(playlist_dir, playlist_file)
                 retrieved_df = pd.read_csv(filepath)
                 st.session_state.user_playlist = retrieved_df.to_dict(orient="records")
-                st.session_state.saved_playlist_name = playlist_file.rsplit("_", 1)[0].replace("_", " ")
+                st.session_state.saved_playlist_name = playlist_file.replace(".csv", "").replace("_", " ")
                 
                 # Link this session to the file for autosave
                 st.session_state.current_playlist_filename = playlist_file 
                 
                 auto_save_session()
-                st.success(f"🪄 Playlist summoned! Changes will now autosave to code: **{entered_code}**")
+                st.success(f"🪄 Playlist summoned! Changes will now autosave to: **{entered_code}**")
             else:
                 st.error("❌ No playlist found with that code.")
 
@@ -906,13 +921,12 @@ def main_app():
             # 🟢 STATE: Playlist is saved. Show status.
             filename = st.session_state.current_playlist_filename
             try:
-                # Parse filename "Name_Code.csv"
-                clean_name = filename.rsplit("_", 1)[0].replace("_", " ")
-                code = filename.rsplit("_", 1)[-1].replace(".csv", "")
+                # Parse filename "Name.csv" — the code IS the name
+                clean_name = filename.replace(".csv", "").replace("_", " ")
                 
                 st.subheader(f"🔮 Enchantment Active: {clean_name}")
-                st.success(f"🎶 Playlist linked to code: **{code}**")
-                st.info(f"🕯️ **Remember:** Your code is **{code}**. Make sure you have it written down to reload this playlist next time!")
+                st.success(f"🎶 Playlist code: **{clean_name}**")
+                st.info(f"🕯️ **Remember:** Your code is your playlist name: **{clean_name}** (not case sensitive)")
             except:
                 st.subheader("🔮 Enchantment Active")
         else:
@@ -922,45 +936,49 @@ def main_app():
             st.markdown("✨ **Magic Tip:** Save your playlist to enable **Autosave**. Any changes will be updated automatically.")
             
             playlist_name = st.text_input("Enter a name for your playlist:")
+            playlist_name = normalize_playlist_name(playlist_name)
             invalid_chars = ['/', '\\', ':', '*', '?', '"', '<', '>', '|', '#', '%', '&', '{', '}', '$', '!', "'", '`', '@']
             found_invalid = [char for char in invalid_chars if char in playlist_name]
             
-            if found_invalid and playlist_name:
+            if not playlist_name:
+                pass  # No input yet, do nothing
+            
+            elif found_invalid:
                 st.error(f"❌ Invalid characters: {' '.join(found_invalid)}")
             
             elif st.button("🖋️ Inscribe to Archives", type="primary") and playlist_name:
                 playlist_dir = "saved_user_playlists"
                 if not os.path.exists(playlist_dir): os.makedirs(playlist_dir)
                 
-                word_choices = ["Graph", "Tempo", "Volume", "Loud", "Soft", "Fast", "Slow", "Numeric", "Data", "Creature", "Bard", "Adventure"]
-                base_word = random.choice(word_choices).lower()
-                existing_codes = {f.rsplit("_", 1)[-1].replace(".csv", "").lower() for f in os.listdir(playlist_dir) if f.endswith(".csv")}
+                # The playlist code IS the playlist name (case-insensitive)
+                playlist_code = playlist_name
                 
-                playlist_code = base_word
-                suffix = 1
-                while playlist_code in existing_codes:
-                    playlist_code = f"{base_word}{suffix}"
-                    suffix += 1
+                # Check if a playlist with this name already exists (case-insensitive)
+                existing_names = {f.replace(".csv", "").replace("_", " ").lower() for f in os.listdir(playlist_dir) if f.endswith(".csv")}
+                
+                if playlist_code.lower() in existing_names:
+                    st.error(f"❌ A playlist named **{playlist_code}** already exists. Please choose a different name.")
+                else:
+                    # Use lowercase filename for filesystem consistency
+                    filename = f"{playlist_name.lower().replace(' ', '_')}.csv"
+                    
+                    # Set the filename in session state
+                    st.session_state.current_playlist_filename = filename
+                    
+                    # Update the playlist name in session state immediately
+                    st.session_state.saved_playlist_name = playlist_name
+                    
+                    # Trigger the save
+                    save_updates_to_file()
+                    auto_save_session() # Update the temp session file too
 
-                filename = f"{playlist_name.replace(' ', '_')}_{playlist_code}.csv"
-                
-                # Set the filename in session state
-                st.session_state.current_playlist_filename = filename
-                
-                # Update the playlist name in session state immediately
-                st.session_state.saved_playlist_name = playlist_name
-                
-                # Trigger the save
-                save_updates_to_file()
-                auto_save_session() # Update the temp session file too
-
-                st.success("✅ Concerto Inscribed Successfully!")
-                
-                st.markdown(f"## 🗝️ CODE: `{playlist_code}`")
-                
-                st.warning("⚠️ **IMPORTANT:** Write this code down now! You will need to enter this code to bring up your playlist next time.")
-                
-                st.rerun()
+                    st.success("✅ Concerto Inscribed Successfully!")
+                    
+                    st.markdown(f"## 🗝️ CODE: `{playlist_code}`")
+                    
+                    st.info("💡 **Your code is your playlist name!** Just type it in to reload next time.")
+                    
+                    st.rerun()
 
 def cleanup_old_playlists():
     playlist_dir = "saved_user_playlists"
@@ -1006,17 +1024,10 @@ def admin_page():
             
             for filename in files:
                 try:
-                    # Parse Filename: "My_Cool_Song_tempo1.csv"
-                    # Split by the last underscore to separate Name from Code
-                    parts = filename.rsplit("_", 1)
-                    
-                    if len(parts) == 2:
-                        raw_name = parts[0]
-                        clean_name = raw_name.replace("_", " ") # "My Cool Song"
-                        code = parts[1].replace(".csv", "")     # "tempo1"
-                    else:
-                        clean_name = "Uncategorized"
-                        code = filename
+                    # Parse Filename: "My_Cool_Song.csv" (name IS the code)
+                    raw_name = filename.replace(".csv", "")
+                    clean_name = raw_name.replace("_", " ")
+                    code = clean_name  # Code is the playlist name
 
                     filepath = os.path.join(playlist_dir, filename)
                     mod_time = os.path.getmtime(filepath)
