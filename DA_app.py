@@ -304,7 +304,6 @@ df_tracks = pd.DataFrame({
     "Duration": df_audio_features["Time"],
     "Bard": df_audio_features["Bard"],
     "YouTube Video ID": track_video_id[:len(df_audio_features)],
-    "Loudness Visualization": df_audio_features.get("Loudness Visualizations", pd.Series(dtype=str)),
 })
 
 # Load Creatures
@@ -516,199 +515,101 @@ def main_app():
             st.write(f"🎚️ **BPM:** {best_match['Tempo (BPM)']}")
             st.write(f"🔊 **Loudness:** {best_match['Loudness (dB)']} dB")
 
-        # --- Loudness Visualization + YouTube Synced Player ---
+        # --- Single Song Waveform Visualization ---
+
+        # Load Waveform Data (Global load, usually done once but fine here for safety)
+        waveform_db = {}
+        if os.path.exists("song_waveforms.json"):
+            with open("song_waveforms.json", "r") as f:
+                waveform_db = json.load(f)
+                
+        # Check if we have data for THIS song
+        song_name = best_match["Name"]
+        db_values = waveform_db.get(song_name)
         
-        yt_video_id = best_match.get("YouTube Video ID", None)
-        loudness_viz_url = best_match.get("Loudness Visualization", None)
-        has_yt = pd.notna(yt_video_id) if yt_video_id is not None else False
-        has_viz = pd.notna(loudness_viz_url) if loudness_viz_url is not None else False
-        
-        if has_yt and has_viz:
-            # --- SYNCED PLAYER: AE Loudness Video on top, YouTube below ---
-            st.markdown("#### 🔊 Loudness Visualization")
+        if db_values:
+            st.markdown("#### Loudness Visualization")
             
-            sync_html = f"""
-            <div id="sync-player-container" style="width:100%; max-width:720px; margin:0 auto;">
-                <!-- Loudness Visualization Video -->
-                <div style="position:relative; width:100%; background:#000; border-radius:8px 8px 0 0; overflow:hidden;">
-                    <video id="loudness-viz" 
-                           style="width:100%; display:block;" 
-                           muted playsinline preload="auto"
-                           poster="">
-                        <source src="{loudness_viz_url}" type="video/mp4">
-                    </video>
-                    <div id="viz-status" style="position:absolute; bottom:8px; left:12px; 
-                         color:#fff; font-size:12px; background:rgba(0,0,0,0.6); 
-                         padding:2px 8px; border-radius:4px; opacity:0.8;">
-                        ▶ Press play on YouTube to start
-                    </div>
-                </div>
-                
-                <!-- YouTube Player -->
-                <div id="yt-player-wrap" style="width:100%; border-radius:0 0 8px 8px; overflow:hidden;">
-                    <div id="yt-player" style="width:100%;"></div>
-                </div>
-            </div>
+            # Calculate visual parameters
+            raw_dur = best_match.get("Duration", 0)
+            try:
+                if isinstance(raw_dur, str) and ":" in raw_dur:
+                    parts = raw_dur.split(":")
+                    duration_sec = int(parts[0]) * 60 + int(parts[1])
+                else:
+                    duration_sec = float(raw_dur) / 1000
+            except:
+                duration_sec = 0
 
-            <script>
-                // Load YouTube IFrame API
-                var tag = document.createElement('script');
-                tag.src = "https://www.youtube.com/iframe_api";
-                var firstScriptTag = document.getElementsByTagName('script')[0];
-                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-                var ytPlayer;
-                var vizVideo = document.getElementById('loudness-viz');
-                var vizStatus = document.getElementById('viz-status');
-                var syncInterval = null;
-                var isUserSeeking = false;
-
-                function onYouTubeIframeAPIReady() {{
-                    ytPlayer = new YT.Player('yt-player', {{
-                        height: '400',
-                        width: '100%',
-                        videoId: '{yt_video_id}',
-                        playerVars: {{
-                            'enablejsapi': 1,
-                            'origin': window.location.origin,
-                            'rel': 0,
-                            'modestbranding': 1
-                        }},
-                        events: {{
-                            'onReady': onPlayerReady,
-                            'onStateChange': onPlayerStateChange
-                        }}
-                    }});
-                }}
-
-                function onPlayerReady(event) {{
-                    vizStatus.textContent = '▶ Press play on YouTube to start';
-                }}
-
-                function onPlayerStateChange(event) {{
-                    var viz = document.getElementById('loudness-viz');
-                    var status = document.getElementById('viz-status');
-                    if (!viz || !status) return;
-
-                    if (event.data === YT.PlayerState.PLAYING) {{
-                        // Sync position before playing
-                        var ytTime = ytPlayer.getCurrentTime();
-                        if (Math.abs(viz.currentTime - ytTime) > 0.3) {{
-                            viz.currentTime = ytTime;
-                        }}
-                        viz.play().catch(function(e) {{ console.log('Viz play blocked:', e); }});
-                        status.textContent = '🔊 Live Loudness Visualization';
-                        status.style.background = 'rgba(173, 152, 176, 0.8)';
-                        startSyncLoop();
-                    }} else if (event.data === YT.PlayerState.PAUSED) {{
-                        viz.pause();
-                        status.textContent = '⏸ Paused';
-                        status.style.background = 'rgba(0,0,0,0.6)';
-                        stopSyncLoop();
-                    }} else if (event.data === YT.PlayerState.ENDED) {{
-                        viz.pause();
-                        viz.currentTime = 0;
-                        status.textContent = '✅ Complete';
-                        status.style.background = 'rgba(0,0,0,0.6)';
-                        stopSyncLoop();
-                    }} else if (event.data === YT.PlayerState.BUFFERING) {{
-                        viz.pause();
-                        status.textContent = '⏳ Buffering...';
-                        stopSyncLoop();
-                    }}
-                }}
-
-                function startSyncLoop() {{
-                    stopSyncLoop();
-                    syncInterval = setInterval(function() {{
-                        if (!ytPlayer || !ytPlayer.getCurrentTime) return;
-                        var viz = document.getElementById('loudness-viz');
-                        if (!viz) return;
-                        var ytTime = ytPlayer.getCurrentTime();
-                        var drift = Math.abs(viz.currentTime - ytTime);
-                        // Correct drift if more than 0.4 seconds
-                        if (drift > 0.4) {{
-                            viz.currentTime = ytTime;
-                        }}
-                    }}, 500);
-                }}
-
-                function stopSyncLoop() {{
-                    if (syncInterval) {{
-                        clearInterval(syncInterval);
-                        syncInterval = null;
-                    }}
-                }}
-            </script>
-            """
-            components.html(sync_html, height=650, scrolling=False)
+            x_axis = np.linspace(0, duration_sec, len(db_values))
             
-        elif has_yt:
-            # Fallback: YouTube only, no visualization video available
-            # --- Static Waveform Chart (if waveform data exists) ---
-            waveform_db = {}
-            if os.path.exists("song_waveforms.json"):
-                with open("song_waveforms.json", "r") as f:
-                    waveform_db = json.load(f)
+            # Rectified Waveform (0 to 1 scale)
+            y_values = [max(0, db + 60) for db in db_values]
             
-            song_name = best_match["Name"]
-            db_values = waveform_db.get(song_name)
+            fig_wave = go.Figure()
             
-            if db_values:
-                st.markdown("#### Loudness Visualization")
-                raw_dur = best_match.get("Duration", 0)
-                try:
-                    if isinstance(raw_dur, str) and ":" in raw_dur:
-                        parts = raw_dur.split(":")
-                        duration_sec = int(parts[0]) * 60 + int(parts[1])
-                    else:
-                        duration_sec = float(raw_dur) / 1000
-                except:
-                    duration_sec = 0
+            # 1. The Waveform (Lavender)
+            fig_wave.add_trace(go.Scatter(
+                x=x_axis,
+                y=y_values,
+                fill='tozeroy',
+                fillcolor='#AD98B0',
+                line=dict(color='#AD98B0', width=1.5),
+                opacity=0.9,
+                name=song_name,
+                hoverinfo="x+text",
+                text=[f"{db} dB" for db in db_values]
+            ))
+            
+            # 2. Average Loudness Line (Neon Orange)
+            avg_loudness = best_match.get("Loudness (dB)", -60)
+            avg_y = avg_loudness + 60
+            
+            fig_wave.add_trace(go.Scatter(
+                x=[0, duration_sec],
+                y=[avg_y, avg_y],
+                mode='lines',
+                line=dict(color='#FF5F1F', width=4), # Thicker line
+                name="Avg Loudness",
+                hoverinfo="text",
+                text=[f"Average: {avg_loudness} dB"]*2
+            ))
 
-                x_axis = np.linspace(0, duration_sec, len(db_values))
-                y_values = [max(0, db + 60) for db in db_values]
-                
-                fig_wave = go.Figure()
-                fig_wave.add_trace(go.Scatter(
-                    x=x_axis, y=y_values,
-                    fill='tozeroy', fillcolor='#AD98B0',
-                    line=dict(color='#AD98B0', width=1.5),
-                    opacity=0.9, name=song_name,
-                    hoverinfo="x+text",
-                    text=[f"{db} dB" for db in db_values]
-                ))
-                
-                avg_loudness = best_match.get("Loudness (dB)", -60)
-                avg_y = avg_loudness + 60
-                fig_wave.add_trace(go.Scatter(
-                    x=[0, duration_sec], y=[avg_y, avg_y],
-                    mode='lines', line=dict(color='#FF5F1F', width=4),
-                    name="Avg Loudness", hoverinfo="text",
-                    text=[f"Average: {avg_loudness} dB"]*2
-                ))
-                fig_wave.add_annotation(
-                    x=duration_sec * 0.02, y=avg_y - 5,
-                    text=f"Average: {avg_loudness} dB",
-                    showarrow=False,
-                    font=dict(color='#FF5F1F', size=18, family="Arial Black"),
-                    xanchor="left", yanchor="top"
-                )
-                fig_wave.update_layout(
-                    xaxis=dict(title="Duration (s)", showgrid=False, zeroline=True, showticklabels=True),
-                    yaxis=dict(
-                        title="Loudness", showgrid=True, gridcolor='rgba(0,0,0,0.1)',
-                        zeroline=False, showticklabels=True,
-                        range=[30, 65], tickmode='array',
-                        tickvals=[30, 40, 50, 60],
-                        ticktext=['-30 dB', '-20 dB', '-10 dB', '0 dB']
-                    ),
-                    height=250, margin=dict(l=60, r=20, t=20, b=40),
-                    plot_bgcolor='white', showlegend=False
-                )
-                st.plotly_chart(fig_wave, use_container_width=True)
+            # 3. Explicit Text Label for the Line
+            fig_wave.add_annotation(
+                x=duration_sec * 0.02, # Near the start
+                y=avg_y - 5,           # Slightly above the line
+                text=f"Average: {avg_loudness} dB",
+                showarrow=False,
+                font=dict(color='#FF5F1F', size=18, family="Arial Black"),
+                xanchor="left",
+                yanchor="top"
+            )
             
-            st.video(f"https://www.youtube.com/embed/{yt_video_id}")
+            fig_wave.update_layout(
+                xaxis=dict(title="Duration (s)", showgrid=False, zeroline=True, showticklabels=True),
+                yaxis=dict(
+                    title="Loudness",
+                    showgrid=True,
+                    gridcolor='rgba(0,0,0,0.1)',
+                    zeroline=False,
+                    showticklabels=True,
+                    # ZOOMED RANGE: 30 (-30dB) to 65 (+5dB headroom)
+                    range=[30, 65],
+                    tickmode='array',
+                    # Ticks every 10dB within the new view
+                    tickvals=[30, 40, 50, 60],
+                    ticktext=['-30 dB', '-20 dB', '-10 dB', '0 dB']
+                ),
+                height=250, 
+                margin=dict(l=60, r=20, t=20, b=40),
+                plot_bgcolor='white',
+                showlegend=False
+            )
+            st.plotly_chart(fig_wave, use_container_width=True)
+            
+        if pd.notna(best_match["YouTube Video ID"]):
+            st.video(f"https://www.youtube.com/embed/{best_match['YouTube Video ID']}")
         else:
             st.write("⚠️ No YouTube video available for this track.")
         
