@@ -431,13 +431,13 @@ def main_app():
         loudness = st.number_input(label=" ", min_value=-60, max_value=0, value=None, step=1, format="%d", label_visibility="collapsed", key=f"loudness_input_{reset_counter}")
 
     if loudness is not None:
-        if loudness < -50: st.write("This is **super quiet**! Like a ghost whispering.")
-        elif loudness < -40: st.write("This is **very quiet**. Like studying in a library.")
-        elif loudness < -30: st.write("This is **quiet**. Chill vibes, background music.")
-        elif loudness < -20: st.write("This is **medium volume**. Like a normal conversation.")
-        elif loudness < -10: st.write("This is **loud**! Like a busy cafeteria.")
-        elif loudness < -5: st.write("This is **really loud**! Like a school assembly.")
-        else: st.write("**Max volume!** Like a rock concert!")
+        if loudness < -30: st.write("**Ultra soft** — This song is mostly very quiet, like background music you'd barely notice. Think of a soft piano piece or gentle nature sounds.")
+        elif loudness < -20: st.write("**Soft** — This song stays pretty quiet most of the time, like an acoustic guitar or a calm soundtrack. You might turn your volume up to hear it better.")
+        elif loudness < -14: st.write("**Medium soft** — This song has a relaxed, easygoing feel. It's not loud, but you can hear everything clearly — like chill lo-fi or folk music.")
+        elif loudness < -10: st.write("**Medium** — This song has a balanced, comfortable loudness. Most pop and indie songs land right around here.")
+        elif loudness < -6: st.write("**Loud** — This song hits pretty hard for most of its runtime. Think of an energetic pop hit or a hip-hop track with heavy bass.")
+        elif loudness < -3: st.write("**Very loud** — This song is cranked up almost the whole way through, like a rock anthem or an EDM drop. It doesn't hold back!")
+        else: st.write("**Extremely loud** — This song is at maximum intensity nearly the entire time, like heavy metal or the loudest club music. There's almost no quiet moment.")
 
     # --- MATCHING LOGIC ---
     if bpm is not None and loudness is not None:
