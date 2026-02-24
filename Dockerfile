@@ -1,21 +1,19 @@
 FROM python:3.11-slim
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    portaudio19-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Install libsndfile (needed by soundfile) in one layer
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends libsndfile1 && \
+    rm -rf /var/lib/apt/lists/*
 
-# Set working directory
 WORKDIR /app
 
-# Copy all files to container
-COPY . .
-
-# Install Python dependencies
+# Copy requirements FIRST — this layer is cached unless requirements.txt changes
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Optional: Symbolic port exposure
-EXPOSE 8501
+# Copy app code SECOND — only this layer rebuilds on code changes
+COPY . .
 
-# Final CMD: Streamlit binds to $PORT from Railway
-CMD streamlit run DA_app.py --server.port=$PORT --server.address=0.0.0.0
+EXPOSE 8080
+
+CMD ["streamlit", "run", "DA_app.py", "--server.port=8080", "--server.address=0.0.0.0", "--server.headless=true"]

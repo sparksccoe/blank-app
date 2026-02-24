@@ -1,0 +1,13 @@
+.git
+__pycache__
+*.pyc
+*.pyo
+temp_user_sessions/
+saved_user_playlists/
+.env
+.venv
+venv/
+*.md
+.gitignore
+.DS_Store
+Thumbs.db
