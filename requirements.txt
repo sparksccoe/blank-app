@@ -28,6 +28,7 @@ rich==13.9.4
 rpds-py==0.22.3
 six==1.17.0
 soundfile==0.12.1
+sounddevice
 spotipy==2.24.0
 streamlit==1.41.0
 tenacity==9.0.0
