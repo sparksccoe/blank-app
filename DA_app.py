@@ -638,70 +638,107 @@ def main_app():
                 </div>
 
                 <script>
-                    var tag = document.createElement('script');
-                    tag.src = "https://www.youtube.com/iframe_api";
-                    var firstScriptTag = document.getElementsByTagName('script')[0];
-                    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-                    var ytPlayer;
+                    // --- YouTube IFrame API Setup ---
+                    // The API calls window.onYouTubeIframeAPIReady when ready.
+                    // We must handle the case where the API loads before or after our script runs.
+                    
+                    var ytPlayer = null;
                     var syncInterval = null;
+                    var pollInterval = null;
+                    var lastYTState = -1;
 
-                    function onYouTubeIframeAPIReady() {{
-                        ytPlayer = new YT.Player('yt-player', {{
-                            height: '400',
-                            width: '100%',
-                            videoId: '{yt_video_id}',
-                            playerVars: {{
-                                'enablejsapi': 1,
-                                'origin': window.location.origin,
-                                'rel': 0,
-                                'modestbranding': 1
-                            }},
-                            events: {{
-                                'onStateChange': onPlayerStateChange
-                            }}
-                        }});
+                    function createPlayer() {{
+                        if (ytPlayer) return; // Already created
+                        try {{
+                            ytPlayer = new YT.Player('yt-player', {{
+                                height: '400',
+                                width: '100%',
+                                videoId: '{yt_video_id}',
+                                playerVars: {{
+                                    'enablejsapi': 1,
+                                    'rel': 0,
+                                    'modestbranding': 1
+                                }},
+                                events: {{
+                                    'onReady': function() {{
+                                        // Player is ready — start polling as backup sync
+                                        startPollLoop();
+                                    }},
+                                    'onStateChange': function(event) {{
+                                        handleStateChange(event.data);
+                                    }}
+                                }}
+                            }});
+                        }} catch(e) {{
+                            console.log('YT Player creation error:', e);
+                        }}
                     }}
 
-                    function onPlayerStateChange(event) {{
+                    // Global callback for YouTube API
+                    window.onYouTubeIframeAPIReady = function() {{
+                        createPlayer();
+                    }};
+
+                    // Load the API script
+                    if (window.YT && window.YT.Player) {{
+                        // API already loaded (e.g., from a previous component)
+                        createPlayer();
+                    }} else {{
+                        var tag = document.createElement('script');
+                        tag.src = "https://www.youtube.com/iframe_api";
+                        document.head.appendChild(tag);
+                    }}
+
+                    function handleStateChange(state) {{
                         var viz = document.getElementById('loudness-viz');
                         var badge = document.getElementById('viz-badge');
                         if (!viz) return;
 
-                        if (event.data === YT.PlayerState.PLAYING) {{
+                        if (state === 1) {{ // PLAYING
                             var ytTime = ytPlayer.getCurrentTime();
                             if (Math.abs(viz.currentTime - ytTime) > 0.3) {{
                                 viz.currentTime = ytTime;
                             }}
-                            viz.play().catch(function(e) {{}});
-                            if (badge) {{
-                                badge.textContent = '🔊 Real-Time Loudness';
-                                badge.style.background = 'rgba(173,152,176,0.85)';
-                            }}
+                            viz.play();
+                            if (badge) badge.textContent = '🔊 Real-Time Loudness';
                             startSyncLoop();
 
-                        }} else if (event.data === YT.PlayerState.PAUSED) {{
+                        }} else if (state === 2) {{ // PAUSED
                             viz.pause();
                             if (badge) badge.textContent = '⏸ Paused';
                             stopSyncLoop();
 
-                        }} else if (event.data === YT.PlayerState.ENDED) {{
+                        }} else if (state === 0) {{ // ENDED
                             viz.pause();
                             viz.currentTime = 0;
                             if (badge) badge.textContent = '✅ Complete';
                             stopSyncLoop();
 
-                        }} else if (event.data === YT.PlayerState.BUFFERING) {{
+                        }} else if (state === 3) {{ // BUFFERING
                             viz.pause();
                             if (badge) badge.textContent = '⏳ Buffering...';
                             stopSyncLoop();
                         }}
                     }}
 
+                    // Polling fallback: checks YT player state every 300ms
+                    // This catches state changes even if the event listener doesn't fire
+                    function startPollLoop() {{
+                        if (pollInterval) return;
+                        pollInterval = setInterval(function() {{
+                            if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
+                            var state = ytPlayer.getPlayerState();
+                            if (state !== lastYTState) {{
+                                lastYTState = state;
+                                handleStateChange(state);
+                            }}
+                        }}, 300);
+                    }}
+
                     function startSyncLoop() {{
                         stopSyncLoop();
                         syncInterval = setInterval(function() {{
-                            if (!ytPlayer || !ytPlayer.getCurrentTime) return;
+                            if (!ytPlayer || typeof ytPlayer.getCurrentTime !== 'function') return;
                             var viz = document.getElementById('loudness-viz');
                             if (!viz) return;
                             var drift = Math.abs(viz.currentTime - ytPlayer.getCurrentTime());
