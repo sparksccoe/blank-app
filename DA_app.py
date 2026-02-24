@@ -756,7 +756,7 @@ def main_app():
                     }}
                 </script>
                 """
-                components.html(sync_html, height=680, scrolling=False)
+                components.html(sync_html, height=820, scrolling=False)
             else:
                 # No AE video — standard YouTube embed
                 st.video(f"https://www.youtube.com/embed/{yt_video_id}")
