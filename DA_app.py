@@ -632,8 +632,8 @@ def main_app():
                     </div>
                     
                     <!-- YouTube Player (below) -->
-                    <div style="width:100%; border-radius:0 0 8px 8px; overflow:hidden;">
-                        <div id="yt-player"></div>
+                    <div style="width:100%; border-radius:0 0 8px 8px; overflow:hidden; position:relative; padding-bottom:56.25%; height:0;">
+                        <div id="yt-player" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
                     </div>
                 </div>
 
@@ -651,7 +651,7 @@ def main_app():
                         if (ytPlayer) return; // Already created
                         try {{
                             ytPlayer = new YT.Player('yt-player', {{
-                                height: '400',
+                                height: '100%',
                                 width: '100%',
                                 videoId: '{yt_video_id}',
                                 playerVars: {{
