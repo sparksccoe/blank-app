@@ -17,7 +17,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 import soundfile as sf
-import sounddevice as sd
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
@@ -304,6 +303,7 @@ df_tracks = pd.DataFrame({
     "Duration": df_audio_features["Time"],
     "Bard": df_audio_features["Bard"],
     "YouTube Video ID": track_video_id[:len(df_audio_features)],
+    "Loudness Visualization": df_audio_features.get("Loudness Visualizations", pd.Series(dtype=str)),
 })
 
 # Load Creatures
@@ -609,7 +609,120 @@ def main_app():
             st.plotly_chart(fig_wave, use_container_width=True)
             
         if pd.notna(best_match["YouTube Video ID"]):
-            st.video(f"https://www.youtube.com/embed/{best_match['YouTube Video ID']}")
+            yt_video_id = best_match["YouTube Video ID"]
+            loudness_viz_url = best_match.get("Loudness Visualization", None)
+            has_viz = pd.notna(loudness_viz_url) if loudness_viz_url is not None else False
+            
+            if has_viz:
+                # --- AE Loudness Video on top + YouTube below, synced via IFrame API ---
+                sync_html = f"""
+                <div id="sync-container" style="width:100%; max-width:720px; margin:0 auto;">
+                    <!-- AE Loudness Visualization Video (on top) -->
+                    <div style="position:relative; width:100%; background:#000; border-radius:8px 8px 0 0; overflow:hidden;">
+                        <video id="loudness-viz" 
+                               style="width:100%; display:block;" 
+                               muted playsinline preload="auto">
+                            <source src="{loudness_viz_url}" type="video/mp4">
+                        </video>
+                        <div id="viz-badge" style="position:absolute; bottom:8px; left:12px; 
+                             color:#fff; font-size:12px; background:rgba(173,152,176,0.85); 
+                             padding:3px 10px; border-radius:4px;">
+                            ▶ Press play below to start
+                        </div>
+                    </div>
+                    
+                    <!-- YouTube Player (below) -->
+                    <div style="width:100%; border-radius:0 0 8px 8px; overflow:hidden;">
+                        <div id="yt-player"></div>
+                    </div>
+                </div>
+
+                <script>
+                    var tag = document.createElement('script');
+                    tag.src = "https://www.youtube.com/iframe_api";
+                    var firstScriptTag = document.getElementsByTagName('script')[0];
+                    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+                    var ytPlayer;
+                    var syncInterval = null;
+
+                    function onYouTubeIframeAPIReady() {{
+                        ytPlayer = new YT.Player('yt-player', {{
+                            height: '400',
+                            width: '100%',
+                            videoId: '{yt_video_id}',
+                            playerVars: {{
+                                'enablejsapi': 1,
+                                'origin': window.location.origin,
+                                'rel': 0,
+                                'modestbranding': 1
+                            }},
+                            events: {{
+                                'onStateChange': onPlayerStateChange
+                            }}
+                        }});
+                    }}
+
+                    function onPlayerStateChange(event) {{
+                        var viz = document.getElementById('loudness-viz');
+                        var badge = document.getElementById('viz-badge');
+                        if (!viz) return;
+
+                        if (event.data === YT.PlayerState.PLAYING) {{
+                            var ytTime = ytPlayer.getCurrentTime();
+                            if (Math.abs(viz.currentTime - ytTime) > 0.3) {{
+                                viz.currentTime = ytTime;
+                            }}
+                            viz.play().catch(function(e) {{}});
+                            if (badge) {{
+                                badge.textContent = '🔊 Real-Time Loudness';
+                                badge.style.background = 'rgba(173,152,176,0.85)';
+                            }}
+                            startSyncLoop();
+
+                        }} else if (event.data === YT.PlayerState.PAUSED) {{
+                            viz.pause();
+                            if (badge) badge.textContent = '⏸ Paused';
+                            stopSyncLoop();
+
+                        }} else if (event.data === YT.PlayerState.ENDED) {{
+                            viz.pause();
+                            viz.currentTime = 0;
+                            if (badge) badge.textContent = '✅ Complete';
+                            stopSyncLoop();
+
+                        }} else if (event.data === YT.PlayerState.BUFFERING) {{
+                            viz.pause();
+                            if (badge) badge.textContent = '⏳ Buffering...';
+                            stopSyncLoop();
+                        }}
+                    }}
+
+                    function startSyncLoop() {{
+                        stopSyncLoop();
+                        syncInterval = setInterval(function() {{
+                            if (!ytPlayer || !ytPlayer.getCurrentTime) return;
+                            var viz = document.getElementById('loudness-viz');
+                            if (!viz) return;
+                            var drift = Math.abs(viz.currentTime - ytPlayer.getCurrentTime());
+                            if (drift > 0.4) {{
+                                viz.currentTime = ytPlayer.getCurrentTime();
+                            }}
+                        }}, 500);
+                    }}
+
+                    function stopSyncLoop() {{
+                        if (syncInterval) {{
+                            clearInterval(syncInterval);
+                            syncInterval = null;
+                        }}
+                    }}
+                </script>
+                """
+                components.html(sync_html, height=680, scrolling=False)
+            else:
+                # No AE video — standard YouTube embed
+                st.video(f"https://www.youtube.com/embed/{yt_video_id}")
         else:
             st.write("⚠️ No YouTube video available for this track.")
         
