@@ -239,8 +239,8 @@ api_key = "AIzaSyAxHBK8MxzePcos86BOaBwUtTurr_ZbpNg"
 youtube_playlist_url = "https://www.youtube.com/playlist?list=PLtg7R4Q_LfGU-WLVp5jeOoD7tdUiS6FHg"
 youtube_playlist_id = youtube_playlist_url.split("list=")[-1]
 
-song_features_csv = "Symphonia Bards-3.csv"
-creatures_csv = "DA Creatures 2.csv"
+song_features_csv = "Symphonia Bards-4.csv"
+creatures_csv = "DA Creatures 4.csv"
 
 # Load Songs
 df_audio_features = pd.read_csv(song_features_csv)
