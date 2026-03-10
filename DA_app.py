@@ -277,6 +277,26 @@ def fetch_playlist_videos(api_key, youtube_playlist_id):
 
 videos, track_video_id = fetch_playlist_videos(api_key, youtube_playlist_id)
 
+# Build a lookup from YouTube video title to video ID for title-based matching
+yt_title_to_id = {}
+for video in videos:
+    if video["video_id"] is not None:
+        # Normalize title to lowercase for flexible matching
+        yt_title_to_id[video["title"].strip().lower()] = video["video_id"]
+
+# Match each song in the CSV to its YouTube video by title
+matched_video_ids = []
+for song_name in df_audio_features["Song"]:
+    song_lower = song_name.strip().lower()
+    matched_id = yt_title_to_id.get(song_lower, None)
+    # If exact match fails, try partial matching
+    if matched_id is None:
+        for yt_title, yt_id in yt_title_to_id.items():
+            if song_lower in yt_title or yt_title in song_lower:
+                matched_id = yt_id
+                break
+    matched_video_ids.append(matched_id)
+
 # Combine Data
 df_tracks = pd.DataFrame({
     "Track ID": df_audio_features["Spotify Track Id"],
@@ -302,7 +322,7 @@ df_tracks = pd.DataFrame({
     "Key": df_audio_features["Key"],
     "Duration": df_audio_features["Time"],
     "Bard": df_audio_features["Bard"],
-    "YouTube Video ID": track_video_id[:len(df_audio_features)],
+    "YouTube Video ID": matched_video_ids,
     "Loudness Visualization": df_audio_features.get("Loudness Visualizations", pd.Series(dtype=str)),
 })
 
@@ -1257,5 +1277,3 @@ if mode == "admin":
     admin_page()
 else:
     main_app()
-
-# for deployment, throwaway line
