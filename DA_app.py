@@ -10,8 +10,6 @@ from datetime import datetime, timedelta
 from PIL import Image
 import uuid
 import json
-import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -229,13 +227,15 @@ def normalize_playlist_name(name):
     return name
 
 # --- DATA LOADING ---
-client_id = '922604ee2b934fbd9d1223f4ec023fba'
-client_secret = '1bdf88cb16d64e54ba30220a8f126997'
-client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
-sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+# Track data is loaded from the bundled CSV below — no Spotify API is used.
+# The YouTube key comes from the environment (set on Railway); fail closed if
+# it's missing. Never hardcode secrets in source.
+api_key = os.environ.get("YOUTUBE_API_KEY")
+if not api_key:
+    st.error("Missing required environment variable: YOUTUBE_API_KEY")
+    st.stop()
 
 playlist_id = "3BGJRi9zQrIjLDtBbRYy5n"
-api_key = "AIzaSyAxHBK8MxzePcos86BOaBwUtTurr_ZbpNg" 
 youtube_playlist_url = "https://www.youtube.com/playlist?list=PLtg7R4Q_LfGU-WLVp5jeOoD7tdUiS6FHg"
 youtube_playlist_id = youtube_playlist_url.split("list=")[-1]
 
@@ -1187,107 +1187,88 @@ def cleanup_old_playlists():
 cleanup_old_playlists()
 
 # ----------------------------------------------------
-# 🔐 2. ADMIN PAGE INTERFACE
+# 🎵 2. TEACHER PAGE — saved-playlist lookup
 # ----------------------------------------------------
-def admin_page():
-    st.title("🔐 Admin Access")
-    
+# Open page (no login) so teachers can look up a student's saved playlist if
+# they forget its name. The playlist name IS the "code" students type to summon
+# it back in the app.
+def teacher_page():
+    st.title("🎵 Saved Playlists")
+    st.caption(
+        "Look up a student's saved playlist. The playlist **name** is the code "
+        "they type into \"Have a Saved Playlist?\" back in the app to load it again."
+    )
+
     playlist_dir = "saved_user_playlists"
 
-    # Initialize session state for admin login
-    if "is_admin" not in st.session_state: st.session_state.is_admin = False
+    files = []
+    if os.path.exists(playlist_dir):
+        files = [f for f in os.listdir(playlist_dir) if f.endswith(".csv")]
 
-    if not st.session_state.is_admin:
-        if st.text_input("Enter Admin Password:", type="password") == os.environ.get("ADMIN_PASSWORD", "secret123"):
-            st.session_state.is_admin = True
-            st.rerun()
-        st.info("Please enter the password to manage saved playlists.")
-    
-    if st.session_state.is_admin:
-        st.success("✅ Logged in")
-        
-        if os.path.exists(playlist_dir):
-            files = [f for f in os.listdir(playlist_dir) if f.endswith(".csv")]
-            
-            # --- GROUPING LOGIC ---
-            grouped_playlists = {}
-            
-            for filename in files:
-                try:
-                    # Parse Filename: "My_Cool_Song.csv" (name IS the code)
-                    raw_name = filename.replace(".csv", "")
-                    clean_name = raw_name.replace("_", " ")
-                    code = clean_name  # Code is the playlist name
+    if not files:
+        st.info("No saved playlists yet.")
+        return
 
-                    filepath = os.path.join(playlist_dir, filename)
-                    mod_time = os.path.getmtime(filepath)
-                    time_str = datetime.fromtimestamp(mod_time).strftime('%Y-%m-%d %I:%M %p')
+    # --- GROUP FILES BY PLAYLIST NAME ---
+    grouped_playlists = {}
+    for filename in files:
+        try:
+            clean_name = filename.replace(".csv", "").replace("_", " ")  # name IS the code
+            filepath = os.path.join(playlist_dir, filename)
+            mod_time = os.path.getmtime(filepath)
+            grouped_playlists.setdefault(clean_name, []).append({
+                "filename": filename,
+                "code": clean_name,
+                "time_val": mod_time,
+                "time_str": datetime.fromtimestamp(mod_time).strftime('%Y-%m-%d %I:%M %p'),
+                "path": filepath,
+            })
+        except Exception:
+            continue
 
-                    # Add to dictionary
-                    if clean_name not in grouped_playlists:
-                        grouped_playlists[clean_name] = []
-                    
-                    grouped_playlists[clean_name].append({
-                        "filename": filename,
-                        "code": code,
-                        "time_val": mod_time,
-                        "time_str": time_str,
-                        "path": filepath
-                    })
-                except:
-                    continue
+    # --- SEARCH ---
+    search = st.text_input("🔍 Search by playlist name", placeholder="Start typing a name…").strip().lower()
+    names = sorted(grouped_playlists.keys())
+    if search:
+        names = [n for n in names if search in n.lower()]
 
-            # --- DISPLAY LOGIC ---
-            if not grouped_playlists:
-                st.warning("No saved playlists found.")
-            else:
-                st.write(f"**Found {len(files)} saved files across {len(grouped_playlists)} unique playlists:**")
-                st.markdown("---")
+    st.write(f"**{len(names)} playlist(s){' matching' if search else ''}** of {len(grouped_playlists)} total")
+    st.markdown("---")
 
-                # Sort groups alphabetically by Name
-                for group_name in sorted(grouped_playlists.keys()):
-                    versions = grouped_playlists[group_name]
-                    
-                    # Sort versions by Time (Newest First)
-                    versions.sort(key=lambda x: x['time_val'], reverse=True)
-                    
-                    latest_time = versions[0]['time_str']
-                    
-                    # Create an Expander for the Group
-                    with st.expander(f"📂 **{group_name}** ({len(versions)} versions) — Last update: {latest_time}"):
-                        
-                        # Table Headers inside the expander
-                        h1, h2, h3 = st.columns([1, 2, 1])
-                        with h1: st.caption("Code")
-                        with h2: st.caption("Saved Time")
-                        with h3: st.caption("Download")
-                        
-                        for v in versions:
-                            c1, c2, c3 = st.columns([1, 2, 1])
-                            with c1: 
-                                st.markdown(f"**`{v['code']}`**")
-                            with c2: 
-                                st.text(v['time_str'])
-                            with c3:
-                                with open(v['path'], "r") as f:
-                                    st.download_button("⬇️", f, v['filename'], "text/csv", key=f"dl_{v['filename']}")
-        else:
-            st.warning("No saved playlists directory found.")
+    if not names:
+        st.warning("No playlists match that search.")
+        return
 
-        if st.button("🔒 Log Out"):
-            st.session_state.is_admin = False
-            st.rerun()
+    for group_name in names:
+        versions = sorted(grouped_playlists[group_name], key=lambda x: x['time_val'], reverse=True)
+        latest_time = versions[0]['time_str']
+        version_label = "version" if len(versions) == 1 else "versions"
+        with st.expander(f"📂 **{group_name}** ({len(versions)} {version_label}) — Last update: {latest_time}"):
+            h1, h2, h3 = st.columns([1, 2, 1])
+            with h1: st.caption("Name / Code")
+            with h2: st.caption("Saved Time")
+            with h3: st.caption("Download")
+
+            for v in versions:
+                c1, c2, c3 = st.columns([1, 2, 1])
+                with c1:
+                    st.markdown(f"**`{v['code']}`**")
+                with c2:
+                    st.text(v['time_str'])
+                with c3:
+                    with open(v['path'], "r") as f:
+                        st.download_button("⬇️", f, v['filename'], "text/csv", key=f"dl_{v['filename']}")
 
 # ----------------------------------------------------
 # 🔀 3. PAGE ROUTER
 # ----------------------------------------------------
-# Check the URL for ?mode=admin
-# If found, show admin page. Otherwise, show main app.
+# ?mode=teacher (or the legacy ?mode=admin) shows the saved-playlist lookup.
+# Otherwise show the main student app.
 
 query_params = st.query_params
 mode = query_params.get("mode", "app")
 
-if mode == "admin":
-    admin_page()
+if mode in ("teacher", "admin"):
+    teacher_page()
 else:
     main_app()
