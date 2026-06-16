@@ -1193,7 +1193,7 @@ cleanup_old_playlists()
 # they forget its name. The playlist name IS the "code" students type to summon
 # it back in the app.
 def teacher_page():
-    st.title("🎵 Saved Playlists")
+    st.title("🔍 Saved Playlists")
     st.caption(
         "Look up a student's saved playlist. The playlist **name** is the code "
         "they type into \"Have a Saved Playlist?\" back in the app to load it again."
