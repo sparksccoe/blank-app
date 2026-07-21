@@ -117,8 +117,13 @@ def cleanup_old_sessions(max_age_hours=24):
                 except Exception:
                     pass
 
-# Run cleanup once on script load
-cleanup_old_sessions()
+# Run cleanup at most once per hour (cache_resource makes this a no-op on all
+# other reruns — previously this directory scan ran on every click of every user)
+@st.cache_resource(ttl=3600, show_spinner=False)
+def _run_session_cleanup_hourly():
+    cleanup_old_sessions()
+    return True
+_run_session_cleanup_hourly()
 
 # 2. Get Session ID from URL or Generate New One
 if "session_id" not in st.query_params:
@@ -144,7 +149,9 @@ def auto_save_session():
             "last_active": datetime.now().isoformat()
         }
         with open(session_file_path, "w") as f:
-            json.dump(state_data, f)
+            # default=str: never let one odd value (e.g. a numpy type) silently
+            # kill the whole autosave
+            json.dump(state_data, f, default=str)
     except Exception as e:
         print(f"Session Save Error: {e}")
 
@@ -175,8 +182,10 @@ if "user_playlist" not in st.session_state:
     
 auto_load_session()
 
+@st.cache_data(ttl=86400, show_spinner=False)
 def get_img_base64(img_path):
-    """Encodes a local image file or remote URL to base64 for Plotly."""
+    """Encodes a local image file or remote URL to base64 for Plotly.
+    Cached for 24h — previously every chart rerun re-downloaded every symbol."""
     if img_path and img_path.startswith(('http://', 'https://')):
         try:
             response = requests.get(img_path, timeout=5)
@@ -239,17 +248,23 @@ playlist_id = "3BGJRi9zQrIjLDtBbRYy5n"
 youtube_playlist_url = "https://www.youtube.com/playlist?list=PLtg7R4Q_LfGU-WLVp5jeOoD7tdUiS6FHg"
 youtube_playlist_id = youtube_playlist_url.split("list=")[-1]
 
-song_features_csv = "Symphonia Bards-4.csv"
+song_features_csv = "Symphonia Bards-5.csv"
 creatures_csv = "DA Creatures 4.csv"
 
-# Load Songs
-df_audio_features = pd.read_csv(song_features_csv)
-df_decades = pd.DataFrame({'Release Date': df_audio_features["Album Date"]})
-df_decades['Year'] = pd.to_datetime(df_decades['Release Date'], format='%m/%d/%y').dt.year
-df_decades['Decade'] = (df_decades['Year'] // 10) * 10
-track_decade = df_decades['Decade'].astype(str) + "s"
+# Cached CSV loader — reread from disk at most once per hour instead of on
+# every rerun of every session.
+@st.cache_data(ttl=3600, show_spinner=False)
+def load_csv(path):
+    return pd.read_csv(path)
 
-# Function to fetch playlist details using the YouTube API
+# Load Songs
+df_audio_features = load_csv(song_features_csv)
+
+# Function to fetch playlist details using the YouTube API.
+# Cached for 1 hour: previously this network call ran on EVERY rerun (every
+# click by every student), adding latency to each interaction and burning API
+# quota. Errors are raised (not cached), so a failed fetch retries next rerun.
+@st.cache_data(ttl=3600, show_spinner=False)
 def fetch_playlist_videos(api_key, youtube_playlist_id):
     base_url = "https://www.googleapis.com/youtube/v3/playlistItems"
     params = {
@@ -258,24 +273,25 @@ def fetch_playlist_videos(api_key, youtube_playlist_id):
         "maxResults": 50,
         "key": api_key
     }
-    response = requests.get(base_url, params=params)
-    if response.status_code == 200:
-        data = response.json()
-        videos = [
-            {
-                "title": item["snippet"]["title"],
-                "url": f"https://www.youtube.com/watch?v={item['snippet']['resourceId']['videoId']}",
-                "video_id": item["snippet"]["resourceId"].get("videoId", None)
-            }
-            for item in data.get("items", [])
-        ]
-        track_video_id = [video["video_id"] for video in videos if video["video_id"] is not None]
-        return videos, track_video_id
-    else:
-        st.error("❌ Failed to fetch playlist details.")
-        return [], []
+    response = requests.get(base_url, params=params, timeout=10)
+    response.raise_for_status()
+    data = response.json()
+    videos = [
+        {
+            "title": item["snippet"]["title"],
+            "url": f"https://www.youtube.com/watch?v={item['snippet']['resourceId']['videoId']}",
+            "video_id": item["snippet"]["resourceId"].get("videoId", None)
+        }
+        for item in data.get("items", [])
+    ]
+    track_video_id = [video["video_id"] for video in videos if video["video_id"] is not None]
+    return videos, track_video_id
 
-videos, track_video_id = fetch_playlist_videos(api_key, youtube_playlist_id)
+try:
+    videos, track_video_id = fetch_playlist_videos(api_key, youtube_playlist_id)
+except Exception:
+    videos, track_video_id = [], []
+    st.error("❌ Failed to fetch playlist details.")
 
 # Build a lookup from YouTube video title to video ID for title-based matching
 yt_title_to_id = {}
@@ -305,7 +321,6 @@ df_tracks = pd.DataFrame({
     "Album": df_audio_features["Album"],
     "Popularity": df_audio_features["Popularity"],
     "Release Date": df_audio_features["Album Date"],
-    "Decade": track_decade,
     "Image": df_audio_features["Image"],
     "Bard Image": df_audio_features["Bard Image"],
     "Song Symbol": df_audio_features["Song Symbol"],
@@ -327,7 +342,15 @@ df_tracks = pd.DataFrame({
 })
 
 # Load Creatures
-df_creatures_data = pd.read_csv(creatures_csv)
+df_creatures_data = load_csv(creatures_csv)
+
+# Cached waveform DB — the 800KB JSON previously re-parsed on every match reveal
+@st.cache_data(ttl=3600, show_spinner=False)
+def load_waveform_db():
+    if os.path.exists("song_waveforms.json"):
+        with open("song_waveforms.json", "r") as f:
+            return json.load(f)
+    return {}
 
 # ----------------------------------------------------
 # 🟢 1. MAIN APP INTERFACE (Student View)
@@ -368,7 +391,12 @@ def main_app():
         elif summon_clicked and entered_code:
             # Match by playlist name (case-insensitive): filename is "Name.csv"
             entered_normalized = entered_code.lower().replace(" ", "_")
-            matching_files = [f for f in os.listdir(playlist_dir) if f.lower().replace(".csv", "") == entered_normalized]
+            # Guard: the folder only exists after the first save — without this,
+            # summoning on a fresh deploy crashes instead of saying "not found"
+            if os.path.exists(playlist_dir):
+                matching_files = [f for f in os.listdir(playlist_dir) if f.lower().replace(".csv", "") == entered_normalized]
+            else:
+                matching_files = []
             if matching_files:
                 playlist_file = matching_files[0]
                 filepath = os.path.join(playlist_dir, playlist_file)
@@ -500,12 +528,10 @@ def main_app():
 
         # --- Single Song Waveform Visualization ---
 
-        # Load Waveform Data (Global load, usually done once but fine here for safety)
-        waveform_db = {}
-        if os.path.exists("song_waveforms.json"):
-            with open("song_waveforms.json", "r") as f:
-                waveform_db = json.load(f)
-                
+        # Load Waveform Data (cached module-level loader)
+        waveform_db = load_waveform_db()
+
+
         # Check if we have data for THIS song
         song_name = best_match["Name"]
         db_values = waveform_db.get(song_name)
@@ -857,7 +883,12 @@ def main_app():
                     if selected_creature_obj is not None:
                         song_with_context["Task Selected"] = selected_creature_obj.get("Revised Task", "")
                         song_with_context["Task Category"] = selected_creature_obj.get("Task Category", "")
-                        song_with_context["Loot"] = selected_creature_obj.get("Loot", 1)
+                        # Cast numpy int64 -> plain int so json.dump in
+                        # auto_save_session doesn't fail silently (autosave bug)
+                        try:
+                            song_with_context["Loot"] = int(selected_creature_obj.get("Loot", 1))
+                        except (TypeError, ValueError):
+                            song_with_context["Loot"] = 1
                     else:
                         song_with_context["Task Selected"] = ""
                         song_with_context["Task Category"] = ""
@@ -1184,7 +1215,13 @@ def cleanup_old_playlists():
                             csv_path = meta_filepath.replace(".meta", "")
                             if os.path.exists(csv_path): os.remove(csv_path)
                 except: pass
-cleanup_old_playlists()
+
+# Run at most once per hour (was: a full directory scan on every rerun)
+@st.cache_resource(ttl=3600, show_spinner=False)
+def _run_playlist_cleanup_hourly():
+    cleanup_old_playlists()
+    return True
+_run_playlist_cleanup_hourly()
 
 # ----------------------------------------------------
 # 🎵 2. TEACHER PAGE — saved-playlist lookup
@@ -1226,9 +1263,25 @@ def teacher_page():
         except Exception:
             continue
 
-    # --- SEARCH ---
+    # --- SEARCH & SORT ---
     search = st.text_input("🔍 Search by playlist name", placeholder="Start typing a name…").strip().lower()
-    names = sorted(grouped_playlists.keys())
+
+    sort_by = st.radio(
+        "Sort playlists by",
+        ["Name (A–Z)", "Date saved (newest first)"],
+        horizontal=True,
+    )
+
+    if sort_by == "Date saved (newest first)":
+        # Sort by each playlist's most recent version, newest at the top
+        names = sorted(
+            grouped_playlists.keys(),
+            key=lambda n: max(v["time_val"] for v in grouped_playlists[n]),
+            reverse=True,
+        )
+    else:
+        names = sorted(grouped_playlists.keys())
+
     if search:
         names = [n for n in names if search in n.lower()]
 
