@@ -245,7 +245,7 @@ creatures_csv = "DA Creatures 4.csv"
 # Load Songs
 df_audio_features = pd.read_csv(song_features_csv)
 df_decades = pd.DataFrame({'Release Date': df_audio_features["Album Date"]})
-df_decades['Year'] = pd.to_datetime(df_decades['Release Date']).dt.year
+df_decades['Year'] = pd.to_datetime(df_decades['Release Date'], format='%m/%d/%y').dt.year
 df_decades['Decade'] = (df_decades['Year'] // 10) * 10
 track_decade = df_decades['Decade'].astype(str) + "s"
 
