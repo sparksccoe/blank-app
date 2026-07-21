@@ -357,6 +357,81 @@ def load_waveform_db():
     return {}
 
 # ----------------------------------------------------
+# Rehydrate an uploaded playlist CSV from the trusted catalog.
+# SECURITY: nothing from the uploaded file is trusted or kept. Each row is
+# treated as a claim ("this track was paired with this creature"); every
+# displayed string, URL, and video ID is rebuilt from the app's own bundled
+# data (df_tracks / df_creatures_data). Rows that don't match the catalog, and
+# duplicate songs/creatures, are skipped. This closes off HTML/script
+# injection, SSRF via attacker URLs, and CSV formula injection — hostile
+# content never reaches the page, the server, or a teacher's spreadsheet.
+# ----------------------------------------------------
+MAX_UPLOAD_BYTES = 1_000_000  # 1 MB — a real playlist is a few KB
+MAX_UPLOAD_ROWS = 40
+
+def rehydrate_uploaded_playlist(uploaded_file):
+    """Validate + rebuild an uploaded playlist. Returns (songs, skipped, error)."""
+    if getattr(uploaded_file, "size", 0) > MAX_UPLOAD_BYTES:
+        return [], [], "That file is too large to be a playlist."
+    try:
+        raw = pd.read_csv(uploaded_file, dtype=str).fillna("")
+    except Exception:
+        return [], [], "That file couldn't be read as a playlist CSV."
+    if raw.empty:
+        return [], [], "That file has no songs in it."
+    if "Track ID" not in raw.columns and "Name" not in raw.columns:
+        return [], [], "That doesn't look like a Data Adventures playlist file."
+
+    raw = raw.head(MAX_UPLOAD_ROWS)
+    songs, skipped = [], []
+    seen_tracks, seen_creatures = set(), set()
+    for _, row in raw.iterrows():
+        tid = str(row.get("Track ID", "")).strip()
+        name = str(row.get("Name", "")).strip()
+
+        match = pd.DataFrame()
+        if tid:
+            match = df_tracks[df_tracks["Track ID"].astype(str).str.strip() == tid]
+        if match.empty and name:
+            match = df_tracks[df_tracks["Name"].astype(str).str.strip().str.lower() == name.lower()]
+        if match.empty:
+            skipped.append(name or tid or "unnamed row")
+            continue
+        song = match.iloc[0].to_dict()  # every field comes from OUR catalog
+        if song["Track ID"] in seen_tracks:
+            skipped.append(f"{song['Name']} (duplicate song)")
+            continue
+
+        creature_name = str(row.get("Creature", "")).strip()
+        c_match = pd.DataFrame()
+        if creature_name:
+            c_match = df_creatures_data[
+                df_creatures_data["Creature name"].astype(str).str.strip().str.lower()
+                == creature_name.lower()
+            ]
+        if c_match.empty:
+            skipped.append(f"{song['Name']} (unknown creature)")
+            continue
+        creature = c_match.iloc[0]
+        if creature["Creature name"] in seen_creatures:
+            skipped.append(f"{song['Name']} ({creature['Creature name']} already used)")
+            continue
+
+        song["Creature"] = creature["Creature name"]
+        song["Task Selected"] = creature.get("Revised Task", "")
+        song["Task Category"] = creature.get("Task Category", "")
+        try:
+            song["Loot"] = int(creature.get("Loot", 1))
+        except (TypeError, ValueError):
+            song["Loot"] = 1
+
+        seen_tracks.add(song["Track ID"])
+        seen_creatures.add(creature["Creature name"])
+        songs.append(song)
+
+    return songs, skipped, None
+
+# ----------------------------------------------------
 # 🟢 1. MAIN APP INTERFACE (Student View)
 # ----------------------------------------------------
 def main_app():
@@ -375,46 +450,94 @@ def main_app():
 
     # --- LOAD SAVED PLAYLIST ---
     with st.expander("**🗝️ Have a Saved Playlist? Tap Here to Load**", expanded=False):
-        st.write("Enter your Playlist Name to load your saved playlist:")
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            entered_code = normalize_playlist_name(st.text_input(label=" ", label_visibility="collapsed", key="playlist_code_input"))
-            
-        col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
-        with col_btn2:
-            summon_clicked = st.button("Summon Playlist", type="primary")
+        tab_code, tab_upload = st.tabs(["🗝️ Summon by code", "📄 Upload a file"])
 
-        playlist_dir = "saved_user_playlists"
+        with tab_code:
+            st.write("Enter your Playlist Name to load your saved playlist:")
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                entered_code = normalize_playlist_name(st.text_input(label=" ", label_visibility="collapsed", key="playlist_code_input"))
 
-        invalid_chars = ['/', '\\', ':', '*', '?', '"', '<', '>', '|', '#', '%', '&', '{', '}', '$', '!', "'", '`', '@']
-        found_invalid = [char for char in invalid_chars if char in entered_code]
+            col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
+            with col_btn2:
+                summon_clicked = st.button("Summon Playlist", type="primary")
 
-        if summon_clicked and entered_code and found_invalid:
-            st.error(f"❌ Invalid characters: {' '.join(found_invalid)}")
+            playlist_dir = "saved_user_playlists"
 
-        elif summon_clicked and entered_code:
-            # Match by playlist name (case-insensitive): filename is "Name.csv"
-            entered_normalized = entered_code.lower().replace(" ", "_")
-            # Guard: the folder only exists after the first save — without this,
-            # summoning on a fresh deploy crashes instead of saying "not found"
-            if os.path.exists(playlist_dir):
-                matching_files = [f for f in os.listdir(playlist_dir) if f.lower().replace(".csv", "") == entered_normalized]
-            else:
-                matching_files = []
-            if matching_files:
-                playlist_file = matching_files[0]
-                filepath = os.path.join(playlist_dir, playlist_file)
-                retrieved_df = pd.read_csv(filepath)
-                st.session_state.user_playlist = retrieved_df.to_dict(orient="records")
-                st.session_state.saved_playlist_name = playlist_file.replace(".csv", "").replace("_", " ")
-                
-                # Link this session to the file for autosave
-                st.session_state.current_playlist_filename = playlist_file 
-                
-                auto_save_session()
-                st.success(f"🪄 Playlist summoned! Changes will now autosave to: **{entered_code}**")
-            else:
-                st.error("❌ No playlist found with that code.")
+            invalid_chars = ['/', '\\', ':', '*', '?', '"', '<', '>', '|', '#', '%', '&', '{', '}', '$', '!', "'", '`', '@']
+            found_invalid = [char for char in invalid_chars if char in entered_code]
+
+            if summon_clicked and entered_code and found_invalid:
+                st.error(f"❌ Invalid characters: {' '.join(found_invalid)}")
+
+            elif summon_clicked and entered_code:
+                # Match by playlist name (case-insensitive): filename is "Name.csv"
+                entered_normalized = entered_code.lower().replace(" ", "_")
+                # Guard: the folder only exists after the first save — without this,
+                # summoning on a fresh deploy crashes instead of saying "not found"
+                if os.path.exists(playlist_dir):
+                    matching_files = [f for f in os.listdir(playlist_dir) if f.lower().replace(".csv", "") == entered_normalized]
+                else:
+                    matching_files = []
+                if matching_files:
+                    playlist_file = matching_files[0]
+                    filepath = os.path.join(playlist_dir, playlist_file)
+                    retrieved_df = pd.read_csv(filepath)
+                    st.session_state.user_playlist = retrieved_df.to_dict(orient="records")
+                    st.session_state.saved_playlist_name = playlist_file.replace(".csv", "").replace("_", " ")
+
+                    # Link this session to the file for autosave
+                    st.session_state.current_playlist_filename = playlist_file
+
+                    auto_save_session()
+                    st.success(f"🪄 Playlist summoned! Changes will now autosave to: **{entered_code}**")
+                else:
+                    st.error("❌ No playlist found with that code.")
+
+        with tab_upload:
+            st.caption(
+                "Drop in a playlist CSV downloaded from Data Adventures. "
+                "Your songs are rebuilt from the official catalog before loading."
+            )
+            uploaded_playlist = st.file_uploader(
+                "Upload playlist CSV",
+                type=["csv"],
+                accept_multiple_files=False,
+                label_visibility="collapsed",
+                key="playlist_upload",
+            )
+            if uploaded_playlist is not None:
+                up_songs, up_skipped, up_error = rehydrate_uploaded_playlist(uploaded_playlist)
+                if up_error:
+                    st.error(f"❌ {up_error}")
+                else:
+                    if up_songs:
+                        st.success(
+                            f"✅ Found **{len(up_songs)}** song{'s' if len(up_songs) != 1 else ''} "
+                            f"in **{uploaded_playlist.name}**"
+                        )
+                    if up_skipped:
+                        shown = ", ".join(up_skipped[:8]) + ("…" if len(up_skipped) > 8 else "")
+                        st.warning(f"⚠️ Skipped {len(up_skipped)} row(s): {shown}")
+                    if up_songs:
+                        preview_df = pd.DataFrame([{
+                            "Song": s["Name"],
+                            "Tempo (BPM)": s["Tempo (BPM)"],
+                            "Loudness (dB)": s["Loudness (dB)"],
+                            "Creature": s.get("Creature", ""),
+                            "Loot": s.get("Loot", ""),
+                        } for s in up_songs])
+                        st.dataframe(preview_df, use_container_width=True, hide_index=True)
+                        if st.button("✨ Load this playlist", type="primary", use_container_width=True, key="load_uploaded_playlist"):
+                            st.session_state.user_playlist = up_songs
+                            # Uploaded playlists start unlinked — the team can
+                            # Inscribe under a name to turn autosave back on
+                            st.session_state.saved_playlist_name = ""
+                            st.session_state.current_playlist_filename = None
+                            auto_save_session()
+                            st.rerun()
+                    elif not up_error:
+                        st.info("No songs from this file matched the catalog.")
 
     # --- BPM INPUT ---
     st.header("🎚️ Tempo (BPM)")
