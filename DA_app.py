@@ -1263,16 +1263,23 @@ def teacher_page():
         except Exception:
             continue
 
-    # --- SEARCH & SORT ---
-    search = st.text_input("🔍 Search by playlist name", placeholder="Start typing a name…").strip().lower()
+    # --- SEARCH & SORT (one toolbar row: search field + segmented sort control) ---
+    col_search, col_sort = st.columns([3, 2], vertical_alignment="bottom")
+    with col_search:
+        search = st.text_input(
+            "Search by playlist name",
+            placeholder="🔍 Search by playlist name…",
+            label_visibility="collapsed",
+        ).strip().lower()
+    with col_sort:
+        sort_by = st.segmented_control(
+            "Sort playlists by",
+            options=["A–Z", "Newest"],
+            default="A–Z",
+            label_visibility="collapsed",
+        )
 
-    sort_by = st.radio(
-        "Sort playlists by",
-        ["Name (A–Z)", "Date saved (newest first)"],
-        horizontal=True,
-    )
-
-    if sort_by == "Date saved (newest first)":
+    if sort_by == "Newest":
         # Sort by each playlist's most recent version, newest at the top
         names = sorted(
             grouped_playlists.keys(),
