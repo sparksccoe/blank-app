@@ -32,3 +32,5 @@ enableCORS = false
 # same time, Streamlit will enable them both instead.
 # Default: true
 enableXsrfProtection = false
+# Cap uploads (playlist CSVs are a few KB; default 200MB invites memory abuse)
+maxUploadSize = 1
