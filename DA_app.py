@@ -7,6 +7,10 @@ import string
 import shutil
 import base64
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+# Display timezone for teacher-facing timestamps (server runs in UTC)
+DISPLAY_TZ = ZoneInfo("America/Los_Angeles")
 from PIL import Image
 import uuid
 import json
@@ -1229,6 +1233,13 @@ _run_playlist_cleanup_hourly()
 # Open page (no login) so teachers can look up a student's saved playlist if
 # they forget its name. The playlist name IS the "code" students type to summon
 # it back in the app.
+# Cached per (path, mtime): Streamlit renders expander contents even when
+# collapsed, so without caching every playlist CSV would be re-read on every
+# rerun. The mtime key auto-invalidates whenever a playlist is updated.
+@st.cache_data(ttl=300, show_spinner=False)
+def load_playlist_csv(path, mtime):
+    return pd.read_csv(path)
+
 def teacher_page():
     st.title("🔍 Saved Playlists")
     st.caption(
@@ -1257,7 +1268,7 @@ def teacher_page():
                 "filename": filename,
                 "code": clean_name,
                 "time_val": mod_time,
-                "time_str": datetime.fromtimestamp(mod_time).strftime('%Y-%m-%d %I:%M %p'),
+                "time_str": datetime.fromtimestamp(mod_time, tz=DISPLAY_TZ).strftime('%Y-%m-%d %I:%M %p %Z'),
                 "path": filepath,
             })
         except Exception:
@@ -1304,20 +1315,44 @@ def teacher_page():
         latest_time = versions[0]['time_str']
         version_label = "version" if len(versions) == 1 else "versions"
         with st.expander(f"📂 **{group_name}** ({len(versions)} {version_label}) — Last update: {latest_time}"):
-            h1, h2, h3 = st.columns([1, 2, 1])
-            with h1: st.caption("Name / Code")
-            with h2: st.caption("Saved Time")
-            with h3: st.caption("Download")
-
             for v in versions:
-                c1, c2, c3 = st.columns([1, 2, 1])
-                with c1:
-                    st.markdown(f"**`{v['code']}`**")
-                with c2:
-                    st.text(v['time_str'])
-                with c3:
+                meta_col, dl_col = st.columns([3, 1], vertical_alignment="center")
+                with meta_col:
+                    st.caption(f"Code: `{v['code']}` · Saved {v['time_str']}")
+                with dl_col:
                     with open(v['path'], "r") as f:
-                        st.download_button("⬇️", f, v['filename'], "text/csv", key=f"dl_{v['filename']}")
+                        st.download_button("⬇️ CSV", f, v['filename'], "text/csv", key=f"dl_{v['filename']}")
+
+                # --- Playlist song contents ---
+                try:
+                    playlist_df = load_playlist_csv(v['path'], v['time_val'])
+                except Exception:
+                    st.warning("Couldn't read this playlist file.")
+                    continue
+
+                display_cols = {
+                    "Name": "Song",
+                    "Tempo (BPM)": "Tempo (BPM)",
+                    "Loudness (dB)": "Loudness (dB)",
+                    "Song Symbol": "Symbol",
+                    "Creature": "Creature",
+                    "Task Selected": "Task",
+                    "Loot": "Loot",
+                }
+                present = [c for c in display_cols if c in playlist_df.columns]
+                if playlist_df.empty or not present:
+                    st.info("This playlist is empty.")
+                    continue
+
+                view = playlist_df[present].rename(columns=display_cols)
+                st.dataframe(
+                    view,
+                    use_container_width=True,
+                    hide_index=True,
+                    column_config={
+                        "Symbol": st.column_config.ImageColumn("Symbol", width="small")
+                    },
+                )
 
 # ----------------------------------------------------
 # 🔀 3. PAGE ROUTER
