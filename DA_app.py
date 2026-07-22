@@ -18,7 +18,6 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
-import soundfile as sf
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
@@ -356,6 +355,78 @@ def load_waveform_db():
             return json.load(f)
     return {}
 
+# Cached per (song, duration, loudness): the loudness waveform Plotly figure.
+# Returns None when we have no waveform data for the song.
+@st.cache_data(ttl=3600, show_spinner=False)
+def build_waveform_fig(song_name, duration_sec, avg_loudness):
+    db_values = load_waveform_db().get(song_name)
+    if not db_values:
+        return None
+
+    x_axis = np.linspace(0, duration_sec, len(db_values))
+    y_values = [max(0, db + 60) for db in db_values]
+
+    fig_wave = go.Figure()
+
+    # 1. The Waveform (Lavender)
+    fig_wave.add_trace(go.Scatter(
+        x=x_axis,
+        y=y_values,
+        fill='tozeroy',
+        fillcolor='#AD98B0',
+        line=dict(color='#AD98B0', width=1.5),
+        opacity=0.9,
+        name=song_name,
+        hoverinfo="x+text",
+        text=[f"{db} dB" for db in db_values]
+    ))
+
+    # 2. Average Loudness Line (Neon Orange)
+    avg_y = avg_loudness + 60
+
+    fig_wave.add_trace(go.Scatter(
+        x=[0, duration_sec],
+        y=[avg_y, avg_y],
+        mode='lines',
+        line=dict(color='#FF5F1F', width=4), # Thicker line
+        name="Avg Loudness",
+        hoverinfo="text",
+        text=[f"Average: {avg_loudness} dB"]*2
+    ))
+
+    # 3. Explicit Text Label for the Line
+    fig_wave.add_annotation(
+        x=duration_sec * 0.02, # Near the start
+        y=avg_y - 5,           # Slightly above the line
+        text=f"Average: {avg_loudness} dB",
+        showarrow=False,
+        font=dict(color='#FF5F1F', size=18, family="Arial Black"),
+        xanchor="left",
+        yanchor="top"
+    )
+
+    fig_wave.update_layout(
+        xaxis=dict(title="Duration (s)", showgrid=False, zeroline=True, showticklabels=True),
+        yaxis=dict(
+            title="Loudness",
+            showgrid=True,
+            gridcolor='rgba(0,0,0,0.1)',
+            zeroline=False,
+            showticklabels=True,
+            # ZOOMED RANGE: 30 (-30dB) to 65 (+5dB headroom)
+            range=[30, 65],
+            tickmode='array',
+            # Ticks every 10dB within the new view
+            tickvals=[30, 40, 50, 60],
+            ticktext=['-30 dB', '-20 dB', '-10 dB', '0 dB']
+        ),
+        height=250,
+        margin=dict(l=60, r=20, t=20, b=40),
+        plot_bgcolor='white',
+        showlegend=False
+    )
+    return fig_wave
+
 # ----------------------------------------------------
 # Rehydrate an uploaded playlist CSV from the trusted catalog.
 # SECURITY: nothing from the uploaded file is trusted or kept. Each row is
@@ -434,12 +505,17 @@ def rehydrate_uploaded_playlist(uploaded_file):
 # ----------------------------------------------------
 # 🟢 1. MAIN APP INTERFACE (Student View)
 # ----------------------------------------------------
+# Compute once — avoids re-opening/decoding the logo PNG on every rerun
+@st.cache_data(show_spinner=False)
+def logo_display_width(path="data_adventures_logo.png"):
+    with Image.open(path) as im:
+        return int(im.width * 0.4)
+
 def main_app():
     # --- UI HEADER ---
-    image = Image.open('data_adventures_logo.png')
     col1, col2, col3 = st.columns([1,6,1])
     with col2:
-        st.image(image, width=int(image.width * 0.4))
+        st.image('data_adventures_logo.png', width=logo_display_width())
 
     st.markdown(
         "<div style='text-align: center; font-size: 24px; font-weight: normal;'>"
@@ -535,7 +611,14 @@ def main_app():
                             st.session_state.saved_playlist_name = ""
                             st.session_state.current_playlist_filename = None
                             auto_save_session()
-                            st.rerun()
+                            # No st.rerun() here: the playlist sections render
+                            # further down this same run, so the ack shows AND
+                            # the loaded playlist appears below immediately.
+                            st.success(
+                                f"🎉 Playlist loaded — {len(up_songs)} "
+                                f"song{'s are' if len(up_songs) != 1 else ' is'} ready! "
+                                "Scroll down to see your playlist."
+                            )
                     elif not up_error:
                         st.info("No songs from this file matched the catalog.")
 
@@ -593,9 +676,9 @@ def main_app():
 
     if bpm is not None:
         if st.button("🥁 Play Your Tempo as a Drum Loop", type="primary"):
-            drum_beat = generate_drum_beat(bpm)
-            sf.write("drum_beat.wav", drum_beat, 44100)
-            st.audio("drum_beat.wav")
+            # Play straight from memory — no shared drum_beat.wav on disk that
+            # concurrent teams would overwrite, and no disk I/O per click
+            st.audio(generate_drum_beat(bpm), sample_rate=44100)
 
     # --- LOUDNESS INPUT ---
     st.header("🔊 Loudness (dB)")
@@ -655,93 +738,22 @@ def main_app():
 
         # --- Single Song Waveform Visualization ---
 
-        # Load Waveform Data (cached module-level loader)
-        waveform_db = load_waveform_db()
-
-
-        # Check if we have data for THIS song
+        # Waveform figure is cached per song — previously rebuilt (a few
+        # thousand Plotly points) on every rerun while a match was on screen
         song_name = best_match["Name"]
-        db_values = waveform_db.get(song_name)
-        
-        if db_values:
+        raw_dur = best_match.get("Duration", 0)
+        try:
+            if isinstance(raw_dur, str) and ":" in raw_dur:
+                parts = raw_dur.split(":")
+                duration_sec = int(parts[0]) * 60 + int(parts[1])
+            else:
+                duration_sec = float(raw_dur) / 1000
+        except:
+            duration_sec = 0
+
+        fig_wave = build_waveform_fig(song_name, duration_sec, best_match.get("Loudness (dB)", -60))
+        if fig_wave is not None:
             st.markdown("#### Loudness Visualization")
-            
-            # Calculate visual parameters
-            raw_dur = best_match.get("Duration", 0)
-            try:
-                if isinstance(raw_dur, str) and ":" in raw_dur:
-                    parts = raw_dur.split(":")
-                    duration_sec = int(parts[0]) * 60 + int(parts[1])
-                else:
-                    duration_sec = float(raw_dur) / 1000
-            except:
-                duration_sec = 0
-
-            x_axis = np.linspace(0, duration_sec, len(db_values))
-            
-            # Rectified Waveform (0 to 1 scale)
-            y_values = [max(0, db + 60) for db in db_values]
-            
-            fig_wave = go.Figure()
-            
-            # 1. The Waveform (Lavender)
-            fig_wave.add_trace(go.Scatter(
-                x=x_axis,
-                y=y_values,
-                fill='tozeroy',
-                fillcolor='#AD98B0',
-                line=dict(color='#AD98B0', width=1.5),
-                opacity=0.9,
-                name=song_name,
-                hoverinfo="x+text",
-                text=[f"{db} dB" for db in db_values]
-            ))
-            
-            # 2. Average Loudness Line (Neon Orange)
-            avg_loudness = best_match.get("Loudness (dB)", -60)
-            avg_y = avg_loudness + 60
-            
-            fig_wave.add_trace(go.Scatter(
-                x=[0, duration_sec],
-                y=[avg_y, avg_y],
-                mode='lines',
-                line=dict(color='#FF5F1F', width=4), # Thicker line
-                name="Avg Loudness",
-                hoverinfo="text",
-                text=[f"Average: {avg_loudness} dB"]*2
-            ))
-
-            # 3. Explicit Text Label for the Line
-            fig_wave.add_annotation(
-                x=duration_sec * 0.02, # Near the start
-                y=avg_y - 5,           # Slightly above the line
-                text=f"Average: {avg_loudness} dB",
-                showarrow=False,
-                font=dict(color='#FF5F1F', size=18, family="Arial Black"),
-                xanchor="left",
-                yanchor="top"
-            )
-            
-            fig_wave.update_layout(
-                xaxis=dict(title="Duration (s)", showgrid=False, zeroline=True, showticklabels=True),
-                yaxis=dict(
-                    title="Loudness",
-                    showgrid=True,
-                    gridcolor='rgba(0,0,0,0.1)',
-                    zeroline=False,
-                    showticklabels=True,
-                    # ZOOMED RANGE: 30 (-30dB) to 65 (+5dB headroom)
-                    range=[30, 65],
-                    tickmode='array',
-                    # Ticks every 10dB within the new view
-                    tickvals=[30, 40, 50, 60],
-                    ticktext=['-30 dB', '-20 dB', '-10 dB', '0 dB']
-                ),
-                height=250, 
-                margin=dict(l=60, r=20, t=20, b=40),
-                plot_bgcolor='white',
-                showlegend=False
-            )
             st.plotly_chart(fig_wave, use_container_width=True)
             
         if pd.notna(best_match["YouTube Video ID"]):
@@ -755,9 +767,9 @@ def main_app():
                 <div id="sync-container" style="width:100%; max-width:720px; margin:0 auto;">
                     <!-- AE Loudness Visualization Video (on top) -->
                     <div style="position:relative; width:100%; background:#000; border-radius:8px 8px 0 0; overflow:hidden;">
-                        <video id="loudness-viz" 
-                               style="width:100%; display:block;" 
-                               muted playsinline preload="auto">
+                        <video id="loudness-viz"
+                               style="width:100%; display:block;"
+                               muted playsinline preload="metadata">
                             <source src="{loudness_viz_url}" type="video/mp4">
                         </video>
                         <div id="viz-badge" style="position:absolute; bottom:8px; left:12px; 
