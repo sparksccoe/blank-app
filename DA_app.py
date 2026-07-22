@@ -1068,13 +1068,43 @@ def main_app():
         st.markdown("""<style>.element-container:has(.stDataFrame) {max-width: 1400px !important; width: 100% !important;} .stDataFrame table {min-width: 1400px !important;}</style>""", unsafe_allow_html=True)
         
         st.dataframe(
-            playlist_summary_df.reset_index(drop=True), 
-            use_container_width=True, 
-            hide_index=True, 
+            playlist_summary_df.reset_index(drop=True),
+            use_container_width=True,
+            hide_index=True,
+            # Size the grid to fit every row (header + N rows @ 35px) so the
+            # table never scrolls internally, no matter the playlist length
+            height=(len(playlist_summary_df) + 1) * 35 + 3,
             column_config={
                 "Symbol": st.column_config.ImageColumn("Symbol", width="small")
             }
         )
+
+        # Quiet download option (tertiary = text-style, low prominence).
+        # Clicking reveals a small name-your-file prompt (default = the team's
+        # inscribed playlist name). Exports the FULL playlist data — not just
+        # the summary table — so the file loads right back in through
+        # "Upload a file" in the summon box.
+        _, dl_col = st.columns([3, 2])
+        with dl_col:
+            if st.button("📜 Download a copy of my playlist", type="tertiary", use_container_width=True, key="dl_toggle"):
+                st.session_state.show_download_namer = not st.session_state.get("show_download_namer", False)
+            if st.session_state.get("show_download_namer"):
+                default_name = st.session_state.get("saved_playlist_name") or "my playlist"
+                raw_name = st.text_input("Name your file:", value=default_name, key="dl_fname")
+                # keep letters/numbers/spaces/hyphens/underscores, then match the
+                # server-side convention: lowercase with underscores
+                import re as _re
+                safe = _re.sub(r"[^A-Za-z0-9 _-]", "", raw_name).strip()
+                safe = _re.sub(r"\s+", " ", safe).lower().replace(" ", "_") or "my_playlist"
+                st.caption(f"Will save as **{safe}.csv**")
+                st.download_button(
+                    "⬇️ Download",
+                    pd.DataFrame(st.session_state.user_playlist).to_csv(index=False),
+                    f"{safe}.csv",
+                    "text/csv",
+                    key="dl_go",
+                    use_container_width=True,
+                )
 
         # YOUTUBE PLAYLIST EMBED
         st.subheader("🎧 Listen to your playlist on YouTube")
@@ -1472,6 +1502,8 @@ def teacher_page():
                     view,
                     use_container_width=True,
                     hide_index=True,
+                    # Fit all rows — no internal scrolling
+                    height=(len(view) + 1) * 35 + 3,
                     column_config={
                         "Symbol": st.column_config.ImageColumn("Symbol", width="small")
                     },
